@@ -1,0 +1,27 @@
+{
+  "name": "js13kgames2020",
+  "version": "0.1.0",
+  "description": "An entry to the js13kGames 2020 game programming competition",
+  "private": "true",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack.dev.js",
+    "prebuild": "npm run lint",
+    "build": "webpack --config webpack.prod.js",
+    "postbuild": "node postbuild.js",
+    "lint": "prettier --check \"src/**/*.js\" && npx eslint \"src/**/*.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tkjantti/js13kgames2020.git"
+  },
+  "keywords": [
+    "game",
+    "js13kgames"
+  ],
+  "author": "Tero Jäntti, Sami Heikkinen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tkjantti/js13kgames2020/issues"
+  },
+  "homepage": "https://github.com/tkjantti/js13kgames2020#readme"
+}
