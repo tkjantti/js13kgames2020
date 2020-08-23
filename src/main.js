@@ -24,9 +24,12 @@
  * SOFTWARE.
  */
 
-import { init, Sprite, GameLoop } from "kontra";
+import { init, initKeys, Sprite, GameLoop, keyPressed } from "kontra";
+
+const PLAYER_SPEED = 5;
 
 let { canvas } = init();
+initKeys();
 
 const resize = () => {
   canvas.width = window.innerWidth - 10;
@@ -36,31 +39,33 @@ const resize = () => {
 window.addEventListener("resize", resize, false);
 resize();
 
-let sprite = Sprite({
-  x: 100, // starting x,y position of the sprite
+let player = Sprite({
+  x: 100,
   y: 80,
-  color: "red", // fill color of the sprite rectangle
-  width: 20, // width and height of the sprite rectangle
-  height: 40,
-  dx: 2 // move the sprite 2px to the right every frame
+  color: "red",
+  width: 20,
+  height: 40
 });
 
 let loop = GameLoop({
-  // create the main game loop
   update: function() {
-    // update the game state
-    sprite.update();
+    player.update();
 
-    // wrap the sprites position when it reaches
-    // the edge of the screen
-    if (sprite.x > canvas.width) {
-      sprite.x = -sprite.width;
+    if (keyPressed("left")) {
+      player.x -= PLAYER_SPEED;
+    } else if (keyPressed("right")) {
+      player.x += PLAYER_SPEED;
+    }
+
+    if (keyPressed("up")) {
+      player.y -= PLAYER_SPEED;
+    } else if (keyPressed("down")) {
+      player.y += PLAYER_SPEED;
     }
   },
   render: function() {
-    // render the game state
-    sprite.render();
+    player.render();
   }
 });
 
-loop.start(); // start the game
+loop.start();
