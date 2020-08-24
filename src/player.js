@@ -24,33 +24,49 @@
  * SOFTWARE.
  */
 
-import { init, initKeys, GameLoop } from "kontra";
-import { Room } from "./room.js";
-import { createPlayer } from "./player.js";
+import { Sprite, keyPressed } from "kontra";
 
-const { canvas, context } = init();
-initKeys();
+const PLAYER_SPEED = 5;
 
-const resize = () => {
-  canvas.width = window.innerWidth - 10;
-  canvas.height = window.innerHeight - 10;
+export const createPlayer = () => {
+  return Sprite({
+    x: 100,
+    y: 80,
+    color: "red",
+    width: 20,
+    height: 40,
+
+    update(room) {
+      let dx = 0,
+        dy = 0;
+
+      if (keyPressed("left")) {
+        dx -= PLAYER_SPEED;
+      } else if (keyPressed("right")) {
+        dx += PLAYER_SPEED;
+      }
+
+      if (keyPressed("up")) {
+        dy -= PLAYER_SPEED;
+      } else if (keyPressed("down")) {
+        dy += PLAYER_SPEED;
+      }
+
+      if (this.x + dx < room.x) {
+        this.x = room.x;
+      } else if (room.right < this.x + dx + this.width) {
+        this.x = room.right - this.width;
+      } else {
+        this.x += dx;
+      }
+
+      if (this.y + dy < room.y) {
+        this.y = room.y;
+      } else if (room.bottom < this.y + dy + this.height) {
+        this.y = room.bottom - this.height;
+      } else {
+        this.y += dy;
+      }
+    }
+  });
 };
-
-window.addEventListener("resize", resize, false);
-resize();
-
-const player = createPlayer();
-
-const room = new Room(30, 30);
-
-const loop = GameLoop({
-  update: function() {
-    player.update(room);
-  },
-  render: function() {
-    room.render(context);
-    player.render();
-  }
-});
-
-loop.start();

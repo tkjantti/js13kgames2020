@@ -24,33 +24,28 @@
  * SOFTWARE.
  */
 
-import { init, initKeys, GameLoop } from "kontra";
-import { Room } from "./room.js";
-import { createPlayer } from "./player.js";
+const ROOM_WIDTH = 300;
+const ROOM_HEIGHT = 300;
 
-const { canvas, context } = init();
-initKeys();
-
-const resize = () => {
-  canvas.width = window.innerWidth - 10;
-  canvas.height = window.innerHeight - 10;
-};
-
-window.addEventListener("resize", resize, false);
-resize();
-
-const player = createPlayer();
-
-const room = new Room(30, 30);
-
-const loop = GameLoop({
-  update: function() {
-    player.update(room);
-  },
-  render: function() {
-    room.render(context);
-    player.render();
+export class Room {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.right = this.x + ROOM_WIDTH;
+    this.bottom = this.y + ROOM_HEIGHT;
   }
-});
 
-loop.start();
+  render(context) {
+    context.save();
+    context.strokeStyle = "white";
+    context.lineWidth = 5;
+    context.beginPath();
+    context.lineTo(this.x, this.y);
+    context.lineTo(this.x + ROOM_WIDTH, this.y);
+    context.lineTo(this.x + ROOM_WIDTH, this.y + ROOM_HEIGHT);
+    context.lineTo(this.x, this.y + ROOM_HEIGHT);
+    context.closePath();
+    context.stroke();
+    context.restore();
+  }
+}
