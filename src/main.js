@@ -25,7 +25,8 @@
  */
 
 import { init, initKeys, GameLoop } from "kontra";
-import { Room } from "./room.js";
+import { Array2D } from "./Array2D.js";
+import { Room, ROOM_WIDTH, ROOM_HEIGHT } from "./room.js";
 import { createPlayer } from "./player.js";
 
 const { canvas, context } = init();
@@ -39,16 +40,39 @@ const resize = () => {
 window.addEventListener("resize", resize, false);
 resize();
 
-const player = createPlayer();
+const createRooms = () => {
+  const rooms = new Array2D(2, 2);
 
-const room = new Room(30, 30);
+  for (let ix = 0; ix < rooms.xCount; ix++) {
+    for (let iy = 0; iy < rooms.yCount; iy++) {
+      const x = ix * (ROOM_WIDTH + 30);
+      const y = iy * (ROOM_HEIGHT + 30);
+      rooms.setValue(ix, iy, new Room(x, y));
+    }
+  }
+
+  return rooms;
+};
+
+const rooms = createRooms();
+let currentRoom = rooms.getValue(0, 0);
+
+const player = createPlayer();
 
 const loop = GameLoop({
   update: function() {
-    player.update(room);
+    player.update(currentRoom);
   },
+
   render: function() {
-    room.render(context);
+    // currentRoom.render(context);
+    for (let ix = 0; ix < rooms.xCount; ix++) {
+      for (let iy = 0; iy < rooms.yCount; iy++) {
+        const room = rooms.getValue(ix, iy);
+        room.render(context);
+      }
+    }
+
     player.render();
   }
 });

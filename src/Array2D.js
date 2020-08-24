@@ -24,28 +24,27 @@
  * SOFTWARE.
  */
 
-export const ROOM_WIDTH = 300;
-export const ROOM_HEIGHT = 300;
-
-export class Room {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.right = this.x + ROOM_WIDTH;
-    this.bottom = this.y + ROOM_HEIGHT;
+/*
+ * A two-dimensional array.
+ */
+export class Array2D {
+  constructor(xCount, yCount) {
+    this.xCount = xCount;
+    this.yCount = yCount;
+    this.values = [xCount * yCount];
   }
 
-  render(context) {
-    context.save();
-    context.strokeStyle = "white";
-    context.lineWidth = 5;
-    context.beginPath();
-    context.lineTo(this.x, this.y);
-    context.lineTo(this.x + ROOM_WIDTH, this.y);
-    context.lineTo(this.x + ROOM_WIDTH, this.y + ROOM_HEIGHT);
-    context.lineTo(this.x, this.y + ROOM_HEIGHT);
-    context.closePath();
-    context.stroke();
-    context.restore();
+  getValue(x, y) {
+    if (x < 0 || this.xCount <= x || y < 0 || this.yCount <= y) {
+      return undefined;
+    }
+    return this.values[x * this.yCount + y];
+  }
+
+  setValue(x, y, value) {
+    if (x < 0 || this.xCount <= x || y < 0 || this.yCount <= y) {
+      return;
+    }
+    this.values[x * this.yCount + y] = value;
   }
 }
