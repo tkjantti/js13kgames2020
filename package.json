@@ -1,0 +1,45 @@
+{
+  "name": "js13kgames2020",
+  "version": "0.1.0",
+  "description": "An entry to the js13kGames 2020 game programming competition",
+  "private": "true",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack.dev.js",
+    "prebuild": "npm run lint",
+    "build": "webpack --config webpack.prod.js",
+    "postbuild": "node postbuild.js",
+    "lint": "prettier --check \"src/**/*.js\" && npx eslint \"src/**/*.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tkjantti/js13kgames2020.git"
+  },
+  "keywords": [
+    "game",
+    "js13kgames"
+  ],
+  "author": "Tero Jäntti, Sami Heikkinen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tkjantti/js13kgames2020/issues"
+  },
+  "homepage": "https://github.com/tkjantti/js13kgames2020#readme",
+  "devDependencies": {
+    "archiver": "^3.1.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "eslint": "^6.2.1",
+    "eslint-config-prettier": "^6.1.0",
+    "eslint-loader": "^2.2.1",
+    "html-webpack-inline-source-plugin": "^0.0.10",
+    "html-webpack-plugin": "^3.2.0",
+    "prettier": "^1.18.2",
+    "svg-inline-loader": "^0.8.0",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.6",
+    "webpack-dev-server": "^3.8.0",
+    "webpack-merge": "^4.2.1"
+  },
+  "dependencies": {
+    "kontra": "^7.1.1"
+  }
+}
