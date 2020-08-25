@@ -47,7 +47,7 @@ const createRooms = () => {
     for (let iy = 0; iy < rooms.yCount; iy++) {
       const x = ix * (ROOM_WIDTH + 30);
       const y = iy * (ROOM_HEIGHT + 30);
-      rooms.setValue(ix, iy, new Room(x, y));
+      rooms.setValue(ix, iy, new Room(x, y, ix, iy));
     }
   }
 

@@ -28,9 +28,11 @@ export const ROOM_WIDTH = 300;
 export const ROOM_HEIGHT = 300;
 
 export class Room {
-  constructor(x, y) {
+  constructor(x, y, ix, iy) {
     this.x = x;
     this.y = y;
+    this.ix = ix;
+    this.iy = iy;
     this.right = this.x + ROOM_WIDTH;
     this.bottom = this.y + ROOM_HEIGHT;
   }
@@ -46,6 +48,11 @@ export class Room {
     context.lineTo(this.x, this.y + ROOM_HEIGHT);
     context.closePath();
     context.stroke();
+
+    context.fillStyle = "white";
+    context.font = "22px Sans-serif";
+    const text = "" + this.ix + ", " + this.iy;
+    context.fillText(text, this.x + 30, this.y + 30);
     context.restore();
   }
 }
