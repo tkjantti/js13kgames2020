@@ -37,6 +37,22 @@ export class Room {
     this.bottom = this.y + ROOM_HEIGHT;
   }
 
+  isCloseToLeftWall(sprite) {
+    return sprite.x - this.x < 10;
+  }
+
+  isCloseToRightWall(sprite) {
+    return this.right - (sprite.x + sprite.width) < 10;
+  }
+
+  isCloseToTopWall(sprite) {
+    return sprite.y - this.y < 10;
+  }
+
+  isCloseToBottomWall(sprite) {
+    return this.bottom - (sprite.y + sprite.height) < 10;
+  }
+
   render(context) {
     context.save();
     context.strokeStyle = "white";
