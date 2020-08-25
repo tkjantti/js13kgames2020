@@ -57,15 +57,15 @@ export class Level {
   update() {
     this.player.update(this.currentRoom);
 
-    if (this.currentRoom.isCloseToRightWall(this.player)) {
+    if (this.currentRoom.isAtRightDoor(this.player)) {
       this.moveHorizontally(this.player, 1);
-    } else if (this.currentRoom.isCloseToLeftWall(this.player)) {
+    } else if (this.currentRoom.isAtLeftDoor(this.player)) {
       this.moveHorizontally(this.player, -1);
     }
 
-    if (this.currentRoom.isCloseToBottomWall(this.player)) {
+    if (this.currentRoom.isAtBottomDoor(this.player)) {
       this.moveVertically(this.player, 1);
-    } else if (this.currentRoom.isCloseToTopWall(this.player)) {
+    } else if (this.currentRoom.isAtTopDoor(this.player)) {
       this.moveVertically(this.player, -1);
     }
   }
