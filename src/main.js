@@ -45,12 +45,13 @@ const camera = new Camera();
 camera.zoomTo(level.currentRoom);
 
 level.roomChanged = (previousRoom, nextRoom) => {
-  camera.zoomTo(nextRoom);
+  camera.panTo(nextRoom);
 };
 
 const loop = GameLoop({
   update: function() {
     level.update();
+    camera.update();
   },
 
   render: function() {

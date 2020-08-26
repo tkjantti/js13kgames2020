@@ -26,12 +26,13 @@
 
 import { getCanvas } from "kontra";
 
+const PAN_SPEED = 15;
+
 export class Camera {
   constructor() {
     this.x = 0;
     this.y = 0;
     this.zoom = 1;
-    this.area = null;
   }
 
   zoomTo(area) {
@@ -49,6 +50,36 @@ export class Camera {
       this.zoom = canvas.width / area.width;
     } else {
       this.zoom = canvas.height / area.height;
+    }
+  }
+
+  panTo(area) {
+    this.area = area;
+  }
+
+  update() {
+    if (!this.area) {
+      return;
+    }
+
+    const area = this.area;
+    const centerX = area.x + area.width / 2;
+    const centerY = area.y + area.height / 2;
+
+    if (this.x < centerX - PAN_SPEED) {
+      this.x += PAN_SPEED;
+    } else if (this.x > centerX + PAN_SPEED) {
+      this.x -= PAN_SPEED;
+    } else {
+      this.x = centerX;
+    }
+
+    if (this.y < centerY - PAN_SPEED) {
+      this.y += PAN_SPEED;
+    } else if (this.y > centerY + PAN_SPEED) {
+      this.y -= PAN_SPEED;
+    } else {
+      this.y = centerY;
     }
   }
 }
