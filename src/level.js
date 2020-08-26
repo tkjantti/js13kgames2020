@@ -28,13 +28,15 @@ import { Array2D } from "./Array2D.js";
 import { Room, ROOM_WIDTH, ROOM_HEIGHT } from "./room.js";
 import { createPlayer } from "./player.js";
 
-const createRooms = (width, height) => {
-  const rooms = new Array2D(width, height);
+const ROOM_GAP = 30;
+
+const createRooms = (xCount, yCount) => {
+  const rooms = new Array2D(xCount, yCount);
 
   for (let ix = 0; ix < rooms.xCount; ix++) {
     for (let iy = 0; iy < rooms.yCount; iy++) {
-      const x = ix * (ROOM_WIDTH + 30);
-      const y = iy * (ROOM_HEIGHT + 30);
+      const x = ix * (ROOM_WIDTH + ROOM_GAP);
+      const y = iy * (ROOM_HEIGHT + ROOM_GAP);
       rooms.setValue(ix, iy, new Room(x, y, ix, iy));
     }
   }
@@ -43,11 +45,17 @@ const createRooms = (width, height) => {
 };
 
 export class Level {
-  constructor(width, height) {
-    this.width = width;
-    this.height = height;
+  constructor(xCount, yCount) {
+    this.xCount = xCount;
+    this.yCount = yCount;
 
-    const rooms = createRooms(width, height);
+    // For level to work with camera.zoomTo()
+    this.x = 0;
+    this.y = 0;
+    this.width = xCount * (ROOM_WIDTH + ROOM_GAP);
+    this.height = yCount * (ROOM_HEIGHT + ROOM_GAP);
+
+    const rooms = createRooms(xCount, yCount);
     this.rooms = rooms;
     this.currentRoom = this.rooms.getValue(0, 0);
 
@@ -75,7 +83,7 @@ export class Level {
   moveHorizontally(sprite, direction) {
     const previousRoom = this.currentRoom;
     const newix = previousRoom.ix + direction;
-    if (newix < 0 || newix >= this.width) {
+    if (newix < 0 || newix >= this.xCount) {
       return;
     }
 
@@ -94,7 +102,7 @@ export class Level {
   moveVertically(sprite, direction) {
     const previousRoom = this.currentRoom;
     const newiy = previousRoom.iy + direction;
-    if (newiy < 0 || newiy >= this.height) {
+    if (newiy < 0 || newiy >= this.yCount) {
       return;
     }
 
@@ -110,8 +118,16 @@ export class Level {
     }
   }
 
-  render(context) {
-    this.currentRoom.render(context);
+  render(context, drawAll) {
+    if (drawAll) {
+      for (let ix = 0; ix < this.rooms.xCount; ix++) {
+        for (let iy = 0; iy < this.rooms.yCount; iy++) {
+          this.rooms.getValue(ix, iy).render(context);
+        }
+      }
+    } else {
+      this.currentRoom.render(context);
+    }
     this.player.render();
   }
 }
