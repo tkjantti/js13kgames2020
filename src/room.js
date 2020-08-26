@@ -41,6 +41,8 @@ export class Room {
     this.iy = iy;
     this.right = this.x + ROOM_WIDTH;
     this.bottom = this.y + ROOM_HEIGHT;
+    this.width = ROOM_WIDTH;
+    this.height = ROOM_HEIGHT;
   }
 
   isAtLeftDoor(sprite) {

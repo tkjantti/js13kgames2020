@@ -52,6 +52,8 @@ export class Level {
     this.currentRoom = this.rooms.getValue(0, 0);
 
     this.player = createPlayer();
+
+    this.roomChanged = () => {};
   }
 
   update() {
@@ -71,14 +73,16 @@ export class Level {
   }
 
   moveHorizontally(sprite, direction) {
-    const newix = this.currentRoom.ix + direction;
+    const previousRoom = this.currentRoom;
+    const newix = previousRoom.ix + direction;
     if (newix < 0 || newix >= this.width) {
       return;
     }
 
-    const nextRoom = this.rooms.getValue(newix, this.currentRoom.iy);
+    const nextRoom = this.rooms.getValue(newix, previousRoom.iy);
 
     this.currentRoom = nextRoom;
+    this.roomChanged(previousRoom, nextRoom);
 
     if (direction >= 0) {
       sprite.x = nextRoom.x + 10;
@@ -88,14 +92,16 @@ export class Level {
   }
 
   moveVertically(sprite, direction) {
-    const newiy = this.currentRoom.iy + direction;
+    const previousRoom = this.currentRoom;
+    const newiy = previousRoom.iy + direction;
     if (newiy < 0 || newiy >= this.height) {
       return;
     }
 
-    const nextRoom = this.rooms.getValue(this.currentRoom.ix, newiy);
+    const nextRoom = this.rooms.getValue(previousRoom.ix, newiy);
 
     this.currentRoom = nextRoom;
+    this.roomChanged(previousRoom, nextRoom);
 
     if (direction >= 0) {
       sprite.y = nextRoom.y + 10;
@@ -105,14 +111,7 @@ export class Level {
   }
 
   render(context) {
-    const rooms = this.rooms;
-    for (let ix = 0; ix < rooms.xCount; ix++) {
-      for (let iy = 0; iy < rooms.yCount; iy++) {
-        const room = rooms.getValue(ix, iy);
-        room.render(context);
-      }
-    }
-
+    this.currentRoom.render(context);
     this.player.render();
   }
 }

@@ -24,45 +24,31 @@
  * SOFTWARE.
  */
 
-import { init, initKeys, GameLoop } from "kontra";
-import { Level } from "./level.js";
-import { Camera } from "./camera.js";
+import { getCanvas } from "kontra";
 
-const { canvas, context } = init();
-initKeys();
-
-const resize = () => {
-  canvas.width = window.innerWidth - 10;
-  canvas.height = window.innerHeight - 10;
-};
-
-window.addEventListener("resize", resize, false);
-resize();
-
-const level = new Level(3, 3);
-
-const camera = new Camera();
-camera.zoomTo(level.currentRoom);
-
-level.roomChanged = (previousRoom, nextRoom) => {
-  camera.zoomTo(nextRoom);
-};
-
-const loop = GameLoop({
-  update: function() {
-    level.update();
-  },
-
-  render: function() {
-    context.save();
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.scale(camera.zoom, camera.zoom);
-    context.translate(-camera.x, -camera.y);
-
-    level.render(context);
-
-    context.restore();
+export class Camera {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.zoom = 1;
+    this.area = null;
   }
-});
 
-loop.start();
+  zoomTo(area) {
+    this.area = area;
+    if (!area) {
+      return;
+    }
+
+    this.x = area.x + area.width / 2;
+    this.y = area.y + area.height / 2;
+
+    const canvas = getCanvas();
+
+    if (area.width / area.height >= canvas.width / canvas.height) {
+      this.zoom = canvas.width / area.width;
+    } else {
+      this.zoom = canvas.height / area.height;
+    }
+  }
+}
