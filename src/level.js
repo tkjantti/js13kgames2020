@@ -65,7 +65,7 @@ export class Level {
   }
 
   update() {
-    this.player.update(this.currentRoom);
+    this.player.do_update(this.currentRoom, [], []);
 
     if (this.currentRoom.isAtRightDoor(this.player)) {
       this.moveHorizontally(this.player, 1);
