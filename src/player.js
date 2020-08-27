@@ -56,7 +56,7 @@ export const createPlayer = () => {
 
     _isOnGround(room) {
       const margin = 5;
-      return this.y + this.height > room.height - margin;
+      return this.y + this.height > room.bottom - margin;
     },
 
     _findLadderCollision(ladders) {
@@ -114,20 +114,25 @@ export const createPlayer = () => {
         dy += this.yVel;
       }
 
-      this._updateHorizontalPosition(room, dx);
       this._updateVerticalPosition(room, platform, dy);
+      this._updateHorizontalPosition(room, dx);
+    },
+
+    isMovingLeft() {
+      return keyPressed("left") || keyPressed("a");
+    },
+
+    isMovingRight() {
+      return keyPressed("right") || keyPressed("d");
     },
 
     _handleControls(now, room, ladderCollision, platform) {
       let dx = 0;
       let dy = 0;
 
-      if ((keyPressed("left") || keyPressed("a")) && this.x > 0) {
+      if (this.isMovingLeft()) {
         dx = -PLAYER_SPEED;
-      } else if (
-        (keyPressed("right") || keyPressed("d")) &&
-        this.x < room.width - this.width
-      ) {
+      } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
       }
 
@@ -180,10 +185,14 @@ export const createPlayer = () => {
     },
 
     _updateHorizontalPosition(room, dx) {
-      if (this.x + dx > room.width - this.width) {
-        this.x = room.width - this.width;
+      if (
+        dx > 0 &&
+        this.x + this.width + dx > room.right &&
+        !room.isAtRightDoor(this)
+      ) {
+        this.x = room.right - this.width;
         this.xVel = 0;
-      } else if (this.x + dx < room.x) {
+      } else if (dx < 0 && this.x + dx < room.x && !room.isAtLeftDoor(this)) {
         this.x = room.x;
         this.xVel = 0;
       } else if (dx !== 0) {
@@ -192,9 +201,9 @@ export const createPlayer = () => {
     },
 
     _updateVerticalPosition(room, platform, dy) {
-      if (this.y + dy > room.height - this.height) {
+      if (this.y + this.height + dy > room.bottom) {
         // hits ground
-        this.y = room.height - this.height;
+        this.y = room.bottom - this.height;
         this.state = STATE_ON_PLATFORM;
         this.yVel = 0;
       } else if (this.fallingToGround) {
