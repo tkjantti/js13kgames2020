@@ -24,57 +24,49 @@
  * SOFTWARE.
  */
 
-import { init, initKeys, bindKeys, GameLoop } from "kontra";
-import { Level } from "./level.js";
-import { Camera } from "./camera.js";
+import { Sprite, keyPressed } from "kontra";
 
-const { canvas, context } = init();
-initKeys();
+const PLAYER_SPEED = 5;
 
-const resize = () => {
-  canvas.width = window.innerWidth - 10;
-  canvas.height = window.innerHeight - 10;
+export const createPlayer = () => {
+  return Sprite({
+    x: 100,
+    y: 80,
+    color: "red",
+    width: 20,
+    height: 40,
+
+    update(room) {
+      let dx = 0,
+        dy = 0;
+
+      if (keyPressed("left")) {
+        dx -= PLAYER_SPEED;
+      } else if (keyPressed("right")) {
+        dx += PLAYER_SPEED;
+      }
+
+      if (keyPressed("up")) {
+        dy -= PLAYER_SPEED;
+      } else if (keyPressed("down")) {
+        dy += PLAYER_SPEED;
+      }
+
+      if (this.x + dx < room.x) {
+        this.x = room.x;
+      } else if (room.right < this.x + dx + this.width) {
+        this.x = room.right - this.width;
+      } else {
+        this.x += dx;
+      }
+
+      if (this.y + dy < room.y) {
+        this.y = room.y;
+      } else if (room.bottom < this.y + dy + this.height) {
+        this.y = room.bottom - this.height;
+      } else {
+        this.y += dy;
+      }
+    }
+  });
 };
-
-window.addEventListener("resize", resize, false);
-resize();
-
-const level = new Level(8, 8);
-
-const camera = new Camera();
-camera.zoomTo(level.currentRoom);
-
-level.roomChanged = (previousRoom, nextRoom) => {
-  if (camera.area !== level) {
-    camera.panTo(nextRoom);
-  }
-};
-
-// Debug keys
-bindKeys("1", () => {
-  camera.zoomTo(level);
-});
-bindKeys("2", () => {
-  camera.zoomTo(level.currentRoom);
-});
-
-const loop = GameLoop({
-  update: function() {
-    level.update();
-    camera.update();
-  },
-
-  render: function() {
-    context.save();
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.scale(camera.zoom, camera.zoom);
-    context.translate(-camera.x, -camera.y);
-
-    const drawAllRooms = camera.area === level;
-    level.render(context, drawAllRooms);
-
-    context.restore();
-  }
-});
-
-loop.start();

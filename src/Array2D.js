@@ -24,57 +24,27 @@
  * SOFTWARE.
  */
 
-import { init, initKeys, bindKeys, GameLoop } from "kontra";
-import { Level } from "./level.js";
-import { Camera } from "./camera.js";
-
-const { canvas, context } = init();
-initKeys();
-
-const resize = () => {
-  canvas.width = window.innerWidth - 10;
-  canvas.height = window.innerHeight - 10;
-};
-
-window.addEventListener("resize", resize, false);
-resize();
-
-const level = new Level(8, 8);
-
-const camera = new Camera();
-camera.zoomTo(level.currentRoom);
-
-level.roomChanged = (previousRoom, nextRoom) => {
-  if (camera.area !== level) {
-    camera.panTo(nextRoom);
+/*
+ * A two-dimensional array.
+ */
+export class Array2D {
+  constructor(xCount, yCount) {
+    this.xCount = xCount;
+    this.yCount = yCount;
+    this.values = [xCount * yCount];
   }
-};
 
-// Debug keys
-bindKeys("1", () => {
-  camera.zoomTo(level);
-});
-bindKeys("2", () => {
-  camera.zoomTo(level.currentRoom);
-});
-
-const loop = GameLoop({
-  update: function() {
-    level.update();
-    camera.update();
-  },
-
-  render: function() {
-    context.save();
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.scale(camera.zoom, camera.zoom);
-    context.translate(-camera.x, -camera.y);
-
-    const drawAllRooms = camera.area === level;
-    level.render(context, drawAllRooms);
-
-    context.restore();
+  getValue(x, y) {
+    if (x < 0 || this.xCount <= x || y < 0 || this.yCount <= y) {
+      return undefined;
+    }
+    return this.values[x * this.yCount + y];
   }
-});
 
-loop.start();
+  setValue(x, y, value) {
+    if (x < 0 || this.xCount <= x || y < 0 || this.yCount <= y) {
+      return;
+    }
+    this.values[x * this.yCount + y] = value;
+  }
+}

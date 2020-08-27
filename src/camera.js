@@ -24,57 +24,62 @@
  * SOFTWARE.
  */
 
-import { init, initKeys, bindKeys, GameLoop } from "kontra";
-import { Level } from "./level.js";
-import { Camera } from "./camera.js";
+import { getCanvas } from "kontra";
 
-const { canvas, context } = init();
-initKeys();
+const PAN_SPEED = 15;
 
-const resize = () => {
-  canvas.width = window.innerWidth - 10;
-  canvas.height = window.innerHeight - 10;
-};
-
-window.addEventListener("resize", resize, false);
-resize();
-
-const level = new Level(8, 8);
-
-const camera = new Camera();
-camera.zoomTo(level.currentRoom);
-
-level.roomChanged = (previousRoom, nextRoom) => {
-  if (camera.area !== level) {
-    camera.panTo(nextRoom);
+export class Camera {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.zoom = 1;
   }
-};
 
-// Debug keys
-bindKeys("1", () => {
-  camera.zoomTo(level);
-});
-bindKeys("2", () => {
-  camera.zoomTo(level.currentRoom);
-});
+  zoomTo(area) {
+    this.area = area;
+    if (!area) {
+      return;
+    }
 
-const loop = GameLoop({
-  update: function() {
-    level.update();
-    camera.update();
-  },
+    this.x = area.x + area.width / 2;
+    this.y = area.y + area.height / 2;
 
-  render: function() {
-    context.save();
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.scale(camera.zoom, camera.zoom);
-    context.translate(-camera.x, -camera.y);
+    const canvas = getCanvas();
 
-    const drawAllRooms = camera.area === level;
-    level.render(context, drawAllRooms);
-
-    context.restore();
+    if (area.width / area.height >= canvas.width / canvas.height) {
+      this.zoom = canvas.width / area.width;
+    } else {
+      this.zoom = canvas.height / area.height;
+    }
   }
-});
 
-loop.start();
+  panTo(area) {
+    this.area = area;
+  }
+
+  update() {
+    if (!this.area) {
+      return;
+    }
+
+    const area = this.area;
+    const centerX = area.x + area.width / 2;
+    const centerY = area.y + area.height / 2;
+
+    if (this.x < centerX - PAN_SPEED) {
+      this.x += PAN_SPEED;
+    } else if (this.x > centerX + PAN_SPEED) {
+      this.x -= PAN_SPEED;
+    } else {
+      this.x = centerX;
+    }
+
+    if (this.y < centerY - PAN_SPEED) {
+      this.y += PAN_SPEED;
+    } else if (this.y > centerY + PAN_SPEED) {
+      this.y -= PAN_SPEED;
+    } else {
+      this.y = centerY;
+    }
+  }
+}
