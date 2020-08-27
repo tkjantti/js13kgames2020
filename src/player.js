@@ -126,6 +126,10 @@ export const createPlayer = () => {
       return keyPressed("right") || keyPressed("d");
     },
 
+    isMovingDown() {
+      return keyPressed("down") || keyPressed("s");
+    },
+
     _handleControls(now, room, ladderCollision, platform) {
       let dx = 0;
       let dy = 0;

@@ -74,6 +74,12 @@ export class Level {
       this.player.isMovingLeft()
     ) {
       this.moveHorizontally(this.player, -1);
+    } else if (
+      this.player.isMovingDown() &&
+      this.currentRoom.isAtBottomDoor(this.player) &&
+      this.currentRoom.bottom <= this.player.y + this.player.height + 5
+    ) {
+      this.moveVertically(this.player, 1);
     }
   }
 
@@ -103,19 +109,19 @@ export class Level {
   moveVertically(sprite, direction) {
     const previousRoom = this.currentRoom;
     const newiy = previousRoom.iy + direction;
-    if (newiy < 0 || newiy >= this.yCount) {
+    const nextRoom = this.rooms.getValue(previousRoom.ix, newiy);
+
+    if (!nextRoom) {
       return;
     }
-
-    const nextRoom = this.rooms.getValue(previousRoom.ix, newiy);
 
     this.currentRoom = nextRoom;
     this.roomChanged(previousRoom, nextRoom);
 
     if (direction >= 0) {
-      sprite.y = nextRoom.y + 10;
+      sprite.y = nextRoom.y;
     } else {
-      sprite.y = nextRoom.bottom - 10 - sprite.height;
+      sprite.y = nextRoom.bottom - sprite.height - 10;
     }
   }
 
