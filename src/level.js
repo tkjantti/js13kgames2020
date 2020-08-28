@@ -65,56 +65,63 @@ export class Level {
   }
 
   update() {
-    this.player.update(this.currentRoom);
+    this.player.do_update(this.currentRoom, [], []);
 
-    if (this.currentRoom.isAtRightDoor(this.player)) {
+    if (this.player.x > this.currentRoom.right && this.player.isMovingRight()) {
       this.moveHorizontally(this.player, 1);
-    } else if (this.currentRoom.isAtLeftDoor(this.player)) {
+    } else if (
+      this.player.x + this.player.width < this.currentRoom.x &&
+      this.player.isMovingLeft()
+    ) {
       this.moveHorizontally(this.player, -1);
-    }
-
-    if (this.currentRoom.isAtBottomDoor(this.player)) {
+    } else if (
+      this.player.isMovingDown() &&
+      this.currentRoom.isAtBottomDoor(this.player) &&
+      this.currentRoom.bottom <= this.player.y + this.player.height + 5
+    ) {
       this.moveVertically(this.player, 1);
-    } else if (this.currentRoom.isAtTopDoor(this.player)) {
-      this.moveVertically(this.player, -1);
     }
   }
 
   moveHorizontally(sprite, direction) {
     const previousRoom = this.currentRoom;
     const newix = previousRoom.ix + direction;
-    if (newix < 0 || newix >= this.xCount) {
+    const nextRoom = this.rooms.getValue(newix, previousRoom.iy);
+
+    if (!nextRoom) {
       return;
     }
-
-    const nextRoom = this.rooms.getValue(newix, previousRoom.iy);
 
     this.currentRoom = nextRoom;
     this.roomChanged(previousRoom, nextRoom);
 
     if (direction >= 0) {
-      sprite.x = nextRoom.x + 10;
+      if (sprite.x < nextRoom.x) {
+        sprite.x = nextRoom.x;
+      }
     } else {
-      sprite.x = nextRoom.right - 10 - sprite.width;
+      if (nextRoom.right < sprite.x + sprite.width) {
+        sprite.x = nextRoom.right - sprite.width;
+      }
     }
   }
 
   moveVertically(sprite, direction) {
     const previousRoom = this.currentRoom;
     const newiy = previousRoom.iy + direction;
-    if (newiy < 0 || newiy >= this.yCount) {
+    const nextRoom = this.rooms.getValue(previousRoom.ix, newiy);
+
+    if (!nextRoom) {
       return;
     }
-
-    const nextRoom = this.rooms.getValue(previousRoom.ix, newiy);
 
     this.currentRoom = nextRoom;
     this.roomChanged(previousRoom, nextRoom);
 
     if (direction >= 0) {
-      sprite.y = nextRoom.y + 10;
+      sprite.y = nextRoom.y;
     } else {
-      sprite.y = nextRoom.bottom - 10 - sprite.height;
+      sprite.y = nextRoom.bottom - sprite.height - 10;
     }
   }
 
