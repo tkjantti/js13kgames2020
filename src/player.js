@@ -40,13 +40,17 @@ const OFF_LEDGE_JUMP_DELAY_MS = 200;
 const STANDING_WIDTH = 15;
 const STANDING_HEIGHT = 45;
 
+// Vertical states
 const STATE_ON_PLATFORM = 0;
 const STATE_FALLING = 1;
 const STATE_CLIMBING = 2;
 
-const MOVEMENT_LEFT = -1;
-const MOVEMENT_NONE = 0;
-const MOVEMENT_RIGHT = 1;
+// Horizontal states
+const HSTATE_FACING_LEFT = 0;
+const HSTATE_FACING_RIGHT = 1,
+  HSTATE_MAX_FACING = 1;
+const HSTATE_WALKING_LEFT = 2;
+const HSTATE_WALKING_RIGHT = 3;
 
 const playerImage = imageFromSvg(playerSvg);
 
@@ -66,8 +70,8 @@ export const createPlayer = () => {
     yVel: 0, // Vertical velocity, affected by jumping and gravity
     latestOnPlatformTime: 0,
     state: STATE_ON_PLATFORM,
+    hstate: HSTATE_FACING_RIGHT, // Horizontal state
     stopClimbing: false,
-    movement: MOVEMENT_NONE,
     animation: standingAnimation,
 
     render() {
@@ -83,7 +87,10 @@ export const createPlayer = () => {
         STANDING_HEIGHT / image.height
       );
 
-      if (this.movement == MOVEMENT_LEFT) {
+      if (
+        this.hstate === HSTATE_WALKING_LEFT ||
+        this.hstate === HSTATE_FACING_LEFT
+      ) {
         // mirror image
         this.context.translate(image.width / 2, 0);
         this.context.scale(-1, 1);
@@ -172,27 +179,28 @@ export const createPlayer = () => {
     },
 
     _handleControls(now, room, ladderCollision, platform) {
-      const previousMovement = this.movement;
+      const previousHorizontalState = this.hstate;
       let dx = 0;
       let dy = 0;
 
       if (this.isMovingLeft()) {
         dx = -PLAYER_SPEED;
-        this.movement = MOVEMENT_LEFT;
-        if (previousMovement !== MOVEMENT_LEFT) {
+        if (previousHorizontalState !== HSTATE_WALKING_LEFT) {
+          this.hstate = HSTATE_WALKING_LEFT;
           this.animation = walkingAnimation.start();
         }
       } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
-        this.movement = MOVEMENT_RIGHT;
-        if (previousMovement !== MOVEMENT_RIGHT) {
+        if (previousHorizontalState !== HSTATE_WALKING_RIGHT) {
+          this.hstate = HSTATE_WALKING_RIGHT;
           this.animation = walkingAnimation.start();
         }
-      } else {
-        this.movement = MOVEMENT_NONE;
-        if (previousMovement !== MOVEMENT_NONE) {
-          this.animation = standingAnimation;
-        }
+      } else if (previousHorizontalState > HSTATE_MAX_FACING) {
+        this.hstate =
+          previousHorizontalState === HSTATE_WALKING_LEFT
+            ? HSTATE_FACING_LEFT
+            : HSTATE_FACING_RIGHT;
+        this.animation = standingAnimation;
       }
 
       const upPressed = keyPressed("up") || keyPressed("w");
