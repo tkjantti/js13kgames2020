@@ -57,17 +57,26 @@ export const createPlayer = () => {
     latestOnPlatformTime: 0,
     state: STATE_ON_PLATFORM,
     stopClimbing: false,
+    moveLeft: false,
 
     render() {
-      this.context.save();
+      // Translate to (x, y) position is done by kontra
 
-      // Translate to position done by kontra
+      this.context.save();
 
       // scale image to player size
       this.context.scale(
         STANDING_WIDTH / this.image.width,
         STANDING_HEIGHT / this.image.height
       );
+
+      if (this.moveLeft) {
+        // mirror image
+        this.context.translate(this.image.width / 2, 0);
+        this.context.scale(-1, 1);
+        this.context.translate(-this.image.width / 2, 0);
+      }
+
       this.context.drawImage(this.image, 0, 0);
 
       this.context.restore();
@@ -155,8 +164,10 @@ export const createPlayer = () => {
 
       if (this.isMovingLeft()) {
         dx = -PLAYER_SPEED;
+        this.moveLeft = true;
       } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
+        this.moveLeft = false;
       }
 
       const upPressed = keyPressed("up") || keyPressed("w");
