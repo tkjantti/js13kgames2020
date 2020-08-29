@@ -25,7 +25,7 @@
  */
 
 import { Sprite, keyPressed } from "kontra";
-import { imageFromSvg } from "./svg.js";
+import { imageFromSvg, VectorAnimation } from "./svg.js";
 import playerSvg from "./images/player.svg";
 import playerLeftfootSvg from "./images/player-leftfoot.svg";
 
@@ -50,8 +50,11 @@ const MOVEMENT_RIGHT = 1;
 
 const playerImage = imageFromSvg(playerSvg);
 
-const standingAnimation = [playerImage];
-const walkingAnimation = [playerImage, imageFromSvg(playerLeftfootSvg)];
+const standingAnimation = new VectorAnimation([playerImage]);
+const walkingAnimation = new VectorAnimation(
+  [playerImage, imageFromSvg(playerLeftfootSvg)],
+  10
+);
 
 export const createPlayer = () => {
   return Sprite({
@@ -66,20 +69,13 @@ export const createPlayer = () => {
     stopClimbing: false,
     movement: MOVEMENT_NONE,
     animation: standingAnimation,
-    animationStartTime: performance.now(),
 
     render() {
       // Translate to (x, y) position is done by kontra
 
       this.context.save();
 
-      const animation = this.animation;
-
-      const secondsAdvanced =
-        (performance.now() - this.animationStartTime) / 1000;
-      const fps = 10;
-      const i = Math.floor(secondsAdvanced * fps) % animation.length;
-      const image = animation[i];
+      const image = this.animation.getImage();
 
       // scale image to player size
       this.context.scale(
@@ -184,21 +180,18 @@ export const createPlayer = () => {
         dx = -PLAYER_SPEED;
         this.movement = MOVEMENT_LEFT;
         if (previousMovement !== MOVEMENT_LEFT) {
-          this.animation = walkingAnimation;
-          this.animationStartTime = performance.now();
+          this.animation = walkingAnimation.start();
         }
       } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
         this.movement = MOVEMENT_RIGHT;
         if (previousMovement !== MOVEMENT_RIGHT) {
-          this.animation = walkingAnimation;
-          this.animationStartTime = performance.now();
+          this.animation = walkingAnimation.start();
         }
       } else {
         this.movement = MOVEMENT_NONE;
         if (previousMovement !== MOVEMENT_NONE) {
           this.animation = standingAnimation;
-          this.animationStartTime = performance.now();
         }
       }
 

@@ -31,3 +31,22 @@ export const imageFromSvg = svgString => {
   image.src = base64Header + svgInBase64;
   return image;
 };
+
+export class VectorAnimation {
+  constructor(frames, fps) {
+    this.frames = frames;
+    this.fps = fps || 0;
+    this.startTime = performance.now();
+  }
+
+  start() {
+    this.startTime = performance.now();
+    return this;
+  }
+
+  getImage() {
+    const secondsAdvanced = (performance.now() - this.startTime) / 1000;
+    const index = Math.floor(secondsAdvanced * this.fps) % this.frames.length;
+    return this.frames[index];
+  }
+}
