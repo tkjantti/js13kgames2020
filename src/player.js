@@ -208,11 +208,7 @@ export const createPlayer = () => {
         // the stairs.
         this.stopClimbing = false;
       }
-      if (
-        (upPressed && !this.stopClimbing) ||
-        keyPressed("space") ||
-        keyPressed("g")
-      ) {
+      if ((upPressed && !this.stopClimbing) || keyPressed("g")) {
         if (
           this.state === STATE_CLIMBING &&
           dx === 0 &&
