@@ -91,6 +91,35 @@ export class Room {
   render(context) {
     context.save();
 
+    //  ceiling
+
+    context.lineWidth = 1;
+    context.strokeStyle = "gray";
+
+    context.beginPath();
+    context.moveTo(this.x, this.y);
+    context.lineTo(this.x + DOOR_WIDTH, this.y + DOOR_WIDTH);
+    context.lineTo(this.x + DOOR_WIDTH + 2 * DOOR_WIDTH, this.y + DOOR_WIDTH);
+    context.lineTo(this.x + ROOM_WIDTH, this.y);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(this.x, this.y + ROOM_HEIGHT);
+    context.lineTo(this.x + DOOR_WIDTH, this.y + ROOM_HEIGHT - DOOR_WIDTH);
+    context.lineTo(this.x + 3 * DOOR_WIDTH, this.y + ROOM_HEIGHT - DOOR_WIDTH);
+    context.lineTo(this.x + ROOM_WIDTH, this.y + ROOM_HEIGHT);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(this.x + DOOR_WIDTH, this.y + DOOR_WIDTH);
+    context.lineTo(this.x + DOOR_WIDTH, this.y + ROOM_HEIGHT - DOOR_WIDTH);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(this.x + 3 * DOOR_WIDTH, this.y + DOOR_WIDTH);
+    context.lineTo(this.x + 3 * DOOR_WIDTH, this.y + ROOM_HEIGHT - DOOR_WIDTH);
+    context.stroke();
+
     // borders
     context.strokeStyle = "white";
     context.lineWidth = 5;
