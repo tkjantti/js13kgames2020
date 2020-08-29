@@ -25,6 +25,8 @@
  */
 
 import { Sprite, keyPressed } from "kontra";
+import { imageFromSvg } from "./svg.js";
+import playerSvg from "./images/player.svg";
 
 const GRAVITY = 1;
 
@@ -34,18 +36,20 @@ const CLIMB_SPEED = 2;
 
 const OFF_LEDGE_JUMP_DELAY_MS = 200;
 
-const STANDING_WIDTH = 20;
-const STANDING_HEIGHT = 40;
+const STANDING_WIDTH = 15;
+const STANDING_HEIGHT = 45;
 
 const STATE_ON_PLATFORM = 0;
 const STATE_FALLING = 1;
 const STATE_CLIMBING = 2;
 
+const playerImage = imageFromSvg(playerSvg);
+
 export const createPlayer = () => {
   return Sprite({
     x: 100,
     y: 80,
-    color: "red",
+    image: playerImage,
     width: STANDING_WIDTH,
     height: STANDING_HEIGHT,
     xVel: 0, // Horizontal velocity
@@ -53,6 +57,21 @@ export const createPlayer = () => {
     latestOnPlatformTime: 0,
     state: STATE_ON_PLATFORM,
     stopClimbing: false,
+
+    render() {
+      this.context.save();
+
+      // Translate to position done by kontra
+
+      // scale image to player size
+      this.context.scale(
+        STANDING_WIDTH / this.image.width,
+        STANDING_HEIGHT / this.image.height
+      );
+      this.context.drawImage(this.image, 0, 0);
+
+      this.context.restore();
+    },
 
     _isOnGround(room) {
       const margin = 5;
