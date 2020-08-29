@@ -189,14 +189,10 @@ export const createPlayer = () => {
     },
 
     _updateHorizontalPosition(room, dx) {
-      if (
-        dx > 0 &&
-        this.x + this.width + dx > room.right &&
-        !room.isAtRightDoor(this)
-      ) {
+      if (this.x + this.width + dx > room.right && !room.isAtRightDoor(this)) {
         this.x = room.right - this.width;
         this.xVel = 0;
-      } else if (dx < 0 && this.x + dx < room.x && !room.isAtLeftDoor(this)) {
+      } else if (this.x + dx < room.x && !room.isAtLeftDoor(this)) {
         this.x = room.x;
         this.xVel = 0;
       } else if (dx !== 0) {
