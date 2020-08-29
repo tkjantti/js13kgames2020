@@ -25,34 +25,82 @@
  */
 
 import { Sprite, keyPressed } from "kontra";
+import { imageFromSvg, VectorAnimation } from "./svg.js";
+import playerSvg from "./images/player.svg";
+import playerLeftfootSvg from "./images/player-leftfoot.svg";
 
 const GRAVITY = 1;
 
-const PLAYER_SPEED = 5;
+const PLAYER_SPEED = 4;
 const JUMP_VELOCITY = -15;
 const CLIMB_SPEED = 2;
 
 const OFF_LEDGE_JUMP_DELAY_MS = 200;
 
-const STANDING_WIDTH = 20;
-const STANDING_HEIGHT = 40;
+const STANDING_WIDTH = 15;
+const STANDING_HEIGHT = 45;
 
+// Vertical states
 const STATE_ON_PLATFORM = 0;
 const STATE_FALLING = 1;
 const STATE_CLIMBING = 2;
+
+// Horizontal states
+const HSTATE_FACING_LEFT = 0;
+const HSTATE_FACING_RIGHT = 1,
+  HSTATE_MAX_FACING = 1;
+const HSTATE_WALKING_LEFT = 2;
+const HSTATE_WALKING_RIGHT = 3;
+
+const playerImage = imageFromSvg(playerSvg);
+
+const standingAnimation = new VectorAnimation([playerImage]);
+const walkingAnimation = new VectorAnimation(
+  [playerImage, imageFromSvg(playerLeftfootSvg)],
+  10
+);
 
 export const createPlayer = () => {
   return Sprite({
     x: 100,
     y: 80,
-    color: "red",
     width: STANDING_WIDTH,
     height: STANDING_HEIGHT,
     xVel: 0, // Horizontal velocity
     yVel: 0, // Vertical velocity, affected by jumping and gravity
     latestOnPlatformTime: 0,
     state: STATE_ON_PLATFORM,
+    hstate: HSTATE_FACING_RIGHT, // Horizontal state
     stopClimbing: false,
+    animation: standingAnimation,
+
+    render() {
+      // Translate to (x, y) position is done by kontra
+
+      this.context.save();
+
+      const image = this.animation.getImage();
+
+      // scale image to player size
+      this.context.scale(
+        STANDING_WIDTH / image.width,
+        STANDING_HEIGHT / image.height
+      );
+
+      if (
+        this.hstate === HSTATE_WALKING_LEFT ||
+        this.hstate === HSTATE_FACING_LEFT
+      ) {
+        // mirror image
+        this.context.translate(image.width / 2, 0);
+        this.context.scale(-1, 1);
+        this.context.translate(-image.width / 2, 0);
+      }
+
+      this.context.drawImage(image, 0, 0);
+
+      this.context.restore();
+    },
 
     _isOnGround(room) {
       const margin = 5;
@@ -131,13 +179,28 @@ export const createPlayer = () => {
     },
 
     _handleControls(now, room, ladderCollision, platform) {
+      const previousHorizontalState = this.hstate;
       let dx = 0;
       let dy = 0;
 
       if (this.isMovingLeft()) {
         dx = -PLAYER_SPEED;
+        if (previousHorizontalState !== HSTATE_WALKING_LEFT) {
+          this.hstate = HSTATE_WALKING_LEFT;
+          this.animation = walkingAnimation.start();
+        }
       } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
+        if (previousHorizontalState !== HSTATE_WALKING_RIGHT) {
+          this.hstate = HSTATE_WALKING_RIGHT;
+          this.animation = walkingAnimation.start();
+        }
+      } else if (previousHorizontalState > HSTATE_MAX_FACING) {
+        this.hstate =
+          previousHorizontalState === HSTATE_WALKING_LEFT
+            ? HSTATE_FACING_LEFT
+            : HSTATE_FACING_RIGHT;
+        this.animation = standingAnimation;
       }
 
       const upPressed = keyPressed("up") || keyPressed("w");
@@ -146,11 +209,7 @@ export const createPlayer = () => {
         // the stairs.
         this.stopClimbing = false;
       }
-      if (
-        (upPressed && !this.stopClimbing) ||
-        keyPressed("space") ||
-        keyPressed("g")
-      ) {
+      if ((upPressed && !this.stopClimbing) || keyPressed("g")) {
         if (
           this.state === STATE_CLIMBING &&
           dx === 0 &&
