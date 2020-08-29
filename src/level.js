@@ -37,7 +37,14 @@ const createRooms = (xCount, yCount) => {
     for (let iy = 0; iy < rooms.yCount; iy++) {
       const x = ix * (ROOM_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_HEIGHT + ROOM_GAP);
-      rooms.setValue(ix, iy, new Room(x, y, ix, iy));
+      const doors = {
+        // Make doors at edges not passable
+        left: ix !== 0,
+        right: ix !== xCount - 1,
+        top: iy !== 0,
+        bottom: iy !== yCount - 1
+      };
+      rooms.setValue(ix, iy, new Room(x, y, ix, iy, doors));
     }
   }
 
