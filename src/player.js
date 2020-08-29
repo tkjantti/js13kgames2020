@@ -27,10 +27,11 @@
 import { Sprite, keyPressed } from "kontra";
 import { imageFromSvg } from "./svg.js";
 import playerSvg from "./images/player.svg";
+import playerLeftfootSvg from "./images/player-leftfoot.svg";
 
 const GRAVITY = 1;
 
-const PLAYER_SPEED = 5;
+const PLAYER_SPEED = 4;
 const JUMP_VELOCITY = -15;
 const CLIMB_SPEED = 2;
 
@@ -43,13 +44,19 @@ const STATE_ON_PLATFORM = 0;
 const STATE_FALLING = 1;
 const STATE_CLIMBING = 2;
 
+const MOVEMENT_LEFT = -1;
+const MOVEMENT_NONE = 0;
+const MOVEMENT_RIGHT = 1;
+
 const playerImage = imageFromSvg(playerSvg);
+
+const standingAnimation = [playerImage];
+const walkingAnimation = [playerImage, imageFromSvg(playerLeftfootSvg)];
 
 export const createPlayer = () => {
   return Sprite({
     x: 100,
     y: 80,
-    image: playerImage,
     width: STANDING_WIDTH,
     height: STANDING_HEIGHT,
     xVel: 0, // Horizontal velocity
@@ -57,27 +64,37 @@ export const createPlayer = () => {
     latestOnPlatformTime: 0,
     state: STATE_ON_PLATFORM,
     stopClimbing: false,
-    moveLeft: false,
+    movement: MOVEMENT_NONE,
+    animation: standingAnimation,
+    animationStartTime: performance.now(),
 
     render() {
       // Translate to (x, y) position is done by kontra
 
       this.context.save();
 
+      const animation = this.animation;
+
+      const secondsAdvanced =
+        (performance.now() - this.animationStartTime) / 1000;
+      const fps = 10;
+      const i = Math.floor(secondsAdvanced * fps) % animation.length;
+      const image = animation[i];
+
       // scale image to player size
       this.context.scale(
-        STANDING_WIDTH / this.image.width,
-        STANDING_HEIGHT / this.image.height
+        STANDING_WIDTH / image.width,
+        STANDING_HEIGHT / image.height
       );
 
-      if (this.moveLeft) {
+      if (this.movement == MOVEMENT_LEFT) {
         // mirror image
-        this.context.translate(this.image.width / 2, 0);
+        this.context.translate(image.width / 2, 0);
         this.context.scale(-1, 1);
-        this.context.translate(-this.image.width / 2, 0);
+        this.context.translate(-image.width / 2, 0);
       }
 
-      this.context.drawImage(this.image, 0, 0);
+      this.context.drawImage(image, 0, 0);
 
       this.context.restore();
     },
@@ -159,15 +176,30 @@ export const createPlayer = () => {
     },
 
     _handleControls(now, room, ladderCollision, platform) {
+      const previousMovement = this.movement;
       let dx = 0;
       let dy = 0;
 
       if (this.isMovingLeft()) {
         dx = -PLAYER_SPEED;
-        this.moveLeft = true;
+        this.movement = MOVEMENT_LEFT;
+        if (previousMovement !== MOVEMENT_LEFT) {
+          this.animation = walkingAnimation;
+          this.animationStartTime = performance.now();
+        }
       } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
-        this.moveLeft = false;
+        this.movement = MOVEMENT_RIGHT;
+        if (previousMovement !== MOVEMENT_RIGHT) {
+          this.animation = walkingAnimation;
+          this.animationStartTime = performance.now();
+        }
+      } else {
+        this.movement = MOVEMENT_NONE;
+        if (previousMovement !== MOVEMENT_NONE) {
+          this.animation = standingAnimation;
+          this.animationStartTime = performance.now();
+        }
       }
 
       const upPressed = keyPressed("up") || keyPressed("w");
