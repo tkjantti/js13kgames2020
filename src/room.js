@@ -33,6 +33,8 @@ const DOOR_HEIGHT = 100;
 const WALL_TO_DOOR_WIDTH = (ROOM_WIDTH - DOOR_WIDTH) / 2;
 const WALL_TO_DOOR_HEIGHT = (ROOM_HEIGHT - DOOR_HEIGHT) / 2;
 
+const DOOR_PASSING_MARGIN = 13;
+
 export class Room {
   constructor(x, y, ix, iy, doors) {
     this.x = x;
@@ -50,8 +52,9 @@ export class Room {
     return (
       this.doors.left &&
       sprite.x - this.x < 10 &&
-      this.y + WALL_TO_DOOR_HEIGHT < sprite.y &&
-      sprite.y + sprite.height < this.bottom - WALL_TO_DOOR_HEIGHT
+      this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
+      sprite.y + sprite.height <
+        this.bottom - WALL_TO_DOOR_HEIGHT + DOOR_PASSING_MARGIN
     );
   }
 
@@ -59,8 +62,9 @@ export class Room {
     return (
       this.doors.right &&
       this.right - (sprite.x + sprite.width) < 10 &&
-      this.y + WALL_TO_DOOR_HEIGHT < sprite.y &&
-      sprite.y + sprite.height < this.bottom - WALL_TO_DOOR_HEIGHT
+      this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
+      sprite.y + sprite.height <
+        this.bottom - WALL_TO_DOOR_HEIGHT + DOOR_PASSING_MARGIN
     );
   }
 
@@ -68,8 +72,9 @@ export class Room {
     return (
       this.doors.top &&
       sprite.y - this.y < 10 &&
-      this.x + WALL_TO_DOOR_WIDTH < sprite.x &&
-      sprite.x + sprite.width < this.right - WALL_TO_DOOR_WIDTH
+      this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
+      sprite.x + sprite.width <
+        this.right - WALL_TO_DOOR_WIDTH + DOOR_PASSING_MARGIN
     );
   }
 
@@ -77,8 +82,9 @@ export class Room {
     return (
       this.doors.bottom &&
       this.bottom - (sprite.y + sprite.height) < 10 &&
-      this.x + WALL_TO_DOOR_WIDTH < sprite.x &&
-      sprite.x + sprite.width < this.right - WALL_TO_DOOR_WIDTH
+      this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
+      sprite.x + sprite.width <
+        this.right - WALL_TO_DOOR_WIDTH + DOOR_PASSING_MARGIN
     );
   }
 
