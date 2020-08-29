@@ -34,11 +34,12 @@ const WALL_TO_DOOR_WIDTH = (ROOM_WIDTH - DOOR_WIDTH) / 2;
 const WALL_TO_DOOR_HEIGHT = (ROOM_HEIGHT - DOOR_HEIGHT) / 2;
 
 export class Room {
-  constructor(x, y, ix, iy) {
+  constructor(x, y, ix, iy, doors) {
     this.x = x;
     this.y = y;
     this.ix = ix;
     this.iy = iy;
+    this.doors = doors;
     this.right = this.x + ROOM_WIDTH;
     this.bottom = this.y + ROOM_HEIGHT;
     this.width = ROOM_WIDTH;
@@ -47,6 +48,7 @@ export class Room {
 
   isAtLeftDoor(sprite) {
     return (
+      this.doors.left &&
       sprite.x - this.x < 10 &&
       this.y + WALL_TO_DOOR_HEIGHT < sprite.y &&
       sprite.y + sprite.height < this.bottom - WALL_TO_DOOR_HEIGHT
@@ -55,6 +57,7 @@ export class Room {
 
   isAtRightDoor(sprite) {
     return (
+      this.doors.right &&
       this.right - (sprite.x + sprite.width) < 10 &&
       this.y + WALL_TO_DOOR_HEIGHT < sprite.y &&
       sprite.y + sprite.height < this.bottom - WALL_TO_DOOR_HEIGHT
@@ -63,6 +66,7 @@ export class Room {
 
   isAtTopDoor(sprite) {
     return (
+      this.doors.top &&
       sprite.y - this.y < 10 &&
       this.x + WALL_TO_DOOR_WIDTH < sprite.x &&
       sprite.x + sprite.width < this.right - WALL_TO_DOOR_WIDTH
@@ -71,6 +75,7 @@ export class Room {
 
   isAtBottomDoor(sprite) {
     return (
+      this.doors.bottom &&
       this.bottom - (sprite.y + sprite.height) < 10 &&
       this.x + WALL_TO_DOOR_WIDTH < sprite.x &&
       sprite.x + sprite.width < this.right - WALL_TO_DOOR_WIDTH
@@ -92,14 +97,31 @@ export class Room {
     context.stroke();
 
     // doors
-    context.strokeStyle = "green";
+
+    // Top
+    context.strokeStyle = this.doors.top ? "green" : "red";
     context.beginPath();
     context.moveTo(this.x + WALL_TO_DOOR_WIDTH, this.y);
     context.lineTo(this.x + WALL_TO_DOOR_WIDTH + DOOR_WIDTH, this.y);
+    context.stroke();
+
+    // Bottom
+    context.strokeStyle = this.doors.bottom ? "green" : "red";
+    context.beginPath();
     context.moveTo(this.x + WALL_TO_DOOR_WIDTH, this.bottom);
     context.lineTo(this.x + WALL_TO_DOOR_WIDTH + DOOR_WIDTH, this.bottom);
+    context.stroke();
+
+    // Left
+    context.strokeStyle = this.doors.left ? "green" : "red";
+    context.beginPath();
     context.moveTo(this.x, this.y + WALL_TO_DOOR_HEIGHT);
     context.lineTo(this.x, this.y + WALL_TO_DOOR_HEIGHT + DOOR_HEIGHT);
+    context.stroke();
+
+    // Right
+    context.strokeStyle = this.doors.right ? "green" : "red";
+    context.beginPath();
     context.moveTo(this.right, this.y + WALL_TO_DOOR_HEIGHT);
     context.lineTo(this.right, this.y + WALL_TO_DOOR_HEIGHT + DOOR_HEIGHT);
     context.stroke();
