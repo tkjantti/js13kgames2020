@@ -91,13 +91,14 @@ export class Room {
   render(context) {
     context.save();
 
-    //  ceiling
+    //  ceiling/bottom/sides
 
     const Z = 40;
 
     context.lineWidth = 1;
     context.strokeStyle = "#202020";
 
+    // top
     context.beginPath();
     context.moveTo(this.x, this.y);
     context.lineTo(this.x + Z, this.y + Z);
@@ -105,6 +106,7 @@ export class Room {
     context.lineTo(this.x + ROOM_WIDTH, this.y);
     context.stroke();
 
+    // bottom
     context.beginPath();
     context.moveTo(this.x, this.y + ROOM_HEIGHT);
     context.lineTo(this.x + Z, this.y + ROOM_HEIGHT - Z);
@@ -112,11 +114,13 @@ export class Room {
     context.lineTo(this.x + ROOM_WIDTH, this.y + ROOM_HEIGHT);
     context.stroke();
 
+    //left
     context.beginPath();
     context.moveTo(this.x + Z, this.y + Z);
     context.lineTo(this.x + Z, this.y + ROOM_HEIGHT - Z);
     context.stroke();
 
+    // right
     context.beginPath();
     context.moveTo(this.x + ROOM_WIDTH - Z, this.y + Z);
     context.lineTo(this.x + ROOM_WIDTH - Z, this.y + ROOM_HEIGHT - Z);
