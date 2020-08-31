@@ -176,7 +176,7 @@ export class Room {
     context.lineTo(this.x + ROOM_WIDTH / 2, this.y + ROOM_HEIGHT);
     context.stroke();
     // left
-    context.strokeStyle = "#202020";
+    context.strokeStyle = "#101010";
     context.beginPath();
     context.moveTo(this.x, this.y + ROOM_HEIGHT / 2);
     context.lineTo(this.x + Z, this.y + ROOM_HEIGHT / 2);
