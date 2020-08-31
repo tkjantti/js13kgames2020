@@ -95,26 +95,48 @@ export class Room {
 
     const Z = 40;
 
-    context.lineWidth = 1;
-    context.strokeStyle = "#202020";
+    context.lineWidth = 8;
 
     // top
+    context.strokeStyle = "#101010";
     context.beginPath();
     context.moveTo(this.x, this.y);
     context.lineTo(this.x + Z, this.y + Z);
+    context.stroke();
+
+    context.strokeStyle = "#202020";
+    context.beginPath();
+    context.moveTo(this.x + Z, this.y + Z);
     context.lineTo(this.x + ROOM_WIDTH - Z, this.y + Z);
+    context.stroke();
+
+    context.strokeStyle = "#303030";
+    context.beginPath();
+    context.moveTo(this.x + ROOM_WIDTH - Z, this.y + Z);
     context.lineTo(this.x + ROOM_WIDTH, this.y);
     context.stroke();
 
     // bottom
+    context.strokeStyle = "#101010";
     context.beginPath();
     context.moveTo(this.x, this.y + ROOM_HEIGHT);
     context.lineTo(this.x + Z, this.y + ROOM_HEIGHT - Z);
+    context.stroke();
+
+    context.strokeStyle = "#202020";
+    context.beginPath();
+    context.moveTo(this.x + Z, this.y + ROOM_HEIGHT - Z);
     context.lineTo(this.x + ROOM_WIDTH - Z, this.y + ROOM_HEIGHT - Z);
+    context.stroke();
+
+    context.strokeStyle = "#303030";
+    context.beginPath();
+    context.moveTo(this.x + ROOM_WIDTH - Z, this.y + ROOM_HEIGHT - Z);
     context.lineTo(this.x + ROOM_WIDTH, this.y + ROOM_HEIGHT);
     context.stroke();
 
     //left
+    context.strokeStyle = "#202020";
     context.beginPath();
     context.moveTo(this.x + Z, this.y + Z);
     context.lineTo(this.x + Z, this.y + ROOM_HEIGHT - Z);
@@ -124,6 +146,46 @@ export class Room {
     context.beginPath();
     context.moveTo(this.x + ROOM_WIDTH - Z, this.y + Z);
     context.lineTo(this.x + ROOM_WIDTH - Z, this.y + ROOM_HEIGHT - Z);
+    context.stroke();
+
+    //texture
+    context.lineWidth = 4;
+
+    //end
+    //top
+    context.beginPath();
+    context.moveTo(this.x + ROOM_WIDTH / 2, this.y + Z);
+    context.lineTo(this.x + ROOM_WIDTH / 2, this.y + ROOM_HEIGHT - Z);
+    context.stroke();
+    // right
+    context.beginPath();
+    context.moveTo(this.x + Z, this.y + ROOM_WIDTH / 2);
+    context.lineTo(this.x + ROOM_WIDTH - Z, this.y + ROOM_HEIGHT / 2);
+    context.stroke();
+
+    // ceiling/sides
+    context.strokeStyle = "#101010";
+    //top
+    context.beginPath();
+    context.moveTo(this.x + ROOM_WIDTH / 2, this.y);
+    context.lineTo(this.x + ROOM_WIDTH / 2, this.y + Z);
+    context.stroke();
+    //bottom
+    context.beginPath();
+    context.moveTo(this.x + ROOM_WIDTH / 2, this.y + ROOM_HEIGHT - Z);
+    context.lineTo(this.x + ROOM_WIDTH / 2, this.y + ROOM_HEIGHT);
+    context.stroke();
+    // left
+    context.strokeStyle = "#202020";
+    context.beginPath();
+    context.moveTo(this.x, this.y + ROOM_HEIGHT / 2);
+    context.lineTo(this.x + Z, this.y + ROOM_HEIGHT / 2);
+    context.stroke();
+    // right
+    context.strokeStyle = "#303030";
+    context.beginPath();
+    context.moveTo(this.x + ROOM_WIDTH - Z, this.y + ROOM_HEIGHT / 2);
+    context.lineTo(this.x + ROOM_WIDTH, this.y + ROOM_HEIGHT / 2);
     context.stroke();
 
     // borders
