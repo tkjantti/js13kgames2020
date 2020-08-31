@@ -93,31 +93,33 @@ export class Room {
 
     //  ceiling
 
+    const Z = 40;
+
     context.lineWidth = 1;
-    context.strokeStyle = "gray";
+    context.strokeStyle = "#202020";
 
     context.beginPath();
     context.moveTo(this.x, this.y);
-    context.lineTo(this.x + DOOR_WIDTH, this.y + DOOR_WIDTH);
-    context.lineTo(this.x + DOOR_WIDTH + 2 * DOOR_WIDTH, this.y + DOOR_WIDTH);
+    context.lineTo(this.x + Z, this.y + Z);
+    context.lineTo(this.x + ROOM_WIDTH - Z, this.y + Z);
     context.lineTo(this.x + ROOM_WIDTH, this.y);
     context.stroke();
 
     context.beginPath();
     context.moveTo(this.x, this.y + ROOM_HEIGHT);
-    context.lineTo(this.x + DOOR_WIDTH, this.y + ROOM_HEIGHT - DOOR_WIDTH);
-    context.lineTo(this.x + 3 * DOOR_WIDTH, this.y + ROOM_HEIGHT - DOOR_WIDTH);
+    context.lineTo(this.x + Z, this.y + ROOM_HEIGHT - Z);
+    context.lineTo(this.x + ROOM_WIDTH - Z, this.y + ROOM_HEIGHT - Z);
     context.lineTo(this.x + ROOM_WIDTH, this.y + ROOM_HEIGHT);
     context.stroke();
 
     context.beginPath();
-    context.moveTo(this.x + DOOR_WIDTH, this.y + DOOR_WIDTH);
-    context.lineTo(this.x + DOOR_WIDTH, this.y + ROOM_HEIGHT - DOOR_WIDTH);
+    context.moveTo(this.x + Z, this.y + Z);
+    context.lineTo(this.x + Z, this.y + ROOM_HEIGHT - Z);
     context.stroke();
 
     context.beginPath();
-    context.moveTo(this.x + 3 * DOOR_WIDTH, this.y + DOOR_WIDTH);
-    context.lineTo(this.x + 3 * DOOR_WIDTH, this.y + ROOM_HEIGHT - DOOR_WIDTH);
+    context.moveTo(this.x + ROOM_WIDTH - Z, this.y + Z);
+    context.lineTo(this.x + ROOM_WIDTH - Z, this.y + ROOM_HEIGHT - Z);
     context.stroke();
 
     // borders
