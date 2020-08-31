@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+import { Sprite } from "kontra";
+
 export const ROOM_WIDTH = 300;
 export const ROOM_HEIGHT = 300;
 
@@ -34,6 +36,35 @@ const WALL_TO_DOOR_WIDTH = (ROOM_WIDTH - DOOR_WIDTH) / 2;
 const WALL_TO_DOOR_HEIGHT = (ROOM_HEIGHT - DOOR_HEIGHT) / 2;
 
 const DOOR_PASSING_MARGIN = 13;
+
+const LADDER_WIDTH = 5;
+const LADDER_HEIGHT = 200;
+
+const createLadder = () => {
+  return Sprite({
+    width: LADDER_WIDTH,
+    height: LADDER_HEIGHT,
+
+    render() {
+      const stepGap = 5;
+      const stepCount = LADDER_HEIGHT / stepGap;
+      const color = "rgb(60,30,30)";
+      const color2 = "rgb(60,60,60)";
+
+      let cx = this.context;
+      cx.save();
+
+      for (let i = 0; i < stepCount; i++) {
+        cx.fillStyle = color2;
+        cx.fillRect(8, i * stepGap, LADDER_WIDTH - 16, stepGap / 2);
+        cx.fillStyle = color;
+        cx.fillRect(0, i * stepGap + stepGap / 2, LADDER_WIDTH, stepGap / 2);
+      }
+
+      cx.restore();
+    }
+  });
+};
 
 export class Room {
   constructor(x, y, ix, iy, doors) {
@@ -46,6 +77,13 @@ export class Room {
     this.bottom = this.y + ROOM_HEIGHT;
     this.width = ROOM_WIDTH;
     this.height = ROOM_HEIGHT;
+
+    this.ladders = [];
+
+    const ladder = createLadder();
+    ladder.x = x + 20;
+    ladder.y = y + 20;
+    this.ladders.push(ladder);
   }
 
   isAtLeftDoor(sprite) {
@@ -235,6 +273,10 @@ export class Room {
     context.font = "22px Sans-serif";
     const text = "" + this.ix + ", " + this.iy;
     context.fillText(text, this.x + 30, this.y + 30);
+
+    for (let i = 0; i < this.ladders.length; i++) {
+      this.ladders[i].render();
+    }
 
     context.restore();
   }

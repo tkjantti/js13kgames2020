@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { Sprite, keyPressed } from "kontra";
+import { Sprite, keyPressed, collides } from "kontra";
 import { imageFromSvg, VectorAnimation } from "./svg.js";
 import playerSvg from "./images/player.svg";
 import playerLeftfootSvg from "./images/player-leftfoot.svg";
@@ -113,7 +113,7 @@ export const createPlayer = () => {
       for (let i = 0; i < ladders.length; i++) {
         let ladder = ladders[i];
 
-        if (ladder.collidesWith(this)) {
+        if (collides(ladder, this)) {
           collision = true;
 
           if (ladder.y < this.y && this.y < ladder.y + ladder.height) {
@@ -286,7 +286,7 @@ export const createPlayer = () => {
     _findPlatform(platforms) {
       for (let i = 0; i < platforms.length; i++) {
         let platform = platforms[i];
-        if (this.collidesWith(platform)) {
+        if (collides(this, platform)) {
           if (this.y + this.height < platform.y + platform.height) {
             return platform;
           }

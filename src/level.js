@@ -72,7 +72,7 @@ export class Level {
   }
 
   update() {
-    this.player.do_update(this.currentRoom, [], []);
+    this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
 
     if (this.player.x > this.currentRoom.right && this.player.isMovingRight()) {
       this.moveHorizontally(this.player, 1);
