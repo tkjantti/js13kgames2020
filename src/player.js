@@ -55,14 +55,14 @@ const HSTATE_FACING_RIGHT = 1,
 const HSTATE_WALKING_LEFT = 2;
 const HSTATE_WALKING_RIGHT = 3;
 
-const walkingAnimation = new VectorAnimation(
-  [imageFromSvg(playerSvg), imageFromSvg(playerLeftfootSvg)],
-  10
-);
-const climbingAnimation = new VectorAnimation(
-  [imageFromSvg(climb1Svg), imageFromSvg(climb2Svg)],
-  10
-);
+const walkingAnimationFrames = [
+  imageFromSvg(playerSvg),
+  imageFromSvg(playerLeftfootSvg)
+];
+const climbingAnimationFrames = [
+  imageFromSvg(climb1Svg),
+  imageFromSvg(climb2Svg)
+];
 
 export const createPlayer = () => {
   return Sprite({
@@ -76,6 +76,8 @@ export const createPlayer = () => {
     state: STATE_ON_PLATFORM,
     hstate: HSTATE_FACING_RIGHT, // Horizontal state
     stopClimbing: false,
+    walkingAnimation: new VectorAnimation(walkingAnimationFrames, 10),
+    climbingAnimation: new VectorAnimation(climbingAnimationFrames, 10),
 
     render() {
       // Translate to (x, y) position is done by kontra
@@ -83,7 +85,9 @@ export const createPlayer = () => {
       this.context.save();
 
       const animation =
-        this.state === STATE_CLIMBING ? climbingAnimation : walkingAnimation;
+        this.state === STATE_CLIMBING
+          ? this.climbingAnimation
+          : this.walkingAnimation;
       const image = animation.getImage();
 
       // scale image to player size
@@ -193,13 +197,13 @@ export const createPlayer = () => {
         if (previousHorizontalState !== HSTATE_WALKING_LEFT) {
           this.hstate = HSTATE_WALKING_LEFT;
         }
-        walkingAnimation.advance();
+        this.walkingAnimation.advance();
       } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
         if (previousHorizontalState !== HSTATE_WALKING_RIGHT) {
           this.hstate = HSTATE_WALKING_RIGHT;
         }
-        walkingAnimation.advance();
+        this.walkingAnimation.advance();
       } else if (previousHorizontalState > HSTATE_MAX_FACING) {
         this.hstate =
           previousHorizontalState === HSTATE_WALKING_LEFT
@@ -242,13 +246,13 @@ export const createPlayer = () => {
         }
 
         if (this.state === STATE_CLIMBING) {
-          climbingAnimation.advance();
+          this.climbingAnimation.advance();
         }
       } else if (this.isMovingDown() && ladderCollision.collision) {
         this.state = STATE_CLIMBING;
         this.yVel = 0;
         dy += CLIMB_SPEED;
-        climbingAnimation.advance();
+        this.climbingAnimation.advance();
       }
 
       return { dx, dy };
