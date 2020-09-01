@@ -83,10 +83,14 @@ export class Level {
       this.moveHorizontally(this.player, -1);
     } else if (
       this.player.isMovingDown() &&
-      this.currentRoom.isAtBottomDoor(this.player) &&
-      this.currentRoom.bottom <= this.player.y + this.player.height + 5
+      this.currentRoom.isAtBottomDoor(this.player)
     ) {
       this.moveVertically(this.player, 1);
+    } else if (
+      this.player.isMovingUp() &&
+      this.currentRoom.isAtTopDoor(this.player)
+    ) {
+      this.moveVertically(this.player, -1);
     }
   }
 
@@ -128,7 +132,7 @@ export class Level {
     if (direction >= 0) {
       sprite.y = nextRoom.y;
     } else {
-      sprite.y = nextRoom.bottom - sprite.height - 10;
+      sprite.y = nextRoom.bottom - sprite.height;
     }
   }
 

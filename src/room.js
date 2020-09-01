@@ -38,16 +38,15 @@ const WALL_TO_DOOR_HEIGHT = (ROOM_HEIGHT - DOOR_HEIGHT) / 2;
 const DOOR_PASSING_MARGIN = 13;
 
 const LADDER_WIDTH = 15;
-const LADDER_HEIGHT = 200;
 
-const createLadder = () => {
+const createLadder = height => {
   return Sprite({
     width: LADDER_WIDTH,
-    height: LADDER_HEIGHT,
+    height: height,
 
     render() {
       const stepGap = 5;
-      const stepCount = LADDER_HEIGHT / stepGap;
+      const stepCount = this.height / stepGap;
       const color = "rgb(60,30,30)";
       const color2 = "rgb(60,60,60)";
 
@@ -56,9 +55,9 @@ const createLadder = () => {
 
       for (let i = 0; i < stepCount; i++) {
         cx.fillStyle = color2;
-        cx.fillRect(this.width / 3, i * stepGap, LADDER_WIDTH / 3, stepGap / 2);
+        cx.fillRect(this.width / 3, i * stepGap, this.width / 3, stepGap / 2);
         cx.fillStyle = color;
-        cx.fillRect(0, i * stepGap + stepGap / 2, LADDER_WIDTH, stepGap / 2);
+        cx.fillRect(0, i * stepGap + stepGap / 2, this.width, stepGap / 2);
       }
 
       cx.restore();
@@ -80,9 +79,9 @@ export class Room {
 
     this.ladders = [];
 
-    const ladder = createLadder();
-    ladder.x = x + 20;
-    ladder.y = y + 20;
+    const ladder = createLadder(ROOM_HEIGHT);
+    ladder.x = x + ROOM_WIDTH / 2 - ladder.width / 2;
+    ladder.y = y;
     this.ladders.push(ladder);
   }
 
@@ -109,7 +108,7 @@ export class Room {
   isAtTopDoor(sprite) {
     return (
       this.doors.top &&
-      sprite.y - this.y < 10 &&
+      sprite.y - this.y < -20 &&
       this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
       sprite.x + sprite.width <
         this.right - WALL_TO_DOOR_WIDTH + DOOR_PASSING_MARGIN
