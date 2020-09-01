@@ -83,6 +83,16 @@ export class Room {
     ladder.x = x + ROOM_WIDTH / 2 - ladder.width / 2;
     ladder.y = y;
     this.ladders.push(ladder);
+
+    const leftLadder = createLadder(ROOM_HEIGHT / 2);
+    leftLadder.x = x + 5;
+    leftLadder.y = y + ROOM_HEIGHT / 2 - 5;
+    this.ladders.push(leftLadder);
+
+    const rightLadder = createLadder(ROOM_HEIGHT / 2);
+    rightLadder.x = x + ROOM_WIDTH - rightLadder.width - 5;
+    rightLadder.y = y + ROOM_HEIGHT / 2 - 5;
+    this.ladders.push(rightLadder);
   }
 
   isAtLeftDoor(sprite) {
