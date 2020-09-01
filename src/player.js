@@ -117,13 +117,13 @@ export const createPlayer = () => {
     },
 
     _findLadderCollision(ladders) {
-      let collision, collidesHigh;
+      let collidingLadder, collidesHigh;
 
       for (let i = 0; i < ladders.length; i++) {
         let ladder = ladders[i];
 
         if (collides(ladder, this)) {
-          collision = true;
+          collidingLadder = ladder;
 
           if (ladder.y < this.y && this.y < ladder.y + ladder.height) {
             // Top of the player sprite is on ladder
@@ -132,7 +132,7 @@ export const createPlayer = () => {
         }
       }
 
-      return { collision, collidesHigh };
+      return { ladder: collidingLadder, collidesHigh };
     },
 
     // Custom update method to replace Kontra GameObject update
@@ -149,7 +149,7 @@ export const createPlayer = () => {
 
       let ladderCollision = this._findLadderCollision(ladders);
 
-      if (!ladderCollision.collision && this.state === STATE_CLIMBING) {
+      if (!ladderCollision.ladder && this.state === STATE_CLIMBING) {
         this.state = STATE_FALLING;
       } else {
         movement = this._handleControls(now, room, ladderCollision, platform);
@@ -183,6 +183,10 @@ export const createPlayer = () => {
       return keyPressed("right") || keyPressed("d");
     },
 
+    isMovingUp() {
+      return keyPressed("up") || keyPressed("w");
+    },
+
     isMovingDown() {
       return keyPressed("down") || keyPressed("s");
     },
@@ -211,14 +215,16 @@ export const createPlayer = () => {
             : HSTATE_FACING_RIGHT;
       }
 
-      const upPressed = keyPressed("up") || keyPressed("w");
+      const upPressed = this.isMovingUp();
+      const downPressed = this.isMovingDown();
+
       if (!upPressed) {
         // Up key must be released to jump after reaching the top of
         // the stairs.
         this.stopClimbing = false;
       }
 
-      if ((upPressed && !this.stopClimbing) || keyPressed("g")) {
+      if (upPressed && !this.stopClimbing) {
         if (
           this.state === STATE_CLIMBING &&
           dx === 0 &&
@@ -238,7 +244,7 @@ export const createPlayer = () => {
           this.yVel = JUMP_VELOCITY;
           this.state = STATE_FALLING;
           this.latestOnPlatformTime = 0;
-        } else if (this.yVel >= 0 && ladderCollision.collision) {
+        } else if (this.yVel >= 0 && ladderCollision.ladder) {
           // Climb when not jumping
           this.state = STATE_CLIMBING;
           this.yVel = 0;
@@ -248,11 +254,17 @@ export const createPlayer = () => {
         if (this.state === STATE_CLIMBING) {
           this.climbingAnimation.advance();
         }
-      } else if (this.isMovingDown() && ladderCollision.collision) {
+      } else if (downPressed && ladderCollision.ladder) {
         this.state = STATE_CLIMBING;
         this.yVel = 0;
         dy += CLIMB_SPEED;
         this.climbingAnimation.advance();
+      }
+
+      if (this.state === STATE_CLIMBING && (upPressed || downPressed)) {
+        // Stay at the center of the ladder when up/down pressed.
+        this.x = ladderCollision.ladder.x;
+        dx = 0;
       }
 
       return { dx, dy };

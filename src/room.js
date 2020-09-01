@@ -37,7 +37,7 @@ const WALL_TO_DOOR_HEIGHT = (ROOM_HEIGHT - DOOR_HEIGHT) / 2;
 
 const DOOR_PASSING_MARGIN = 13;
 
-const LADDER_WIDTH = 5;
+const LADDER_WIDTH = 15;
 const LADDER_HEIGHT = 200;
 
 const createLadder = () => {
@@ -56,7 +56,7 @@ const createLadder = () => {
 
       for (let i = 0; i < stepCount; i++) {
         cx.fillStyle = color2;
-        cx.fillRect(8, i * stepGap, LADDER_WIDTH - 16, stepGap / 2);
+        cx.fillRect(this.width / 3, i * stepGap, LADDER_WIDTH / 3, stepGap / 2);
         cx.fillStyle = color;
         cx.fillRect(0, i * stepGap + stepGap / 2, LADDER_WIDTH, stepGap / 2);
       }
