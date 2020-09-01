@@ -35,13 +35,13 @@ import climb2Svg from "./images/player-vertical-leftfoot.svg";
 const GRAVITY = 1;
 
 const PLAYER_SPEED = 4;
-const JUMP_VELOCITY = -15;
+const JUMP_VELOCITY = -12;
 const CLIMB_SPEED = 2;
 
 const OFF_LEDGE_JUMP_DELAY_MS = 200;
 
-const STANDING_WIDTH = 15;
-const STANDING_HEIGHT = 45;
+const STANDING_WIDTH = 10;
+const STANDING_HEIGHT = 30;
 
 // Vertical states
 const STATE_ON_PLATFORM = 0;

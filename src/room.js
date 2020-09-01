@@ -37,7 +37,7 @@ const WALL_TO_DOOR_HEIGHT = (ROOM_HEIGHT - DOOR_HEIGHT) / 2;
 
 const DOOR_PASSING_MARGIN = 13;
 
-const LADDER_WIDTH = 15;
+const LADDER_WIDTH = 10;
 
 const createLadder = height => {
   return Sprite({
