@@ -53,35 +53,49 @@ const DOOR_PASSING_MARGIN = 13;
 
 const LADDER_WIDTH = 10;
 
+const LADDER_PERSPECTIVE_LEFT = 0;
+const LADDER_PERSPECTIVE_BACK = 1;
+const LADDER_PERSPECTIVE_RIGHT = 2;
+
 // drawHeight parameter when ladder needs to be drawn shorter
 // than it actually is.
-const createLadder = (height, drawHeight) => {
+const createLadder = (height, perspective, drawHeight) => {
   return Sprite({
     width: LADDER_WIDTH,
     height: height,
     drawHeight: drawHeight || height,
+    perspective: perspective,
 
     render() {
       const stepGap = 5;
       const stepCount = this.drawHeight / stepGap;
       const color = "rgb(60,30,30)";
       const color2 = "rgb(60,60,60)";
-      const drawY = (height - this.drawHeight) / 2;
+      const width =
+        this.perspective === LADDER_PERSPECTIVE_BACK
+          ? this.width
+          : LADDER_WIDTH / 2;
+      const y =
+        this.perspective === LADDER_PERSPECTIVE_BACK
+          ? (this.height - this.drawHeight) / 2
+          : this.height - this.drawHeight;
+
+      let rodX = width / 3;
+      if (this.perspective === LADDER_PERSPECTIVE_LEFT) {
+        rodX = 0;
+      } else if (this.perspective === LADDER_PERSPECTIVE_RIGHT) {
+        rodX = (2 * width) / 3;
+      }
 
       let cx = this.context;
       cx.save();
 
       cx.fillStyle = color2;
-      cx.fillRect(this.width / 3, drawY, this.width / 3, this.drawHeight);
+      cx.fillRect(rodX, y, width / 3, this.drawHeight);
 
       for (let i = 0; i < stepCount; i++) {
         cx.fillStyle = color;
-        cx.fillRect(
-          0,
-          drawY + i * stepGap + stepGap / 2,
-          this.width,
-          stepGap / 2
-        );
+        cx.fillRect(0, y + i * stepGap + stepGap / 2, width, stepGap / 2);
       }
 
       cx.restore();
@@ -107,6 +121,7 @@ export class Room {
 
     const ladder = createLadder(
       ROOM_HEIGHT,
+      LADDER_PERSPECTIVE_BACK,
       // Make ladder appear as tall as the back wall is.
       ROOM_HEIGHT - 2 * ROOM_EDGE_HEIGHT
     );
@@ -114,13 +129,21 @@ export class Room {
     ladder.y = this.y;
     this.ladders.push(ladder);
 
-    const leftLadder = createLadder(ROOM_HEIGHT / 2);
-    leftLadder.x = this.x + 5;
+    const leftLadder = createLadder(
+      ROOM_HEIGHT / 2,
+      LADDER_PERSPECTIVE_LEFT,
+      ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2
+    );
+    leftLadder.x = this.x;
     leftLadder.y = this.y + ROOM_HEIGHT / 2 - 5;
     this.ladders.push(leftLadder);
 
-    const rightLadder = createLadder(ROOM_HEIGHT / 2);
-    rightLadder.x = this.x + ROOM_WIDTH - rightLadder.width - 5;
+    const rightLadder = createLadder(
+      ROOM_HEIGHT / 2,
+      LADDER_PERSPECTIVE_RIGHT,
+      ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2
+    );
+    rightLadder.x = this.x + ROOM_WIDTH - rightLadder.width + 5;
     rightLadder.y = this.y + ROOM_HEIGHT / 2 - 5;
     this.ladders.push(rightLadder);
   }
