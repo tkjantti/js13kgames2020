@@ -55,11 +55,8 @@ const HSTATE_FACING_RIGHT = 1,
 const HSTATE_WALKING_LEFT = 2;
 const HSTATE_WALKING_RIGHT = 3;
 
-const playerImage = imageFromSvg(playerSvg);
-
-const standingAnimation = new VectorAnimation([playerImage]);
 const walkingAnimation = new VectorAnimation(
-  [playerImage, imageFromSvg(playerLeftfootSvg)],
+  [imageFromSvg(playerSvg), imageFromSvg(playerLeftfootSvg)],
   10
 );
 const climbingAnimation = new VectorAnimation(
@@ -79,14 +76,15 @@ export const createPlayer = () => {
     state: STATE_ON_PLATFORM,
     hstate: HSTATE_FACING_RIGHT, // Horizontal state
     stopClimbing: false,
-    animation: standingAnimation,
 
     render() {
       // Translate to (x, y) position is done by kontra
 
       this.context.save();
 
-      const image = this.animation.getImage();
+      const animation =
+        this.state === STATE_CLIMBING ? climbingAnimation : walkingAnimation;
+      const image = animation.getImage();
 
       // scale image to player size
       this.context.scale(
@@ -149,7 +147,6 @@ export const createPlayer = () => {
 
       if (!ladderCollision.collision && this.state === STATE_CLIMBING) {
         this.state = STATE_FALLING;
-        this.animation = standingAnimation;
       } else {
         movement = this._handleControls(now, room, ladderCollision, platform);
       }
@@ -195,16 +192,14 @@ export const createPlayer = () => {
         dx = -PLAYER_SPEED;
         if (previousHorizontalState !== HSTATE_WALKING_LEFT) {
           this.hstate = HSTATE_WALKING_LEFT;
-          this.animation = walkingAnimation;
         }
-        this.animation.advance();
+        walkingAnimation.advance();
       } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
         if (previousHorizontalState !== HSTATE_WALKING_RIGHT) {
           this.hstate = HSTATE_WALKING_RIGHT;
-          this.animation = walkingAnimation;
         }
-        this.animation.advance();
+        walkingAnimation.advance();
       } else if (previousHorizontalState > HSTATE_MAX_FACING) {
         this.hstate =
           previousHorizontalState === HSTATE_WALKING_LEFT
@@ -218,8 +213,6 @@ export const createPlayer = () => {
         // the stairs.
         this.stopClimbing = false;
       }
-
-      const previousState = this.state;
 
       if ((upPressed && !this.stopClimbing) || keyPressed("g")) {
         if (
@@ -246,23 +239,16 @@ export const createPlayer = () => {
           this.state = STATE_CLIMBING;
           this.yVel = 0;
           dy -= CLIMB_SPEED;
-          if (previousState !== STATE_CLIMBING) {
-            this.animation = climbingAnimation;
-          }
         }
 
         if (this.state === STATE_CLIMBING) {
-          this.animation.advance();
+          climbingAnimation.advance();
         }
       } else if (this.isMovingDown() && ladderCollision.collision) {
         this.state = STATE_CLIMBING;
         this.yVel = 0;
         dy += CLIMB_SPEED;
-
-        if (previousState !== STATE_CLIMBING) {
-          this.animation = climbingAnimation;
-        }
-        this.animation.advance();
+        climbingAnimation.advance();
       }
 
       return { dx, dy };
