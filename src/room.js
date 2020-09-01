@@ -318,34 +318,92 @@ export class Room {
     context.stroke();
 
     // doors
+    const DOOR_OUTER_WIDTH = DOOR_WIDTH * (ROOM_OUTER_WIDTH / ROOM_WIDTH);
+    const DOOR_OUTER_HEIGHT = DOOR_HEIGHT * (ROOM_OUTER_HEIGHT / ROOM_HEIGHT);
 
     // Top
-    context.strokeStyle = this.doors.top ? "green" : "red";
+    context.fillStyle = this.doors.top ? "green" : "red";
     context.beginPath();
-    context.moveTo(this.x + WALL_TO_DOOR_WIDTH, this.y);
-    context.lineTo(this.x + WALL_TO_DOOR_WIDTH + DOOR_WIDTH, this.y);
-    context.stroke();
+    context.moveTo(
+      this.x + ROOM_WIDTH / 2 - DOOR_OUTER_WIDTH / 2,
+      this.y - ROOM_EDGE_HEIGHT / 2
+    );
+    context.lineTo(
+      this.x + ROOM_WIDTH / 2 + DOOR_OUTER_WIDTH / 2,
+      this.y - ROOM_EDGE_HEIGHT / 2
+    );
+    context.lineTo(
+      this.x + ROOM_WIDTH / 2 + DOOR_WIDTH / 2,
+      this.y + ROOM_EDGE_HEIGHT / 4
+    );
+    context.lineTo(
+      this.x + ROOM_WIDTH / 2 - DOOR_WIDTH / 2,
+      this.y + ROOM_EDGE_HEIGHT / 4
+    );
+    context.fill();
 
     // Bottom
-    context.strokeStyle = this.doors.bottom ? "green" : "red";
+    context.fillStyle = this.doors.bottom ? "green" : "red";
     context.beginPath();
-    context.moveTo(this.x + WALL_TO_DOOR_WIDTH, this.bottom);
-    context.lineTo(this.x + WALL_TO_DOOR_WIDTH + DOOR_WIDTH, this.bottom);
-    context.stroke();
+    context.moveTo(
+      this.x + ROOM_WIDTH / 2 - DOOR_OUTER_WIDTH / 2,
+      this.bottom + ROOM_EDGE_HEIGHT / 2
+    );
+    context.lineTo(
+      this.x + ROOM_WIDTH / 2 + DOOR_OUTER_WIDTH / 2,
+      this.bottom + ROOM_EDGE_HEIGHT / 2
+    );
+    context.lineTo(
+      this.x + ROOM_WIDTH / 2 + DOOR_WIDTH / 2,
+      this.bottom - ROOM_EDGE_HEIGHT / 4
+    );
+    context.lineTo(
+      this.x + ROOM_WIDTH / 2 - DOOR_WIDTH / 2,
+      this.bottom - ROOM_EDGE_HEIGHT / 4
+    );
+    context.fill();
 
     // Left
-    context.strokeStyle = this.doors.left ? "green" : "red";
+    context.fillStyle = this.doors.left ? "green" : "red";
     context.beginPath();
-    context.moveTo(this.x, this.y + WALL_TO_DOOR_HEIGHT);
-    context.lineTo(this.x, this.y + WALL_TO_DOOR_HEIGHT + DOOR_HEIGHT);
-    context.stroke();
+    context.moveTo(
+      this.x - ROOM_EDGE_WIDTH / 2,
+      this.y + ROOM_HEIGHT / 2 - DOOR_OUTER_HEIGHT / 2
+    );
+    context.lineTo(
+      this.x - ROOM_EDGE_WIDTH / 2,
+      this.y + ROOM_HEIGHT / 2 + DOOR_OUTER_HEIGHT / 2
+    );
+    context.lineTo(
+      this.x + ROOM_EDGE_WIDTH / 2,
+      this.y + ROOM_HEIGHT / 2 + DOOR_HEIGHT / 2
+    );
+    context.lineTo(
+      this.x + ROOM_EDGE_WIDTH / 2,
+      this.y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2
+    );
+    context.fill();
 
     // Right
-    context.strokeStyle = this.doors.right ? "green" : "red";
+    context.fillStyle = this.doors.right ? "green" : "red";
     context.beginPath();
-    context.moveTo(this.right, this.y + WALL_TO_DOOR_HEIGHT);
-    context.lineTo(this.right, this.y + WALL_TO_DOOR_HEIGHT + DOOR_HEIGHT);
-    context.stroke();
+    context.moveTo(
+      this.right + ROOM_EDGE_WIDTH / 2,
+      this.y + ROOM_HEIGHT / 2 - DOOR_OUTER_HEIGHT / 2
+    );
+    context.lineTo(
+      this.right + ROOM_EDGE_WIDTH / 2,
+      this.y + ROOM_HEIGHT / 2 + DOOR_OUTER_HEIGHT / 2
+    );
+    context.lineTo(
+      this.right - ROOM_EDGE_WIDTH / 2,
+      this.y + ROOM_HEIGHT / 2 + DOOR_HEIGHT / 2
+    );
+    context.lineTo(
+      this.right - ROOM_EDGE_WIDTH / 2,
+      this.y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2
+    );
+    context.fill();
 
     // id number
     context.fillStyle = "white";
