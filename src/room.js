@@ -53,9 +53,10 @@ const createLadder = height => {
       let cx = this.context;
       cx.save();
 
+      cx.fillStyle = color2;
+      cx.fillRect(this.width / 3, 0, this.width / 3, this.height);
+
       for (let i = 0; i < stepCount; i++) {
-        cx.fillStyle = color2;
-        cx.fillRect(this.width / 3, i * stepGap, this.width / 3, stepGap / 2);
         cx.fillStyle = color;
         cx.fillRect(0, i * stepGap + stepGap / 2, this.width, stepGap / 2);
       }
