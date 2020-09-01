@@ -25,7 +25,7 @@
  */
 
 import { Array2D } from "./Array2D.js";
-import { Room, ROOM_WIDTH, ROOM_HEIGHT } from "./room.js";
+import { Room, ROOM_OUTER_WIDTH, ROOM_OUTER_HEIGHT } from "./room.js";
 import { createPlayer } from "./player.js";
 
 const ROOM_GAP = 30;
@@ -35,8 +35,8 @@ const createRooms = (xCount, yCount) => {
 
   for (let ix = 0; ix < rooms.xCount; ix++) {
     for (let iy = 0; iy < rooms.yCount; iy++) {
-      const x = ix * (ROOM_WIDTH + ROOM_GAP);
-      const y = iy * (ROOM_HEIGHT + ROOM_GAP);
+      const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
+      const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
       const doors = {
         // Make doors at edges not passable
         left: ix !== 0,
@@ -59,8 +59,8 @@ export class Level {
     // For level to work with camera.zoomTo()
     this.x = 0;
     this.y = 0;
-    this.width = xCount * (ROOM_WIDTH + ROOM_GAP);
-    this.height = yCount * (ROOM_HEIGHT + ROOM_GAP);
+    this.width = xCount * (ROOM_OUTER_WIDTH + ROOM_GAP);
+    this.height = yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
 
     const rooms = createRooms(xCount, yCount);
     this.rooms = rooms;
@@ -146,6 +146,7 @@ export class Level {
     } else {
       this.currentRoom.render(context);
     }
+
     this.player.render();
   }
 }

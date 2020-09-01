@@ -42,7 +42,7 @@ resize();
 const level = new Level(8, 8);
 
 const camera = new Camera();
-camera.zoomTo(level.currentRoom);
+camera.zoomTo(level.currentRoom.getOuterBoundingBox());
 
 level.roomChanged = (previousRoom, nextRoom) => {
   if (camera.area !== level) {
@@ -55,7 +55,7 @@ bindKeys("1", () => {
   camera.zoomTo(level);
 });
 bindKeys("2", () => {
-  camera.zoomTo(level.currentRoom);
+  camera.zoomTo(level.currentRoom.getOuterBoundingBox());
 });
 
 const loop = GameLoop({
