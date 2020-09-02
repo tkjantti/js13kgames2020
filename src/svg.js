@@ -36,17 +36,17 @@ export class VectorAnimation {
   constructor(frames, fps) {
     this.frames = frames;
     this.fps = fps || 0;
-    this.startTime = performance.now();
+    this.startTime = this.currentTime = performance.now();
   }
 
-  start() {
-    this.startTime = performance.now();
-    return this;
+  advance() {
+    this.currentTime += 1000 / 60;
   }
 
   getImage() {
-    const secondsAdvanced = (performance.now() - this.startTime) / 1000;
-    const index = Math.floor(secondsAdvanced * this.fps) % this.frames.length;
+    let index = 0;
+    const secondsAdvanced = (this.currentTime - this.startTime) / 1000;
+    index = Math.floor(secondsAdvanced * this.fps) % this.frames.length;
     return this.frames[index];
   }
 }

@@ -24,21 +24,24 @@
  * SOFTWARE.
  */
 
-import { Sprite, keyPressed } from "kontra";
+import { Sprite, keyPressed, collides } from "kontra";
 import { imageFromSvg, VectorAnimation } from "./svg.js";
+
 import playerSvg from "./images/player.svg";
 import playerLeftfootSvg from "./images/player-leftfoot.svg";
+import climb1Svg from "./images/player-vertical.svg";
+import climb2Svg from "./images/player-vertical-leftfoot.svg";
 
 const GRAVITY = 1;
 
 const PLAYER_SPEED = 4;
-const JUMP_VELOCITY = -15;
+const JUMP_VELOCITY = -12;
 const CLIMB_SPEED = 2;
 
 const OFF_LEDGE_JUMP_DELAY_MS = 200;
 
-const STANDING_WIDTH = 15;
-const STANDING_HEIGHT = 45;
+const STANDING_WIDTH = 10;
+const STANDING_HEIGHT = 30;
 
 // Vertical states
 const STATE_ON_PLATFORM = 0;
@@ -52,13 +55,14 @@ const HSTATE_FACING_RIGHT = 1,
 const HSTATE_WALKING_LEFT = 2;
 const HSTATE_WALKING_RIGHT = 3;
 
-const playerImage = imageFromSvg(playerSvg);
-
-const standingAnimation = new VectorAnimation([playerImage]);
-const walkingAnimation = new VectorAnimation(
-  [playerImage, imageFromSvg(playerLeftfootSvg)],
-  10
-);
+const walkingAnimationFrames = [
+  imageFromSvg(playerSvg),
+  imageFromSvg(playerLeftfootSvg)
+];
+const climbingAnimationFrames = [
+  imageFromSvg(climb1Svg),
+  imageFromSvg(climb2Svg)
+];
 
 export const createPlayer = () => {
   return Sprite({
@@ -72,14 +76,19 @@ export const createPlayer = () => {
     state: STATE_ON_PLATFORM,
     hstate: HSTATE_FACING_RIGHT, // Horizontal state
     stopClimbing: false,
-    animation: standingAnimation,
+    walkingAnimation: new VectorAnimation(walkingAnimationFrames, 10),
+    climbingAnimation: new VectorAnimation(climbingAnimationFrames, 10),
 
     render() {
       // Translate to (x, y) position is done by kontra
 
       this.context.save();
 
-      const image = this.animation.getImage();
+      const animation =
+        this.state === STATE_CLIMBING
+          ? this.climbingAnimation
+          : this.walkingAnimation;
+      const image = animation.getImage();
 
       // scale image to player size
       this.context.scale(
@@ -108,13 +117,13 @@ export const createPlayer = () => {
     },
 
     _findLadderCollision(ladders) {
-      let collision, collidesHigh;
+      let collidingLadder, collidesHigh;
 
       for (let i = 0; i < ladders.length; i++) {
         let ladder = ladders[i];
 
-        if (ladder.collidesWith(this)) {
-          collision = true;
+        if (collides(ladder, this)) {
+          collidingLadder = ladder;
 
           if (ladder.y < this.y && this.y < ladder.y + ladder.height) {
             // Top of the player sprite is on ladder
@@ -123,7 +132,7 @@ export const createPlayer = () => {
         }
       }
 
-      return { collision, collidesHigh };
+      return { ladder: collidingLadder, collidesHigh };
     },
 
     // Custom update method to replace Kontra GameObject update
@@ -140,7 +149,7 @@ export const createPlayer = () => {
 
       let ladderCollision = this._findLadderCollision(ladders);
 
-      if (!ladderCollision.collision && this.state === STATE_CLIMBING) {
+      if (!ladderCollision.ladder && this.state === STATE_CLIMBING) {
         this.state = STATE_FALLING;
       } else {
         movement = this._handleControls(now, room, ladderCollision, platform);
@@ -174,6 +183,10 @@ export const createPlayer = () => {
       return keyPressed("right") || keyPressed("d");
     },
 
+    isMovingUp() {
+      return keyPressed("up") || keyPressed("w");
+    },
+
     isMovingDown() {
       return keyPressed("down") || keyPressed("s");
     },
@@ -187,29 +200,31 @@ export const createPlayer = () => {
         dx = -PLAYER_SPEED;
         if (previousHorizontalState !== HSTATE_WALKING_LEFT) {
           this.hstate = HSTATE_WALKING_LEFT;
-          this.animation = walkingAnimation.start();
         }
+        this.walkingAnimation.advance();
       } else if (this.isMovingRight()) {
         dx = PLAYER_SPEED;
         if (previousHorizontalState !== HSTATE_WALKING_RIGHT) {
           this.hstate = HSTATE_WALKING_RIGHT;
-          this.animation = walkingAnimation.start();
         }
+        this.walkingAnimation.advance();
       } else if (previousHorizontalState > HSTATE_MAX_FACING) {
         this.hstate =
           previousHorizontalState === HSTATE_WALKING_LEFT
             ? HSTATE_FACING_LEFT
             : HSTATE_FACING_RIGHT;
-        this.animation = standingAnimation;
       }
 
-      const upPressed = keyPressed("up") || keyPressed("w");
+      const upPressed = this.isMovingUp();
+      const downPressed = this.isMovingDown();
+
       if (!upPressed) {
         // Up key must be released to jump after reaching the top of
         // the stairs.
         this.stopClimbing = false;
       }
-      if ((upPressed && !this.stopClimbing) || keyPressed("g")) {
+
+      if (upPressed && !this.stopClimbing) {
         if (
           this.state === STATE_CLIMBING &&
           dx === 0 &&
@@ -229,19 +244,27 @@ export const createPlayer = () => {
           this.yVel = JUMP_VELOCITY;
           this.state = STATE_FALLING;
           this.latestOnPlatformTime = 0;
-        } else if (this.yVel >= 0 && ladderCollision.collision) {
+        } else if (this.yVel >= 0 && ladderCollision.ladder) {
           // Climb when not jumping
           this.state = STATE_CLIMBING;
           this.yVel = 0;
           dy -= CLIMB_SPEED;
         }
-      } else if (
-        (keyPressed("down") || keyPressed("s")) &&
-        ladderCollision.collision
-      ) {
+
+        if (this.state === STATE_CLIMBING) {
+          this.climbingAnimation.advance();
+        }
+      } else if (downPressed && ladderCollision.ladder) {
         this.state = STATE_CLIMBING;
         this.yVel = 0;
         dy += CLIMB_SPEED;
+        this.climbingAnimation.advance();
+      }
+
+      if (this.state === STATE_CLIMBING && (upPressed || downPressed)) {
+        // Stay at the center of the ladder when up/down pressed.
+        this.x = ladderCollision.ladder.x;
+        dx = 0;
       }
 
       return { dx, dy };
@@ -286,7 +309,7 @@ export const createPlayer = () => {
     _findPlatform(platforms) {
       for (let i = 0; i < platforms.length; i++) {
         let platform = platforms[i];
-        if (this.collidesWith(platform)) {
+        if (collides(this, platform)) {
           if (this.y + this.height < platform.y + platform.height) {
             return platform;
           }
