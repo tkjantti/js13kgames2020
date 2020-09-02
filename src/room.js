@@ -26,6 +26,10 @@
 
 import { Sprite } from "kontra";
 
+export const DOOR_EDGE = 0;
+export const DOOR_404 = 1;
+export const DOOR_OPEN = 2;
+
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
 export const ROOM_OUTER_WIDTH = 300;
@@ -103,19 +107,36 @@ const createLadder = (height, perspective, drawHeight) => {
   });
 };
 
+const getDoorColor = doorState => {
+  switch (doorState) {
+    case DOOR_OPEN:
+      return "green";
+    case DOOR_404:
+      return "red";
+    default:
+      return "gray";
+  }
+};
+
 export class Room {
-  constructor(x, y, ix, iy, doors) {
+  constructor(x, y, ix, iy) {
     this.outerX = x;
     this.outerY = y;
     this.x = x + ROOM_EDGE_WIDTH;
     this.y = y + ROOM_EDGE_HEIGHT;
     this.ix = ix;
     this.iy = iy;
-    this.doors = doors;
     this.right = this.x + ROOM_WIDTH;
     this.bottom = this.y + ROOM_HEIGHT;
     this.width = ROOM_WIDTH;
     this.height = ROOM_HEIGHT;
+
+    this.doors = {
+      left: DOOR_EDGE,
+      right: DOOR_EDGE,
+      top: DOOR_EDGE,
+      bottom: DOOR_EDGE
+    };
 
     this.ladders = [];
 
@@ -159,7 +180,7 @@ export class Room {
 
   isAtLeftDoor(sprite) {
     return (
-      this.doors.left &&
+      this.doors.left === DOOR_OPEN &&
       sprite.x - this.x < 10 &&
       this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
       sprite.y + sprite.height <
@@ -169,7 +190,7 @@ export class Room {
 
   isAtRightDoor(sprite) {
     return (
-      this.doors.right &&
+      this.doors.right === DOOR_OPEN &&
       this.right - (sprite.x + sprite.width) < 10 &&
       this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
       sprite.y + sprite.height <
@@ -179,7 +200,7 @@ export class Room {
 
   isAtTopDoor(sprite) {
     return (
-      this.doors.top &&
+      this.doors.top === DOOR_OPEN &&
       sprite.y - this.y < -10 &&
       this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
       sprite.x + sprite.width <
@@ -189,7 +210,7 @@ export class Room {
 
   isAtBottomDoor(sprite) {
     return (
-      this.doors.bottom &&
+      this.doors.bottom === DOOR_OPEN &&
       this.bottom - (sprite.y + sprite.height) < 10 &&
       this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
       sprite.x + sprite.width <
@@ -345,7 +366,7 @@ export class Room {
     const DOOR_OUTER_HEIGHT = DOOR_HEIGHT * (ROOM_OUTER_HEIGHT / ROOM_HEIGHT);
 
     // Top
-    context.fillStyle = this.doors.top ? "green" : "red";
+    context.fillStyle = getDoorColor(this.doors.top);
     context.beginPath();
     context.moveTo(
       this.x + ROOM_WIDTH / 2 - DOOR_OUTER_WIDTH / 2,
@@ -366,7 +387,7 @@ export class Room {
     context.fill();
 
     // Bottom
-    context.fillStyle = this.doors.bottom ? "green" : "red";
+    context.fillStyle = getDoorColor(this.doors.bottom);
     context.beginPath();
     context.moveTo(
       this.x + ROOM_WIDTH / 2 - DOOR_OUTER_WIDTH / 2,
@@ -387,7 +408,7 @@ export class Room {
     context.fill();
 
     // Left
-    context.fillStyle = this.doors.left ? "green" : "red";
+    context.fillStyle = getDoorColor(this.doors.left);
     context.beginPath();
     context.moveTo(
       this.x - ROOM_EDGE_WIDTH / 2,
@@ -408,7 +429,7 @@ export class Room {
     context.fill();
 
     // Right
-    context.fillStyle = this.doors.right ? "green" : "red";
+    context.fillStyle = getDoorColor(this.doors.right);
     context.beginPath();
     context.moveTo(
       this.right + ROOM_EDGE_WIDTH / 2,

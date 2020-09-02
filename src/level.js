@@ -25,7 +25,14 @@
  */
 
 import { Array2D } from "./Array2D.js";
-import { Room, ROOM_OUTER_WIDTH, ROOM_OUTER_HEIGHT } from "./room.js";
+import {
+  Room,
+  ROOM_OUTER_WIDTH,
+  ROOM_OUTER_HEIGHT,
+  DOOR_EDGE,
+  DOOR_404,
+  DOOR_OPEN
+} from "./room.js";
 import { createPlayer } from "./player.js";
 
 const ROOM_GAP = 30;
@@ -37,14 +44,7 @@ const createRooms = (xCount, yCount) => {
     for (let iy = 0; iy < rooms.yCount; iy++) {
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
-      const doors = {
-        // Make doors at edges not passable
-        left: ix !== 0,
-        right: ix !== xCount - 1,
-        top: iy !== 0,
-        bottom: iy !== yCount - 1
-      };
-      rooms.setValue(ix, iy, new Room(x, y, ix, iy, doors));
+      rooms.setValue(ix, iy, new Room(x, y, ix, iy));
     }
   }
 
@@ -62,13 +62,57 @@ export class Level {
     this.width = xCount * (ROOM_OUTER_WIDTH + ROOM_GAP);
     this.height = yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
 
-    const rooms = createRooms(xCount, yCount);
-    this.rooms = rooms;
+    this.rooms = createRooms(xCount, yCount);
+    this.updateDoors();
     this.currentRoom = this.rooms.getValue(0, 0);
 
     this.player = createPlayer();
 
     this.roomChanged = () => {};
+  }
+
+  updateDoors() {
+    const rooms = this.rooms;
+
+    for (let ix = 0; ix < rooms.xCount; ix++) {
+      for (let iy = 0; iy < rooms.yCount; iy++) {
+        const room = rooms.getValue(ix, iy);
+
+        if (room) {
+          if (ix === 0) {
+            room.doors.left = DOOR_EDGE;
+          } else if (!rooms.getValue(ix - 1, iy)) {
+            room.doors.left = DOOR_404;
+          } else {
+            room.doors.left = DOOR_OPEN;
+          }
+
+          if (ix === rooms.xCount - 1) {
+            room.doors.right = DOOR_EDGE;
+          } else if (!rooms.getValue(ix + 1, iy)) {
+            room.doors.right = DOOR_404;
+          } else {
+            room.doors.right = DOOR_OPEN;
+          }
+
+          if (iy === 0) {
+            room.doors.top = DOOR_EDGE;
+          } else if (!rooms.getValue(ix, iy - 1)) {
+            room.doors.top = DOOR_404;
+          } else {
+            room.doors.top = DOOR_OPEN;
+          }
+
+          if (iy === rooms.yCount - 1) {
+            room.doors.bottom = DOOR_EDGE;
+          } else if (!rooms.getValue(ix, iy + 1)) {
+            room.doors.bottom = DOOR_404;
+          } else {
+            room.doors.bottom = DOOR_OPEN;
+          }
+        }
+      }
+    }
   }
 
   update() {
@@ -140,7 +184,10 @@ export class Level {
     if (drawAll) {
       for (let ix = 0; ix < this.rooms.xCount; ix++) {
         for (let iy = 0; iy < this.rooms.yCount; iy++) {
-          this.rooms.getValue(ix, iy).render(context);
+          const room = this.rooms.getValue(ix, iy);
+          if (room) {
+            room.render(context);
+          }
         }
       }
     } else {
