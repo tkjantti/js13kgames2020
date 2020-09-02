@@ -42,6 +42,15 @@ const createRooms = (xCount, yCount) => {
 
   for (let ix = 0; ix < rooms.xCount; ix++) {
     for (let iy = 0; iy < rooms.yCount; iy++) {
+      if (
+        (ix === 1 && iy === 2) ||
+        (ix === 3 && iy === 6) ||
+        (ix === 5 && iy === 4)
+      ) {
+        // Some of the rooms are missing.
+        continue;
+      }
+
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
       rooms.setValue(ix, iy, new Room(x, y, ix, iy));
@@ -64,9 +73,11 @@ export class Level {
 
     this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(0, 0);
+    this.currentRoom = this.rooms.getValue(3, 4);
 
     this.player = createPlayer();
+    this.player.x = this.currentRoom.x + 30;
+    this.player.y = this.currentRoom.bottom - this.player.height;
 
     this.roomChanged = () => {};
   }
