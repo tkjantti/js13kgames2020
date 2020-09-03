@@ -42,18 +42,14 @@ const createRooms = (xCount, yCount) => {
 
   for (let ix = 0; ix < rooms.xCount; ix++) {
     for (let iy = 0; iy < rooms.yCount; iy++) {
-      if (
+      const isMissing =
         (ix === 1 && iy === 2) ||
         (ix === 3 && iy === 6) ||
-        (ix === 5 && iy === 4)
-      ) {
-        // Some of the rooms are missing.
-        continue;
-      }
+        (ix === 5 && iy === 4);
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
-      rooms.setValue(ix, iy, new Room(x, y, ix, iy));
+      rooms.setValue(ix, iy, new Room(x, y, ix, iy, isMissing));
     }
   }
 
@@ -73,7 +69,7 @@ export class Level {
 
     this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(3, 4);
+    this.currentRoom = this.rooms.getValue(3, 5);
 
     this.player = createPlayer();
     this.player.x = this.currentRoom.x + 30;
@@ -90,9 +86,14 @@ export class Level {
         const room = rooms.getValue(ix, iy);
 
         if (room) {
+          const leftRoom = rooms.getValue(ix - 1, iy);
+          const rightRoom = rooms.getValue(ix + 1, iy);
+          const topRoom = rooms.getValue(ix, iy - 1);
+          const bottomRoom = rooms.getValue(ix, iy + 1);
+
           if (ix === 0) {
             room.doors.left = DOOR_EDGE;
-          } else if (!rooms.getValue(ix - 1, iy)) {
+          } else if (!leftRoom || leftRoom.isMissing) {
             room.doors.left = DOOR_404;
           } else {
             room.doors.left = DOOR_OPEN;
@@ -100,7 +101,7 @@ export class Level {
 
           if (ix === rooms.xCount - 1) {
             room.doors.right = DOOR_EDGE;
-          } else if (!rooms.getValue(ix + 1, iy)) {
+          } else if (!rightRoom || rightRoom.isMissing) {
             room.doors.right = DOOR_404;
           } else {
             room.doors.right = DOOR_OPEN;
@@ -108,7 +109,7 @@ export class Level {
 
           if (iy === 0) {
             room.doors.top = DOOR_EDGE;
-          } else if (!rooms.getValue(ix, iy - 1)) {
+          } else if (!topRoom || topRoom.isMissing) {
             room.doors.top = DOOR_404;
           } else {
             room.doors.top = DOOR_OPEN;
@@ -116,7 +117,7 @@ export class Level {
 
           if (iy === rooms.yCount - 1) {
             room.doors.bottom = DOOR_EDGE;
-          } else if (!rooms.getValue(ix, iy + 1)) {
+          } else if (!bottomRoom || bottomRoom.isMissing) {
             room.doors.bottom = DOOR_404;
           } else {
             room.doors.bottom = DOOR_OPEN;
