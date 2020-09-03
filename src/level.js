@@ -30,6 +30,7 @@ import {
   ROOM_OUTER_WIDTH,
   ROOM_OUTER_HEIGHT,
   DOOR_NONE,
+  DOOR_NONE_EDGE,
   DOOR_EDGE,
   DOOR_404,
   DOOR_OPEN
@@ -45,6 +46,8 @@ const createRooms = (xCount, yCount) => {
     for (let iy = 0; iy < rooms.yCount; iy++) {
       const isMissing =
         (ix === 1 && iy === 2) ||
+        (ix === 4 && iy === 4) ||
+        (ix === 5 && iy === 5) ||
         (ix === 3 && iy === 6) ||
         (ix === 5 && iy === 4);
 
@@ -70,7 +73,7 @@ export class Level {
 
     this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(3, 5);
+    this.currentRoom = this.rooms.getValue(3, 4);
 
     this.player = createPlayer();
     this.player.x = this.currentRoom.x + 30;
@@ -83,7 +86,10 @@ export class Level {
     const rooms = this.rooms;
 
     const getDoor = (room, otherRoom) => {
-      if (room.isMissing && (!otherRoom || otherRoom.isMissing)) {
+      if (room.isMissing && !otherRoom) {
+        return DOOR_NONE_EDGE;
+      }
+      if (room.isMissing && otherRoom.isMissing) {
         return DOOR_NONE;
       }
       if (!otherRoom) {

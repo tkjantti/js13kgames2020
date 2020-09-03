@@ -26,9 +26,19 @@
 
 import { Sprite } from "kontra";
 
+// No door at missing rooms, can pass
 export const DOOR_NONE = 0;
-export const DOOR_EDGE = 1;
-export const DOOR_OPEN = 2;
+
+// No door at missing rooms, can not pass
+export const DOOR_NONE_EDGE = 1;
+
+// Door at the edge of the level
+export const DOOR_EDGE = 2;
+
+// Open door, can pass
+export const DOOR_OPEN = 3;
+
+// Door to a missing room
 export const DOOR_404 = 404;
 
 // The outmost width and height of the room that is drawn when
@@ -127,7 +137,9 @@ const getDoorColor = doorState => {
 };
 
 const canPassDoor = doorState => {
-  return doorState === DOOR_OPEN || doorState === DOOR_404;
+  return (
+    doorState === DOOR_OPEN || doorState === DOOR_404 || doorState === DOOR_NONE
+  );
 };
 
 export class Room {
@@ -201,9 +213,7 @@ export class Room {
     return (
       canPassDoor(this.doors.left) &&
       sprite.x - this.x < 10 &&
-      this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
-      sprite.y + sprite.height <
-        this.bottom - WALL_TO_DOOR_HEIGHT + DOOR_PASSING_MARGIN
+      (this.doors.left === DOOR_NONE || this.atDoorY(sprite))
     );
   }
 
@@ -211,9 +221,7 @@ export class Room {
     return (
       canPassDoor(this.doors.right) &&
       this.right - (sprite.x + sprite.width) < 10 &&
-      this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
-      sprite.y + sprite.height <
-        this.bottom - WALL_TO_DOOR_HEIGHT + DOOR_PASSING_MARGIN
+      (this.doors.right === DOOR_NONE || this.atDoorY(sprite))
     );
   }
 
@@ -221,9 +229,7 @@ export class Room {
     return (
       canPassDoor(this.doors.top) &&
       sprite.y - this.y < -10 &&
-      this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
-      sprite.x + sprite.width <
-        this.right - WALL_TO_DOOR_WIDTH + DOOR_PASSING_MARGIN
+      (this.doors.top === DOOR_NONE || this.atDoorX(sprite))
     );
   }
 
@@ -231,9 +237,23 @@ export class Room {
     return (
       canPassDoor(this.doors.bottom) &&
       this.bottom - (sprite.y + sprite.height) < 10 &&
+      (this.doors.bottom === DOOR_NONE || this.atDoorX(sprite))
+    );
+  }
+
+  atDoorX(sprite) {
+    return (
       this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
       sprite.x + sprite.width <
         this.right - WALL_TO_DOOR_WIDTH + DOOR_PASSING_MARGIN
+    );
+  }
+
+  atDoorY(sprite) {
+    return (
+      this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
+      sprite.y + sprite.height <
+        this.bottom - WALL_TO_DOOR_HEIGHT + DOOR_PASSING_MARGIN
     );
   }
 
