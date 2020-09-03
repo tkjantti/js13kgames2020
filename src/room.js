@@ -26,9 +26,10 @@
 
 import { Sprite } from "kontra";
 
-export const DOOR_EDGE = 0;
-export const DOOR_404 = 1;
+export const DOOR_NONE = 0;
+export const DOOR_EDGE = 1;
 export const DOOR_OPEN = 2;
+export const DOOR_404 = 404;
 
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
@@ -112,12 +113,15 @@ const getDoorColor = doorState => {
     case DOOR_OPEN: {
       return "green";
     }
+    case DOOR_EDGE: {
+      return "red";
+    }
     case DOOR_404: {
       // blink colors
       return Math.floor(performance.now() / 1000) % 2 === 0 ? "red" : "gray";
     }
     default: {
-      return "red";
+      return "transparent";
     }
   }
 };

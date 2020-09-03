@@ -29,6 +29,7 @@ import {
   Room,
   ROOM_OUTER_WIDTH,
   ROOM_OUTER_HEIGHT,
+  DOOR_NONE,
   DOOR_EDGE,
   DOOR_404,
   DOOR_OPEN
@@ -81,48 +82,30 @@ export class Level {
   updateDoors() {
     const rooms = this.rooms;
 
+    const getDoor = (room, otherRoom) => {
+      if (room.isMissing && (!otherRoom || otherRoom.isMissing)) {
+        return DOOR_NONE;
+      }
+      if (!otherRoom) {
+        return DOOR_EDGE;
+      }
+      if (otherRoom.isMissing) {
+        return DOOR_404;
+      }
+      return DOOR_OPEN;
+    };
+
     for (let ix = 0; ix < rooms.xCount; ix++) {
       for (let iy = 0; iy < rooms.yCount; iy++) {
         const room = rooms.getValue(ix, iy);
-
-        if (room) {
-          const leftRoom = rooms.getValue(ix - 1, iy);
-          const rightRoom = rooms.getValue(ix + 1, iy);
-          const topRoom = rooms.getValue(ix, iy - 1);
-          const bottomRoom = rooms.getValue(ix, iy + 1);
-
-          if (ix === 0) {
-            room.doors.left = DOOR_EDGE;
-          } else if (!leftRoom || leftRoom.isMissing) {
-            room.doors.left = DOOR_404;
-          } else {
-            room.doors.left = DOOR_OPEN;
-          }
-
-          if (ix === rooms.xCount - 1) {
-            room.doors.right = DOOR_EDGE;
-          } else if (!rightRoom || rightRoom.isMissing) {
-            room.doors.right = DOOR_404;
-          } else {
-            room.doors.right = DOOR_OPEN;
-          }
-
-          if (iy === 0) {
-            room.doors.top = DOOR_EDGE;
-          } else if (!topRoom || topRoom.isMissing) {
-            room.doors.top = DOOR_404;
-          } else {
-            room.doors.top = DOOR_OPEN;
-          }
-
-          if (iy === rooms.yCount - 1) {
-            room.doors.bottom = DOOR_EDGE;
-          } else if (!bottomRoom || bottomRoom.isMissing) {
-            room.doors.bottom = DOOR_404;
-          } else {
-            room.doors.bottom = DOOR_OPEN;
-          }
+        if (!room) {
+          continue;
         }
+
+        room.doors.left = getDoor(room, rooms.getValue(ix - 1, iy));
+        room.doors.right = getDoor(room, rooms.getValue(ix + 1, iy));
+        room.doors.top = getDoor(room, rooms.getValue(ix, iy - 1));
+        room.doors.bottom = getDoor(room, rooms.getValue(ix, iy + 1));
       }
     }
   }
