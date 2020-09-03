@@ -25,7 +25,16 @@
  */
 
 import { Array2D } from "./Array2D.js";
-import { Room, ROOM_OUTER_WIDTH, ROOM_OUTER_HEIGHT } from "./room.js";
+import {
+  Room,
+  ROOM_OUTER_WIDTH,
+  ROOM_OUTER_HEIGHT,
+  DOOR_NONE,
+  DOOR_NONE_EDGE,
+  DOOR_EDGE,
+  DOOR_404,
+  DOOR_OPEN
+} from "./room.js";
 import { createPlayer } from "./player.js";
 
 const ROOM_GAP = 30;
@@ -35,16 +44,16 @@ const createRooms = (xCount, yCount) => {
 
   for (let ix = 0; ix < rooms.xCount; ix++) {
     for (let iy = 0; iy < rooms.yCount; iy++) {
+      const isMissing =
+        (ix === 1 && iy === 2) ||
+        (ix === 4 && iy === 4) ||
+        (ix === 5 && iy === 5) ||
+        (ix === 3 && iy === 6) ||
+        (ix === 5 && iy === 4);
+
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
-      const doors = {
-        // Make doors at edges not passable
-        left: ix !== 0,
-        right: ix !== xCount - 1,
-        top: iy !== 0,
-        bottom: iy !== yCount - 1
-      };
-      rooms.setValue(ix, iy, new Room(x, y, ix, iy, doors));
+      rooms.setValue(ix, iy, new Room(x, y, ix, iy, isMissing));
     }
   }
 
@@ -62,13 +71,53 @@ export class Level {
     this.width = xCount * (ROOM_OUTER_WIDTH + ROOM_GAP);
     this.height = yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
 
-    const rooms = createRooms(xCount, yCount);
-    this.rooms = rooms;
-    this.currentRoom = this.rooms.getValue(0, 0);
+    this.rooms = createRooms(xCount, yCount);
+    this.updateDoors();
+    this.currentRoom = this.rooms.getValue(3, 4);
 
     this.player = createPlayer();
+    this.player.x = this.currentRoom.x + 30;
+    this.player.y = this.currentRoom.bottom - this.player.height;
 
     this.roomChanged = () => {};
+  }
+
+  updateDoors() {
+    const rooms = this.rooms;
+
+    const getDoor = (room, otherRoom) => {
+      if (room.isMissing && !otherRoom) {
+        return DOOR_NONE_EDGE;
+      }
+      if (room.isMissing && otherRoom.isMissing) {
+        return DOOR_NONE;
+      }
+      if (!otherRoom) {
+        return DOOR_EDGE;
+      }
+      if (otherRoom.isMissing) {
+        return DOOR_404;
+      }
+      if (room.isMissing && !otherRoom.isMissing) {
+        // A 404 door when looking at it from the missing room.
+        return DOOR_404;
+      }
+      return DOOR_OPEN;
+    };
+
+    for (let ix = 0; ix < rooms.xCount; ix++) {
+      for (let iy = 0; iy < rooms.yCount; iy++) {
+        const room = rooms.getValue(ix, iy);
+        if (!room) {
+          continue;
+        }
+
+        room.doors.left = getDoor(room, rooms.getValue(ix - 1, iy));
+        room.doors.right = getDoor(room, rooms.getValue(ix + 1, iy));
+        room.doors.top = getDoor(room, rooms.getValue(ix, iy - 1));
+        room.doors.bottom = getDoor(room, rooms.getValue(ix, iy + 1));
+      }
+    }
   }
 
   update() {
@@ -140,7 +189,10 @@ export class Level {
     if (drawAll) {
       for (let ix = 0; ix < this.rooms.xCount; ix++) {
         for (let iy = 0; iy < this.rooms.yCount; iy++) {
-          this.rooms.getValue(ix, iy).render(context);
+          const room = this.rooms.getValue(ix, iy);
+          if (room) {
+            room.render(context);
+          }
         }
       }
     } else {

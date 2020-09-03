@@ -26,6 +26,21 @@
 
 import { Sprite } from "kontra";
 
+// No door at missing rooms, can pass
+export const DOOR_NONE = 0;
+
+// No door at missing rooms, can not pass
+export const DOOR_NONE_EDGE = 1;
+
+// Door at the edge of the level
+export const DOOR_EDGE = 2;
+
+// Open door, can pass
+export const DOOR_OPEN = 3;
+
+// Door to a missing room
+export const DOOR_404 = 404;
+
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
 export const ROOM_OUTER_WIDTH = 300;
@@ -103,22 +118,41 @@ const createLadder = (height, perspective, drawHeight) => {
   });
 };
 
+const canPassDoor = doorState => {
+  return (
+    doorState === DOOR_OPEN || doorState === DOOR_404 || doorState === DOOR_NONE
+  );
+};
+
 export class Room {
-  constructor(x, y, ix, iy, doors) {
+  constructor(x, y, ix, iy, isMissing) {
     this.outerX = x;
     this.outerY = y;
     this.x = x + ROOM_EDGE_WIDTH;
     this.y = y + ROOM_EDGE_HEIGHT;
     this.ix = ix;
     this.iy = iy;
-    this.doors = doors;
     this.right = this.x + ROOM_WIDTH;
     this.bottom = this.y + ROOM_HEIGHT;
     this.width = ROOM_WIDTH;
     this.height = ROOM_HEIGHT;
+    this.isMissing = isMissing;
+
+    this.doors = {
+      left: DOOR_EDGE,
+      right: DOOR_EDGE,
+      top: DOOR_EDGE,
+      bottom: DOOR_EDGE
+    };
 
     this.ladders = [];
 
+    if (!this.isMissing) {
+      this.addLadders();
+    }
+  }
+
+  addLadders() {
     const ladder = createLadder(
       ROOM_HEIGHT,
       LADDER_PERSPECTIVE_BACK,
@@ -159,47 +193,75 @@ export class Room {
 
   isAtLeftDoor(sprite) {
     return (
-      this.doors.left &&
+      canPassDoor(this.doors.left) &&
       sprite.x - this.x < 10 &&
-      this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
-      sprite.y + sprite.height <
-        this.bottom - WALL_TO_DOOR_HEIGHT + DOOR_PASSING_MARGIN
+      (this.doors.left === DOOR_NONE || this.atDoorY(sprite))
     );
   }
 
   isAtRightDoor(sprite) {
     return (
-      this.doors.right &&
+      canPassDoor(this.doors.right) &&
       this.right - (sprite.x + sprite.width) < 10 &&
-      this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
-      sprite.y + sprite.height <
-        this.bottom - WALL_TO_DOOR_HEIGHT + DOOR_PASSING_MARGIN
+      (this.doors.right === DOOR_NONE || this.atDoorY(sprite))
     );
   }
 
   isAtTopDoor(sprite) {
     return (
-      this.doors.top &&
+      canPassDoor(this.doors.top) &&
       sprite.y - this.y < -10 &&
+      (this.doors.top === DOOR_NONE || this.atDoorX(sprite))
+    );
+  }
+
+  isAtBottomDoor(sprite) {
+    return (
+      canPassDoor(this.doors.bottom) &&
+      this.bottom - (sprite.y + sprite.height) < 10 &&
+      (this.doors.bottom === DOOR_NONE || this.atDoorX(sprite))
+    );
+  }
+
+  atDoorX(sprite) {
+    return (
       this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
       sprite.x + sprite.width <
         this.right - WALL_TO_DOOR_WIDTH + DOOR_PASSING_MARGIN
     );
   }
 
-  isAtBottomDoor(sprite) {
+  atDoorY(sprite) {
     return (
-      this.doors.bottom &&
-      this.bottom - (sprite.y + sprite.height) < 10 &&
-      this.x + WALL_TO_DOOR_WIDTH - DOOR_PASSING_MARGIN < sprite.x &&
-      sprite.x + sprite.width <
-        this.right - WALL_TO_DOOR_WIDTH + DOOR_PASSING_MARGIN
+      this.y + WALL_TO_DOOR_HEIGHT - DOOR_PASSING_MARGIN < sprite.y &&
+      sprite.y + sprite.height <
+        this.bottom - WALL_TO_DOOR_HEIGHT + DOOR_PASSING_MARGIN
     );
   }
 
   render(context) {
     context.save();
 
+    if (!this.isMissing) {
+      this.renderRoom(context);
+    }
+
+    this.renderDoors(context);
+
+    // id number
+    context.fillStyle = "white";
+    context.font = "22px Sans-serif";
+    const text = "" + this.ix + ", " + this.iy;
+    context.fillText(text, this.outerX + 30, this.outerY + 30);
+
+    for (let i = 0; i < this.ladders.length; i++) {
+      this.ladders[i].render();
+    }
+
+    context.restore();
+  }
+
+  renderRoom(context) {
     //  ceiling/bottom/sides
 
     context.lineWidth = 8;
@@ -339,13 +401,14 @@ export class Room {
     context.lineTo(this.outerX, this.outerY + ROOM_OUTER_HEIGHT);
     context.closePath();
     context.stroke();
+  }
 
-    // doors
+  renderDoors(context) {
     const DOOR_OUTER_WIDTH = DOOR_WIDTH * (ROOM_OUTER_WIDTH / ROOM_WIDTH);
     const DOOR_OUTER_HEIGHT = DOOR_HEIGHT * (ROOM_OUTER_HEIGHT / ROOM_HEIGHT);
 
     // Top
-    context.fillStyle = this.doors.top ? "green" : "red";
+    context.fillStyle = this.getDoorColor(this.doors.top);
     context.beginPath();
     context.moveTo(
       this.x + ROOM_WIDTH / 2 - DOOR_OUTER_WIDTH / 2,
@@ -366,7 +429,7 @@ export class Room {
     context.fill();
 
     // Bottom
-    context.fillStyle = this.doors.bottom ? "green" : "red";
+    context.fillStyle = this.getDoorColor(this.doors.bottom);
     context.beginPath();
     context.moveTo(
       this.x + ROOM_WIDTH / 2 - DOOR_OUTER_WIDTH / 2,
@@ -387,7 +450,7 @@ export class Room {
     context.fill();
 
     // Left
-    context.fillStyle = this.doors.left ? "green" : "red";
+    context.fillStyle = this.getDoorColor(this.doors.left);
     context.beginPath();
     context.moveTo(
       this.x - ROOM_EDGE_WIDTH / 2,
@@ -408,7 +471,7 @@ export class Room {
     context.fill();
 
     // Right
-    context.fillStyle = this.doors.right ? "green" : "red";
+    context.fillStyle = this.getDoorColor(this.doors.right);
     context.beginPath();
     context.moveTo(
       this.right + ROOM_EDGE_WIDTH / 2,
@@ -427,17 +490,29 @@ export class Room {
       this.y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2
     );
     context.fill();
+  }
 
-    // id number
-    context.fillStyle = "white";
-    context.font = "22px Sans-serif";
-    const text = "" + this.ix + ", " + this.iy;
-    context.fillText(text, this.outerX + 30, this.outerY + 30);
+  getDoorColor(doorState) {
+    switch (doorState) {
+      case DOOR_OPEN: {
+        return "green";
+      }
+      case DOOR_EDGE: {
+        return "red";
+      }
+      case DOOR_404: {
+        // blinking colors
+        const blink = Math.floor(performance.now() / 1000) % 2 === 0;
 
-    for (let i = 0; i < this.ladders.length; i++) {
-      this.ladders[i].render();
+        if (this.isMissing) {
+          return blink ? "rgb(60, 0, 0)" : "transparent";
+        } else {
+          return blink ? "red" : "gray";
+        }
+      }
+      default: {
+        return "transparent";
+      }
     }
-
-    context.restore();
   }
 }

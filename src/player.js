@@ -66,8 +66,6 @@ const climbingAnimationFrames = [
 
 export const createPlayer = () => {
   return Sprite({
-    x: 100,
-    y: 80,
     width: STANDING_WIDTH,
     height: STANDING_HEIGHT,
     xVel: 0, // Horizontal velocity
