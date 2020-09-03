@@ -98,6 +98,10 @@ export class Level {
       if (otherRoom.isMissing) {
         return DOOR_404;
       }
+      if (room.isMissing && !otherRoom.isMissing) {
+        // A 404 door when looking at it from the missing room.
+        return DOOR_404;
+      }
       return DOOR_OPEN;
     };
 

@@ -118,24 +118,6 @@ const createLadder = (height, perspective, drawHeight) => {
   });
 };
 
-const getDoorColor = doorState => {
-  switch (doorState) {
-    case DOOR_OPEN: {
-      return "green";
-    }
-    case DOOR_EDGE: {
-      return "red";
-    }
-    case DOOR_404: {
-      // blink colors
-      return Math.floor(performance.now() / 1000) % 2 === 0 ? "red" : "gray";
-    }
-    default: {
-      return "transparent";
-    }
-  }
-};
-
 const canPassDoor = doorState => {
   return (
     doorState === DOOR_OPEN || doorState === DOOR_404 || doorState === DOOR_NONE
@@ -426,7 +408,7 @@ export class Room {
     const DOOR_OUTER_HEIGHT = DOOR_HEIGHT * (ROOM_OUTER_HEIGHT / ROOM_HEIGHT);
 
     // Top
-    context.fillStyle = getDoorColor(this.doors.top);
+    context.fillStyle = this.getDoorColor(this.doors.top);
     context.beginPath();
     context.moveTo(
       this.x + ROOM_WIDTH / 2 - DOOR_OUTER_WIDTH / 2,
@@ -447,7 +429,7 @@ export class Room {
     context.fill();
 
     // Bottom
-    context.fillStyle = getDoorColor(this.doors.bottom);
+    context.fillStyle = this.getDoorColor(this.doors.bottom);
     context.beginPath();
     context.moveTo(
       this.x + ROOM_WIDTH / 2 - DOOR_OUTER_WIDTH / 2,
@@ -468,7 +450,7 @@ export class Room {
     context.fill();
 
     // Left
-    context.fillStyle = getDoorColor(this.doors.left);
+    context.fillStyle = this.getDoorColor(this.doors.left);
     context.beginPath();
     context.moveTo(
       this.x - ROOM_EDGE_WIDTH / 2,
@@ -489,7 +471,7 @@ export class Room {
     context.fill();
 
     // Right
-    context.fillStyle = getDoorColor(this.doors.right);
+    context.fillStyle = this.getDoorColor(this.doors.right);
     context.beginPath();
     context.moveTo(
       this.right + ROOM_EDGE_WIDTH / 2,
@@ -508,5 +490,29 @@ export class Room {
       this.y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2
     );
     context.fill();
+  }
+
+  getDoorColor(doorState) {
+    switch (doorState) {
+      case DOOR_OPEN: {
+        return "green";
+      }
+      case DOOR_EDGE: {
+        return "red";
+      }
+      case DOOR_404: {
+        // blinking colors
+        const blink = Math.floor(performance.now() / 1000) % 2 === 0;
+
+        if (this.isMissing) {
+          return blink ? "rgb(60, 0, 0)" : "transparent";
+        } else {
+          return blink ? "red" : "gray";
+        }
+      }
+      default: {
+        return "transparent";
+      }
+    }
   }
 }
