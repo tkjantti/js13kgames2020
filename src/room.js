@@ -109,12 +109,16 @@ const createLadder = (height, perspective, drawHeight) => {
 
 const getDoorColor = doorState => {
   switch (doorState) {
-    case DOOR_OPEN:
+    case DOOR_OPEN: {
       return "green";
-    case DOOR_404:
+    }
+    case DOOR_404: {
+      // blink colors
+      return Math.floor(performance.now() / 1000) % 2 === 0 ? "red" : "gray";
+    }
+    default: {
       return "red";
-    default:
-      return "gray";
+    }
   }
 };
 
