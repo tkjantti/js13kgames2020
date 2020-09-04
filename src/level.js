@@ -35,6 +35,7 @@ import {
   DOOR_404,
   DOOR_OPEN
 } from "./room.js";
+import { Camera } from "./camera.js";
 import { createPlayer } from "./player.js";
 
 const ROOM_GAP = 30;
@@ -78,10 +79,15 @@ export class Level {
     this.player.x = this.currentRoom.x + 30;
     this.player.y = this.currentRoom.bottom - this.player.height;
 
-    this.roomChanged = () => {};
+    this.camera = new Camera();
+    this.camera.zoomTo(this.currentRoom.getOuterBoundingBox());
   }
 
   moveRoom(xAmount, yAmount) {
+    if (this.currentRoom.isMissing) {
+      return;
+    }
+
     const oldIx = this.currentRoom.ix;
     const oldIy = this.currentRoom.iy;
     const ix = this.currentRoom.ix + xAmount;
@@ -106,6 +112,8 @@ export class Level {
 
       this.updateDoors();
       this.player.x += xDiff;
+
+      this.camera.zoomTo(this.currentRoom.getOuterBoundingBox());
     }
   }
 
@@ -168,6 +176,8 @@ export class Level {
     ) {
       this.moveVertically(this.player, -1);
     }
+
+    this.camera.update();
   }
 
   moveHorizontally(sprite, direction) {
@@ -180,7 +190,6 @@ export class Level {
     }
 
     this.currentRoom = nextRoom;
-    this.roomChanged(previousRoom, nextRoom);
 
     if (direction >= 0) {
       if (sprite.x < nextRoom.x) {
@@ -191,6 +200,8 @@ export class Level {
         sprite.x = nextRoom.right - sprite.width;
       }
     }
+
+    this.panCameraTo(nextRoom);
   }
 
   moveVertically(sprite, direction) {
@@ -203,17 +214,33 @@ export class Level {
     }
 
     this.currentRoom = nextRoom;
-    this.roomChanged(previousRoom, nextRoom);
 
     if (direction >= 0) {
       sprite.y = nextRoom.y;
     } else {
       sprite.y = nextRoom.bottom - sprite.height;
     }
+
+    this.panCameraTo(nextRoom);
   }
 
-  render(context, drawAll) {
-    if (drawAll) {
+  panCameraTo(room) {
+    if (this.camera.area !== this) {
+      this.camera.panTo(room);
+    }
+  }
+
+  render(canvas, context) {
+    const camera = this.camera;
+
+    context.save();
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.scale(camera.zoom, camera.zoom);
+    context.translate(-camera.x, -camera.y);
+
+    const drawAllRooms = camera.area === this;
+
+    if (drawAllRooms) {
       for (let ix = 0; ix < this.rooms.xCount; ix++) {
         for (let iy = 0; iy < this.rooms.yCount; iy++) {
           const room = this.rooms.getValue(ix, iy);
@@ -227,5 +254,7 @@ export class Level {
     }
 
     this.player.render();
+
+    context.restore();
   }
 }

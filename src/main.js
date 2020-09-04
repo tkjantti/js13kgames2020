@@ -26,7 +26,6 @@
 
 import { init, initKeys, bindKeys, GameLoop } from "kontra";
 import { Level } from "./level.js";
-import { Camera } from "./camera.js";
 
 const { canvas, context } = init();
 initKeys();
@@ -41,39 +40,21 @@ resize();
 
 const level = new Level(8, 8);
 
-const camera = new Camera();
-camera.zoomTo(level.currentRoom.getOuterBoundingBox());
-
-level.roomChanged = (previousRoom, nextRoom) => {
-  if (camera.area !== level) {
-    camera.panTo(nextRoom);
-  }
-};
-
 // Debug keys
 bindKeys("1", () => {
-  camera.zoomTo(level);
+  level.camera.zoomTo(level);
 });
 bindKeys("2", () => {
-  camera.zoomTo(level.currentRoom.getOuterBoundingBox());
+  level.camera.zoomTo(level.currentRoom.getOuterBoundingBox());
 });
 
 const loop = GameLoop({
   update: function() {
     level.update();
-    camera.update();
   },
 
   render: function() {
-    context.save();
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.scale(camera.zoom, camera.zoom);
-    context.translate(-camera.x, -camera.y);
-
-    const drawAllRooms = camera.area === level;
-    level.render(context, drawAllRooms);
-
-    context.restore();
+    level.render(canvas, context);
   }
 });
 
