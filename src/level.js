@@ -75,7 +75,7 @@ export class Level {
 
     this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(2, 4);
+    this.currentRoom = this.rooms.getValue(3, 4);
 
     this.movingRoom = this.rooms.getValue(3, 4);
     this.movingRoom.xMoveDirection = 1;
@@ -144,7 +144,7 @@ export class Level {
         this.player.x += xDiff;
         this.player.y += yDiff;
         this.moveCameraTo(room);
-        this.camera.shake();
+        this.camera.shake(xAmount * 20, yAmount * 20);
       } else if (roomAtNextPosition === this.currentRoom) {
         // Player is crushed by the room.
         this.gameOver = true;
