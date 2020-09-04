@@ -98,9 +98,10 @@ export class Level {
     const roomAtNextPosition = this.rooms.getValue(ix, iy);
 
     if (roomAtNextPosition && roomAtNextPosition.isMissing) {
-      const xDiff = ROOM_OUTER_WIDTH + ROOM_GAP;
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
+      const xDiff = x - oldX;
+      const yDiff = y - oldY;
 
       this.rooms.setValue(ix, iy, this.currentRoom);
       this.currentRoom.setPosition(x, y, ix, iy);
@@ -112,8 +113,9 @@ export class Level {
 
       this.updateDoors();
       this.player.x += xDiff;
+      this.player.y += yDiff;
 
-      this.camera.zoomTo(this.currentRoom.getOuterBoundingBox());
+      this.moveCameraTo(this.currentRoom);
     }
   }
 
@@ -222,6 +224,12 @@ export class Level {
     }
 
     this.panCameraTo(nextRoom);
+  }
+
+  moveCameraTo(room) {
+    if (this.camera.area !== this) {
+      this.camera.zoomTo(room.getOuterBoundingBox());
+    }
   }
 
   panCameraTo(room) {
