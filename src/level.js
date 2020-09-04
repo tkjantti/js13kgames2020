@@ -144,6 +144,10 @@ export class Level {
         this.player.x += xDiff;
         this.player.y += yDiff;
         this.moveCameraTo(room);
+      } else if (roomAtNextPosition === this.currentRoom) {
+        // Player is crushed by the room.
+        this.gameOver = true;
+        return;
       }
     }
   }
@@ -188,8 +192,10 @@ export class Level {
 
   update() {
     this.autoMoveRooms();
-    this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
-    this.checkRoomChange();
+    if (!this.gameOver) {
+      this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
+      this.checkRoomChange();
+    }
     this.camera.update();
   }
 
@@ -293,7 +299,9 @@ export class Level {
       this.currentRoom.render(context);
     }
 
-    this.player.render();
+    if (!this.gameOver) {
+      this.player.render();
+    }
 
     context.restore();
   }

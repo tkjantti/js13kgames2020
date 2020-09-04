@@ -60,6 +60,19 @@ bindKeys("k", () => {
   level.moveRoom(level.currentRoom, 0, 1);
 });
 
+const renderTexts = (context, ...texts) => {
+  context.fillStyle = "white";
+  context.font = "32px Sans-serif";
+
+  for (let i = 0; i < texts.length; i++) {
+    const text = texts[i];
+    let textWidth = text.length * 14;
+    const x = canvas.width / 2 - textWidth / 2;
+    let y = canvas.height * 0.35 + i * 50;
+    context.fillText(text, x, y);
+  }
+};
+
 const loop = GameLoop({
   update: function() {
     level.update();
@@ -67,6 +80,10 @@ const loop = GameLoop({
 
   render: function() {
     level.render(canvas, context);
+
+    if (level.gameOver) {
+      renderTexts(context, "Something heavy crushed you!", "GAME OVER");
+    }
   }
 });
 
