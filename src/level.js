@@ -40,6 +40,8 @@ import { createPlayer } from "./player.js";
 
 const ROOM_GAP = 30;
 
+const ROOM_MOVE_DELAY_MS = 3000;
+
 const createRooms = (xCount, yCount) => {
   const rooms = new Array2D(xCount, yCount);
 
@@ -73,7 +75,11 @@ export class Level {
 
     this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(3, 4);
+    this.currentRoom = this.rooms.getValue(2, 4);
+
+    this.movingRoom = this.rooms.getValue(3, 4);
+    this.movingRoom.xMoveDirection = 1;
+    this.lastAutoMoveTime = performance.now();
 
     this.player = createPlayer();
     this.player.x = this.currentRoom.x + 30;
@@ -83,17 +89,39 @@ export class Level {
     this.camera.zoomTo(this.currentRoom.getOuterBoundingBox());
   }
 
-  moveRoom(xAmount, yAmount) {
-    if (this.currentRoom.isMissing) {
+  autoMoveRooms() {
+    if (!this.movingRoom) {
       return;
     }
 
-    const oldIx = this.currentRoom.ix;
-    const oldIy = this.currentRoom.iy;
-    const ix = this.currentRoom.ix + xAmount;
-    const iy = this.currentRoom.iy + yAmount;
-    const oldX = this.currentRoom.outerX;
-    const oldY = this.currentRoom.outerY;
+    const room = this.movingRoom;
+    const now = performance.now();
+
+    if (now - this.lastAutoMoveTime > ROOM_MOVE_DELAY_MS) {
+      const roomAtNextPosition = this.rooms.getValue(
+        room.ix + room.xMoveDirection,
+        room.iy
+      );
+      if (!(roomAtNextPosition && roomAtNextPosition.isMissing)) {
+        room.xMoveDirection = -room.xMoveDirection;
+      }
+
+      this.moveRoom(room, room.xMoveDirection, 0);
+      this.lastAutoMoveTime = now;
+    }
+  }
+
+  moveRoom(room, xAmount, yAmount) {
+    if (room.isMissing) {
+      return;
+    }
+
+    const oldIx = room.ix;
+    const oldIy = room.iy;
+    const ix = room.ix + xAmount;
+    const iy = room.iy + yAmount;
+    const oldX = room.outerX;
+    const oldY = room.outerY;
 
     const roomAtNextPosition = this.rooms.getValue(ix, iy);
 
@@ -103,19 +131,20 @@ export class Level {
       const xDiff = x - oldX;
       const yDiff = y - oldY;
 
-      this.rooms.setValue(ix, iy, this.currentRoom);
-      this.currentRoom.setPosition(x, y, ix, iy);
+      this.rooms.setValue(ix, iy, room);
+      room.setPosition(x, y, ix, iy);
       this.rooms.setValue(
         oldIx,
         oldIy,
         new Room(oldX, oldY, oldIx, oldIy, true)
       );
-
       this.updateDoors();
-      this.player.x += xDiff;
-      this.player.y += yDiff;
 
-      this.moveCameraTo(this.currentRoom);
+      if (room === this.currentRoom) {
+        this.player.x += xDiff;
+        this.player.y += yDiff;
+        this.moveCameraTo(room);
+      }
     }
   }
 
@@ -158,8 +187,13 @@ export class Level {
   }
 
   update() {
+    this.autoMoveRooms();
     this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
+    this.checkRoomChange();
+    this.camera.update();
+  }
 
+  checkRoomChange() {
     if (this.player.x > this.currentRoom.right && this.player.isMovingRight()) {
       this.moveHorizontally(this.player, 1);
     } else if (
@@ -178,8 +212,6 @@ export class Level {
     ) {
       this.moveVertically(this.player, -1);
     }
-
-    this.camera.update();
   }
 
   moveHorizontally(sprite, direction) {
