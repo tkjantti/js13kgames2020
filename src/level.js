@@ -81,17 +81,17 @@ export class Level {
     this.roomChanged = () => {};
   }
 
-  moveRoomRight() {
+  moveRoom(xAmount, yAmount) {
     const oldIx = this.currentRoom.ix;
     const oldIy = this.currentRoom.iy;
-    const ix = this.currentRoom.ix + 1;
-    const iy = this.currentRoom.iy;
+    const ix = this.currentRoom.ix + xAmount;
+    const iy = this.currentRoom.iy + yAmount;
     const oldX = this.currentRoom.outerX;
     const oldY = this.currentRoom.outerY;
 
-    const rightRoom = this.rooms.getValue(ix, iy);
+    const roomAtNextPosition = this.rooms.getValue(ix, iy);
 
-    if (rightRoom && rightRoom.isMissing) {
+    if (roomAtNextPosition && roomAtNextPosition.isMissing) {
       const xDiff = ROOM_OUTER_WIDTH + ROOM_GAP;
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
