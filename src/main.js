@@ -47,6 +47,18 @@ bindKeys("1", () => {
 bindKeys("2", () => {
   level.camera.zoomTo(level.currentRoom.getOuterBoundingBox());
 });
+bindKeys("j", () => {
+  level.moveRoom(-1, 0);
+});
+bindKeys("l", () => {
+  level.moveRoom(1, 0);
+});
+bindKeys("i", () => {
+  level.moveRoom(0, -1);
+});
+bindKeys("k", () => {
+  level.moveRoom(0, 1);
+});
 
 const loop = GameLoop({
   update: function() {
