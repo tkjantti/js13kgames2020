@@ -258,16 +258,11 @@ export class Room {
     context.save();
 
     if (!this.isMissing) {
+      this.renderId(context);
       this.renderRoom(context);
     }
 
     this.renderDoors(context);
-
-    // id number
-    context.fillStyle = "white";
-    context.font = "22px Sans-serif";
-    const text = "" + this.ix + ", " + this.iy;
-    context.fillText(text, this.outerX + 30, this.outerY + 30);
 
     for (let i = 0; i < this.ladders.length; i++) {
       this.ladders[i].render();
@@ -416,6 +411,13 @@ export class Room {
     context.lineTo(this.outerX, this.outerY + ROOM_OUTER_HEIGHT);
     context.closePath();
     context.stroke();
+  }
+
+  renderId(context) {
+    context.fillStyle = "green";
+    context.font = "bold 18px Sans-serif";
+    const text = "" + this.ix + ", " + this.iy;
+    context.fillText(text, this.outerX + Z + 30, this.outerY + Z + 35);
   }
 
   renderDoors(context) {
