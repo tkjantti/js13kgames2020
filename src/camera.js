@@ -33,6 +33,10 @@ export class Camera {
     this.x = 0;
     this.y = 0;
     this.zoom = 1;
+    this.shakeXPower = 0;
+    this.shakeYPower = 0;
+    this.shakeXDecay = 0;
+    this.shakeYDecay = 0;
   }
 
   zoomTo(area) {
@@ -55,6 +59,13 @@ export class Camera {
 
   panTo(area) {
     this.area = area;
+  }
+
+  shake(xPower = 8, yPower = 8, length = 0.5) {
+    this.shakeXPower = Math.abs(xPower);
+    this.shakeYPower = Math.abs(yPower);
+    this.shakeXDecay = Math.abs(xPower) / length;
+    this.shakeYDecay = Math.abs(yPower) / length;
   }
 
   update() {
@@ -80,6 +91,22 @@ export class Camera {
       this.y -= PAN_SPEED;
     } else {
       this.y = centerY;
+    }
+
+    this._shake();
+  }
+
+  _shake() {
+    const { shakeXPower, shakeYPower, shakeXDecay, shakeYDecay } = this;
+
+    if (shakeXPower > 0) {
+      this.x += Math.random() * shakeXPower * 2 - shakeXPower;
+      this.shakeXPower -= shakeXDecay * (1.0 / 60);
+    }
+
+    if (shakeYPower > 0) {
+      this.y += Math.random() * shakeYPower * 2 - shakeYPower;
+      this.shakeYPower -= shakeYDecay * (1.0 / 60);
     }
   }
 }

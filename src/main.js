@@ -26,7 +26,6 @@
 
 import { init, initKeys, bindKeys, GameLoop } from "kontra";
 import { Level } from "./level.js";
-import { Camera } from "./camera.js";
 
 const { canvas, context } = init();
 initKeys();
@@ -41,39 +40,50 @@ resize();
 
 const level = new Level(8, 8);
 
-const camera = new Camera();
-camera.zoomTo(level.currentRoom.getOuterBoundingBox());
-
-level.roomChanged = (previousRoom, nextRoom) => {
-  if (camera.area !== level) {
-    camera.panTo(nextRoom);
-  }
-};
-
 // Debug keys
 bindKeys("1", () => {
-  camera.zoomTo(level);
+  level.camera.zoomTo(level);
 });
 bindKeys("2", () => {
-  camera.zoomTo(level.currentRoom.getOuterBoundingBox());
+  level.camera.zoomTo(level.currentRoom.getOuterBoundingBox());
 });
+bindKeys("j", () => {
+  level.moveRoom(level.currentRoom, -1, 0);
+});
+bindKeys("l", () => {
+  level.moveRoom(level.currentRoom, 1, 0);
+});
+bindKeys("i", () => {
+  level.moveRoom(level.currentRoom, 0, -1);
+});
+bindKeys("k", () => {
+  level.moveRoom(level.currentRoom, 0, 1);
+});
+
+const renderTexts = (context, ...texts) => {
+  context.fillStyle = "white";
+  context.font = "32px Sans-serif";
+
+  for (let i = 0; i < texts.length; i++) {
+    const text = texts[i];
+    let textWidth = text.length * 14;
+    const x = canvas.width / 2 - textWidth / 2;
+    let y = canvas.height * 0.35 + i * 50;
+    context.fillText(text, x, y);
+  }
+};
 
 const loop = GameLoop({
   update: function() {
     level.update();
-    camera.update();
   },
 
   render: function() {
-    context.save();
-    context.translate(canvas.width / 2, canvas.height / 2);
-    context.scale(camera.zoom, camera.zoom);
-    context.translate(-camera.x, -camera.y);
+    level.render(canvas, context);
 
-    const drawAllRooms = camera.area === level;
-    level.render(context, drawAllRooms);
-
-    context.restore();
+    if (level.gameOver) {
+      renderTexts(context, "Something heavy crushed you!", "GAME OVER");
+    }
   }
 });
 
