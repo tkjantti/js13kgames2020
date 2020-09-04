@@ -126,6 +126,26 @@ const canPassDoor = doorState => {
 
 export class Room {
   constructor(x, y, ix, iy, isMissing) {
+    this.ladders = [];
+    this.setPosition(x, y, ix, iy);
+    this.isMissing = isMissing;
+
+    this.doors = {
+      left: DOOR_EDGE,
+      right: DOOR_EDGE,
+      top: DOOR_EDGE,
+      bottom: DOOR_EDGE
+    };
+
+    if (!this.isMissing) {
+      this.addLadders();
+    }
+  }
+
+  setPosition(x, y, ix, iy) {
+    const previousX = this.x;
+    const previousY = this.y;
+
     this.outerX = x;
     this.outerY = y;
     this.x = x + ROOM_EDGE_WIDTH;
@@ -136,19 +156,14 @@ export class Room {
     this.bottom = this.y + ROOM_HEIGHT;
     this.width = ROOM_WIDTH;
     this.height = ROOM_HEIGHT;
-    this.isMissing = isMissing;
 
-    this.doors = {
-      left: DOOR_EDGE,
-      right: DOOR_EDGE,
-      top: DOOR_EDGE,
-      bottom: DOOR_EDGE
-    };
+    const xDiff = this.x - previousX;
+    const yDiff = this.y - previousY;
 
-    this.ladders = [];
-
-    if (!this.isMissing) {
-      this.addLadders();
+    for (let i = 0; i < this.ladders.length; i++) {
+      const ladder = this.ladders[i];
+      ladder.x += xDiff;
+      ladder.y += yDiff;
     }
   }
 

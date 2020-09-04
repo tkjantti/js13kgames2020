@@ -45,11 +45,10 @@ const createRooms = (xCount, yCount) => {
   for (let ix = 0; ix < rooms.xCount; ix++) {
     for (let iy = 0; iy < rooms.yCount; iy++) {
       const isMissing =
+        ix === 5 ||
         (ix === 1 && iy === 2) ||
         (ix === 4 && iy === 4) ||
-        (ix === 5 && iy === 5) ||
-        (ix === 3 && iy === 6) ||
-        (ix === 5 && iy === 4);
+        (ix === 3 && iy === 6);
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
@@ -80,6 +79,34 @@ export class Level {
     this.player.y = this.currentRoom.bottom - this.player.height;
 
     this.roomChanged = () => {};
+  }
+
+  moveRoomRight() {
+    const oldIx = this.currentRoom.ix;
+    const oldIy = this.currentRoom.iy;
+    const ix = this.currentRoom.ix + 1;
+    const iy = this.currentRoom.iy;
+    const oldX = this.currentRoom.outerX;
+    const oldY = this.currentRoom.outerY;
+
+    const rightRoom = this.rooms.getValue(ix, iy);
+
+    if (rightRoom && rightRoom.isMissing) {
+      const xDiff = ROOM_OUTER_WIDTH + ROOM_GAP;
+      const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
+      const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
+
+      this.rooms.setValue(ix, iy, this.currentRoom);
+      this.currentRoom.setPosition(x, y, ix, iy);
+      this.rooms.setValue(
+        oldIx,
+        oldIy,
+        new Room(oldX, oldY, oldIx, oldIy, true)
+      );
+
+      this.updateDoors();
+      this.player.x += xDiff;
+    }
   }
 
   updateDoors() {
