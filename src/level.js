@@ -144,6 +144,7 @@ export class Level {
         this.player.x += xDiff;
         this.player.y += yDiff;
         this.moveCameraTo(room);
+        this.camera.shake();
       } else if (roomAtNextPosition === this.currentRoom) {
         // Player is crushed by the room.
         this.gameOver = true;

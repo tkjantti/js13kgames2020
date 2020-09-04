@@ -33,6 +33,8 @@ export class Camera {
     this.x = 0;
     this.y = 0;
     this.zoom = 1;
+    this.shakePower = 0;
+    this.shakeDecay = 0;
   }
 
   zoomTo(area) {
@@ -55,6 +57,11 @@ export class Camera {
 
   panTo(area) {
     this.area = area;
+  }
+
+  shake(power = 8, length = 0.5) {
+    this.shakePower = power;
+    this.shakeDecay = power / length;
   }
 
   update() {
@@ -81,5 +88,20 @@ export class Camera {
     } else {
       this.y = centerY;
     }
+
+    this._shake();
+  }
+
+  _shake() {
+    const { shakePower } = this;
+
+    if (shakePower <= 0) {
+      return;
+    }
+
+    this.x += Math.random() * shakePower * 2 - shakePower;
+    this.y += Math.random() * shakePower * 2 - shakePower;
+
+    this.shakePower -= this.shakeDecay * (1.0 / 60);
   }
 }
