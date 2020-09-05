@@ -34,7 +34,8 @@ import {
   DOOR_EDGE,
   DOOR_404,
   DOOR_OPEN,
-  GAME_OK
+  GAME_OK,
+  GAME_OVER_FALL
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { createPlayer } from "./player.js";
@@ -65,9 +66,6 @@ const createRooms = (xCount, yCount) => {
 
 export class Level {
   constructor(xCount, yCount) {
-    this.xCount = xCount;
-    this.yCount = yCount;
-
     // For level to work with camera.zoomTo()
     this.x = 0;
     this.y = 0;
@@ -217,16 +215,27 @@ export class Level {
     ) {
       this.enterRoom(this.player, -1, 0);
     } else if (
-      this.player.isMovingDown() &&
+      (this.player.isMovingDown() ||
+        this.isEmptyHereAndBelow(this.currentRoom)) &&
       this.currentRoom.isAtBottomDoor(this.player)
     ) {
       this.enterRoom(this.player, 0, 1);
+    } else if (
+      this.currentRoom.isMissing &&
+      this.currentRoom.iy >= this.rooms.yCount - 1
+    ) {
+      this.gameOverState = GAME_OVER_FALL;
     } else if (
       this.player.isMovingUp() &&
       this.currentRoom.isAtTopDoor(this.player)
     ) {
       this.enterRoom(this.player, 0, -1);
     }
+  }
+
+  isEmptyHereAndBelow(room) {
+    const roomBelow = this.rooms.getValue(room.ix, room.iy + 1);
+    return room.isMissing && roomBelow && roomBelow.isMissing;
   }
 
   enterRoom(sprite, xDirection, yDirection) {

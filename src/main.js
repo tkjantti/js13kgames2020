@@ -26,7 +26,7 @@
 
 import { init, initKeys, bindKeys, GameLoop } from "kontra";
 import { Level } from "./level";
-import { GAME_OVER_LASER, GAME_OVER_CRUSH } from "./room";
+import { GAME_OVER_LASER, GAME_OVER_CRUSH, GAME_OVER_FALL } from "./room";
 
 const { canvas, context } = init();
 initKeys();
@@ -88,6 +88,9 @@ const loop = GameLoop({
         break;
       case GAME_OVER_CRUSH:
         renderTexts(context, "Something heavy crushed you!", "GAME OVER");
+        break;
+      case GAME_OVER_FALL:
+        renderTexts(context, "You fall into the abyss!", "GAME OVER");
         break;
     }
   }

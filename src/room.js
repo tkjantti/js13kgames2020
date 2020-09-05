@@ -44,6 +44,7 @@ export const DOOR_404 = 404;
 export const GAME_OK = 0;
 export const GAME_OVER_LASER = 1;
 export const GAME_OVER_CRUSH = 2;
+export const GAME_OVER_FALL = 3;
 
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
