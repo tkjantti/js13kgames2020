@@ -147,10 +147,12 @@ export class Room {
     if (!this.isMissing) {
       this.addLadders();
 
-      this.lasers.push({
-        x: this.x + this.width * 0.75,
-        speed: LASER_SPEED
-      });
+      if (Math.random() < 0.3) {
+        this.lasers.push({
+          x: this.x + this.width * 0.75,
+          speed: LASER_SPEED
+        });
+      }
     }
   }
 
