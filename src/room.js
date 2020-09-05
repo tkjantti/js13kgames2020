@@ -272,37 +272,56 @@ export class Room {
   }
 
   renderRoom(context) {
+    // this.ix + ", " + this.iy;
+
+    let bgcolor1 = "#10000080";
+    let bgcolor2 = "#40101080";
+    // Change color for every second room to make room change more obvious
+    if (
+      (this.ix % 2 === 0 && this.iy % 2 !== 0) ||
+      (this.ix % 2 !== 0 && this.iy % 2 === 0)
+    ) {
+      bgcolor1 = "#00001080";
+      bgcolor2 = "#00104080";
+    }
+
+    const color1 = "#101010";
+    const color2 = "#202020";
+    const color3 = "#303030";
+    const color4 = "#606060";
+
     //  ceiling/bottom/sides
 
     context.lineWidth = 8;
 
     // top
-    context.strokeStyle = "#101010";
+    context.strokeStyle = color1;
     context.beginPath();
     context.moveTo(this.outerX, this.outerY);
     context.lineTo(this.outerX + Z, this.outerY + Z);
     context.stroke();
 
-    context.strokeStyle = "#202020";
+    context.strokeStyle = color2;
     context.beginPath();
     context.moveTo(this.outerX + Z, this.outerY + Z);
     context.lineTo(this.outerX + ROOM_OUTER_WIDTH - Z, this.outerY + Z);
     context.stroke();
 
-    context.strokeStyle = "#303030";
+    context.strokeStyle = color3;
     context.beginPath();
     context.moveTo(this.outerX + ROOM_OUTER_WIDTH - Z, this.outerY + Z);
     context.lineTo(this.outerX + ROOM_OUTER_WIDTH, this.outerY);
     context.stroke();
 
     // bottom
-    context.strokeStyle = "#101010";
+    context.strokeStyle = color1;
+    context.fillStyle = color1;
     context.beginPath();
     context.moveTo(this.outerX, this.outerY + ROOM_OUTER_HEIGHT);
     context.lineTo(this.outerX + Z, this.outerY + ROOM_OUTER_HEIGHT - Z);
     context.stroke();
 
-    context.strokeStyle = "#202020";
+    context.strokeStyle = color2;
     context.beginPath();
     context.moveTo(this.outerX + Z, this.outerY + ROOM_OUTER_HEIGHT - Z);
     context.lineTo(
@@ -311,7 +330,7 @@ export class Room {
     );
     context.stroke();
 
-    context.strokeStyle = "#303030";
+    context.strokeStyle = color3;
     context.beginPath();
     context.moveTo(
       this.outerX + ROOM_OUTER_WIDTH - Z,
@@ -324,7 +343,7 @@ export class Room {
     context.stroke();
 
     //left
-    context.strokeStyle = "#202020";
+    context.strokeStyle = color2;
     context.beginPath();
     context.moveTo(this.outerX + Z, this.outerY + Z);
     context.lineTo(this.outerX + Z, this.outerY + ROOM_OUTER_HEIGHT - Z);
@@ -358,17 +377,18 @@ export class Room {
       this.outerX + ROOM_OUTER_WIDTH - Z,
       this.outerY + ROOM_OUTER_HEIGHT / 2
     );
+    context.fill();
     context.stroke();
 
     // ceiling/sides
-    context.strokeStyle = "#101010";
+    context.strokeStyle = color1;
     //top
     context.beginPath();
     context.moveTo(this.outerX + ROOM_OUTER_WIDTH / 2, this.outerY);
     context.lineTo(this.outerX + ROOM_OUTER_WIDTH / 2, this.outerY + Z);
     context.stroke();
     //bottom
-    context.strokeStyle = "#303030";
+    context.strokeStyle = color3;
     context.beginPath();
     context.moveTo(
       this.outerX + ROOM_OUTER_WIDTH / 2,
@@ -378,15 +398,16 @@ export class Room {
       this.outerX + ROOM_OUTER_WIDTH / 2,
       this.outerY + ROOM_OUTER_HEIGHT
     );
+    context.fill();
     context.stroke();
     // left
-    context.strokeStyle = "#101010";
+    context.strokeStyle = color1;
     context.beginPath();
     context.moveTo(this.outerX, this.outerY + ROOM_OUTER_HEIGHT / 2);
     context.lineTo(this.outerX + Z, this.outerY + ROOM_OUTER_HEIGHT / 2);
     context.stroke();
     // right
-    context.strokeStyle = "#303030";
+    context.strokeStyle = color3;
     context.beginPath();
     context.moveTo(
       this.outerX + ROOM_OUTER_WIDTH - Z,
@@ -396,10 +417,11 @@ export class Room {
       this.outerX + ROOM_OUTER_WIDTH,
       this.outerY + ROOM_OUTER_HEIGHT / 2
     );
+    context.fill();
     context.stroke();
 
     // borders
-    context.strokeStyle = "white";
+    context.strokeStyle = color4;
     context.lineWidth = 5;
     context.beginPath();
     context.lineTo(this.outerX, this.outerY);
@@ -411,6 +433,23 @@ export class Room {
     context.lineTo(this.outerX, this.outerY + ROOM_OUTER_HEIGHT);
     context.closePath();
     context.stroke();
+
+    // background
+    const gradient = context.createLinearGradient(
+      this.outerX,
+      this.outerY,
+      this.outerX + ROOM_OUTER_WIDTH,
+      this.outerY + ROOM_HEIGHT
+    );
+    gradient.addColorStop(0, bgcolor1);
+    gradient.addColorStop(1, bgcolor2);
+    context.fillStyle = gradient;
+    context.fillRect(
+      this.outerX,
+      this.outerY,
+      ROOM_OUTER_WIDTH,
+      this.outerY + ROOM_HEIGHT
+    );
   }
 
   renderId(context) {
