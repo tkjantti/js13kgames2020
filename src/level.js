@@ -35,6 +35,7 @@ import {
   DOOR_404,
   DOOR_OPEN,
   GAME_OK,
+  GAME_OVER_CRUSH,
   GAME_OVER_FALL
 } from "./room.js";
 import { Camera } from "./camera.js";
@@ -148,7 +149,7 @@ export class Level {
         this.camera.shake(xAmount * 20, yAmount * 20);
       } else if (roomAtNextPosition === this.currentRoom) {
         // Player is crushed by the room.
-        this.gameOver = true;
+        this.gameOverState = GAME_OVER_CRUSH;
         return;
       }
     }
