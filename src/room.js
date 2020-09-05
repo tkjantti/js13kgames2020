@@ -76,6 +76,8 @@ const LADDER_PERSPECTIVE_LEFT = 0;
 const LADDER_PERSPECTIVE_BACK = 1;
 const LADDER_PERSPECTIVE_RIGHT = 2;
 
+const LASER_SPEED = 0.5;
+
 // drawHeight parameter when ladder needs to be drawn shorter
 // than it actually is.
 const createLadder = (height, perspective, drawHeight) => {
@@ -145,7 +147,10 @@ export class Room {
     if (!this.isMissing) {
       this.addLadders();
 
-      this.lasers.push({ x: this.x + this.width * 0.75 });
+      this.lasers.push({
+        x: this.x + this.width * 0.75,
+        speed: LASER_SPEED
+      });
     }
   }
 
@@ -192,9 +197,16 @@ export class Room {
       ) {
         // Player entering from left/right doors
         laser.x = this.x + 0.25 * this.width;
+        laser.speed = LASER_SPEED;
       } else {
         // Player entering from top/bottom doors
-        laser.x = this.x + 0.75 * this.width;
+        if (Math.random() < 0.5) {
+          laser.x = this.x + 0.75 * this.width;
+          laser.speed = LASER_SPEED;
+        } else {
+          laser.x = this.x + 0.25 * this.width;
+          laser.speed = -LASER_SPEED;
+        }
       }
     }
   }
@@ -290,10 +302,13 @@ export class Room {
     for (let i = 0; i < this.lasers.length; i++) {
       const laser = this.lasers[i];
 
-      if (laser.x < this.right) {
-        laser.x += 0.5;
-      } else {
-        laser.x = this.x;
+      laser.x += laser.speed;
+
+      if (laser.x < this.x) {
+        laser.speed = LASER_SPEED;
+      }
+      if (this.right < laser.x) {
+        laser.speed = -LASER_SPEED;
       }
 
       if (player.x < laser.x && laser.x < player.x + player.width) {
