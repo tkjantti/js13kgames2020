@@ -257,6 +257,8 @@ export class Level {
       sprite.y = nextRoom.bottom - sprite.height;
     }
 
+    nextRoom.resetTraps(sprite);
+
     this.panCameraTo(nextRoom);
   }
 

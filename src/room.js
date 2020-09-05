@@ -180,6 +180,25 @@ export class Room {
     }
   }
 
+  /*
+   * Makes sure that traps won't hurt player when entering the room.
+   */
+  resetTraps(player) {
+    for (let i = 0; i < this.lasers.length; i++) {
+      const laser = this.lasers[i];
+      if (
+        this.y + 0.25 * this.height < player.y &&
+        player.y < this.y + 0.75 * this.height
+      ) {
+        // Player entering from left/right doors
+        laser.x = this.x + 0.25 * this.width;
+      } else {
+        // Player entering from top/bottom doors
+        laser.x = this.x + 0.75 * this.width;
+      }
+    }
+  }
+
   addLadders() {
     const ladder = createLadder(
       ROOM_HEIGHT,
