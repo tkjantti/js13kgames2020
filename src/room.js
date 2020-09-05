@@ -41,6 +41,10 @@ export const DOOR_OPEN = 3;
 // Door to a missing room
 export const DOOR_404 = 404;
 
+export const GAME_OK = 0;
+export const GAME_OVER_LASER = 1;
+export const GAME_OVER_CRUSH = 2;
+
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
 export const ROOM_OUTER_WIDTH = 300;
@@ -127,6 +131,7 @@ const canPassDoor = doorState => {
 export class Room {
   constructor(x, y, ix, iy, isMissing) {
     this.ladders = [];
+    this.lasers = [];
     this.setPosition(x, y, ix, iy);
     this.isMissing = isMissing;
 
@@ -139,6 +144,8 @@ export class Room {
 
     if (!this.isMissing) {
       this.addLadders();
+
+      this.lasers.push({ x: this.x + this.width * 0.75 });
     }
   }
 
@@ -164,6 +171,12 @@ export class Room {
       const ladder = this.ladders[i];
       ladder.x += xDiff;
       ladder.y += yDiff;
+    }
+
+    for (let i = 0; i < this.lasers.length; i++) {
+      const laser = this.lasers[i];
+      laser.x += xDiff;
+      laser.y += yDiff;
     }
   }
 
@@ -254,6 +267,24 @@ export class Room {
     );
   }
 
+  update(player) {
+    for (let i = 0; i < this.lasers.length; i++) {
+      const laser = this.lasers[i];
+
+      if (laser.x < this.right) {
+        laser.x += 0.5;
+      } else {
+        laser.x = this.x;
+      }
+
+      if (player.x < laser.x && laser.x < player.x + player.width) {
+        return GAME_OVER_LASER;
+      }
+    }
+
+    return GAME_OK;
+  }
+
   render(context) {
     context.save();
 
@@ -267,6 +298,8 @@ export class Room {
     for (let i = 0; i < this.ladders.length; i++) {
       this.ladders[i].render();
     }
+
+    this.renderLasers(context);
 
     context.restore();
   }
@@ -546,6 +579,18 @@ export class Room {
       this.y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2
     );
     context.fill();
+  }
+
+  renderLasers(context) {
+    for (let i = 0; i < this.lasers.length; i++) {
+      const laser = this.lasers[i];
+      context.strokeStyle = "red";
+      context.lineWidth = Math.random() < 0.1 ? 2 : 1;
+      context.beginPath();
+      context.moveTo(laser.x, this.y);
+      context.lineTo(laser.x, this.y + this.height);
+      context.stroke();
+    }
   }
 
   getDoorColor(doorState) {

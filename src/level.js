@@ -33,7 +33,8 @@ import {
   DOOR_NONE_EDGE,
   DOOR_EDGE,
   DOOR_404,
-  DOOR_OPEN
+  DOOR_OPEN,
+  GAME_OK
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { createPlayer } from "./player.js";
@@ -87,6 +88,8 @@ export class Level {
 
     this.camera = new Camera();
     this.camera.zoomTo(this.currentRoom.getOuterBoundingBox());
+
+    this.gameOverState = GAME_OK;
   }
 
   autoMoveRooms() {
@@ -193,7 +196,12 @@ export class Level {
 
   update() {
     this.autoMoveRooms();
-    if (!this.gameOver) {
+    const gameOverState = this.currentRoom.update(this.player);
+    if (gameOverState !== GAME_OK && gameOverState !== this.gameOverState) {
+      this.gameOverState = gameOverState;
+    }
+
+    if (this.gameOverState === GAME_OK) {
       this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
       this.checkRoomChange();
     }
@@ -300,7 +308,7 @@ export class Level {
       this.currentRoom.render(context);
     }
 
-    if (!this.gameOver) {
+    if (this.gameOverState === GAME_OK) {
       this.player.render();
     }
 
