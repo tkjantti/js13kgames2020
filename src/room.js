@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { Sprite } from "kontra";
+import { Sprite, collides, keyPressed } from "kontra";
 
 // No door at missing rooms, can pass
 export const DOOR_NONE = 0;
@@ -145,6 +145,15 @@ export class Room {
       bottom: DOOR_EDGE
     };
 
+    this.switch = {
+      x: this.x + this.width * 0.7,
+      y: this.y + this.width * 0.78, // Just low enough that player collides
+      width: 20,
+      height: 30,
+      on: false,
+      lastToggleTime: performance.now()
+    };
+
     if (!this.isMissing) {
       this.addLadders();
 
@@ -185,6 +194,11 @@ export class Room {
       const laser = this.lasers[i];
       laser.x += xDiff;
       laser.y += yDiff;
+    }
+
+    if (this.switch) {
+      this.switch.x += xDiff;
+      this.switch.y += yDiff;
     }
   }
 
@@ -302,6 +316,7 @@ export class Room {
   }
 
   update(player) {
+    // Check for laser hits
     for (let i = 0; i < this.lasers.length; i++) {
       const laser = this.lasers[i];
 
@@ -317,6 +332,16 @@ export class Room {
       if (player.x < laser.x && laser.x < player.x + player.width) {
         return GAME_OVER_LASER;
       }
+    }
+
+    // Check for switch toggle
+    if (
+      collides(player, this.switch) &&
+      keyPressed("space") &&
+      300 < performance.now() - this.switch.lastToggleTime
+    ) {
+      this.switch.on = !this.switch.on;
+      this.switch.lastToggleTime = performance.now();
     }
 
     return GAME_OK;
@@ -336,9 +361,23 @@ export class Room {
       this.ladders[i].render();
     }
 
+    if (this.switch) {
+      this.renderSwitch(context, this.switch);
+    }
+
     this.renderLasers(context);
 
     context.restore();
+  }
+
+  renderSwitch(context, sw) {
+    context.fillStyle = "gray";
+    context.fillRect(sw.x, sw.y, sw.width, sw.height);
+    context.fillStyle = "black";
+    context.fillRect(sw.x + 5, sw.y + 5, sw.width - 10, sw.height - 10);
+    context.fillStyle = "brown";
+    const y = sw.on ? sw.y + 3 : sw.y + sw.height - 8;
+    context.fillRect(sw.x, y, sw.width, 5);
   }
 
   renderRoom(context) {
