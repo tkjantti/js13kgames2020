@@ -33,7 +33,10 @@ import {
   DOOR_NONE_EDGE,
   DOOR_EDGE,
   DOOR_404,
-  DOOR_OPEN
+  DOOR_OPEN,
+  GAME_OK,
+  GAME_OVER_CRUSH,
+  GAME_OVER_FALL
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { createPlayer } from "./player.js";
@@ -64,9 +67,6 @@ const createRooms = (xCount, yCount) => {
 
 export class Level {
   constructor(xCount, yCount) {
-    this.xCount = xCount;
-    this.yCount = yCount;
-
     // For level to work with camera.zoomTo()
     this.x = 0;
     this.y = 0;
@@ -87,6 +87,8 @@ export class Level {
 
     this.camera = new Camera();
     this.camera.zoomTo(this.currentRoom.getOuterBoundingBox());
+
+    this.gameOverState = GAME_OK;
   }
 
   autoMoveRooms() {
@@ -147,7 +149,7 @@ export class Level {
         this.camera.shake(xAmount * 20, yAmount * 20);
       } else if (roomAtNextPosition === this.currentRoom) {
         // Player is crushed by the room.
-        this.gameOver = true;
+        this.gameOverState = GAME_OVER_CRUSH;
         return;
       }
     }
@@ -193,7 +195,12 @@ export class Level {
 
   update() {
     this.autoMoveRooms();
-    if (!this.gameOver) {
+    const gameOverState = this.currentRoom.update(this.player);
+    if (gameOverState !== GAME_OK && gameOverState !== this.gameOverState) {
+      this.gameOverState = gameOverState;
+    }
+
+    if (this.gameOverState === GAME_OK) {
       this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
       this.checkRoomChange();
     }
@@ -202,29 +209,41 @@ export class Level {
 
   checkRoomChange() {
     if (this.player.x > this.currentRoom.right && this.player.isMovingRight()) {
-      this.moveHorizontally(this.player, 1);
+      this.enterRoom(this.player, 1, 0);
     } else if (
       this.player.x + this.player.width < this.currentRoom.x &&
       this.player.isMovingLeft()
     ) {
-      this.moveHorizontally(this.player, -1);
+      this.enterRoom(this.player, -1, 0);
     } else if (
-      this.player.isMovingDown() &&
+      (this.player.isMovingDown() ||
+        this.isEmptyHereAndBelow(this.currentRoom)) &&
       this.currentRoom.isAtBottomDoor(this.player)
     ) {
-      this.moveVertically(this.player, 1);
+      this.enterRoom(this.player, 0, 1);
+    } else if (
+      this.currentRoom.isMissing &&
+      this.currentRoom.iy >= this.rooms.yCount - 1
+    ) {
+      this.gameOverState = GAME_OVER_FALL;
     } else if (
       this.player.isMovingUp() &&
       this.currentRoom.isAtTopDoor(this.player)
     ) {
-      this.moveVertically(this.player, -1);
+      this.enterRoom(this.player, 0, -1);
     }
   }
 
-  moveHorizontally(sprite, direction) {
+  isEmptyHereAndBelow(room) {
+    const roomBelow = this.rooms.getValue(room.ix, room.iy + 1);
+    return room.isMissing && roomBelow && roomBelow.isMissing;
+  }
+
+  enterRoom(sprite, xDirection, yDirection) {
     const previousRoom = this.currentRoom;
-    const newix = previousRoom.ix + direction;
-    const nextRoom = this.rooms.getValue(newix, previousRoom.iy);
+    const ix = previousRoom.ix + xDirection;
+    const iy = previousRoom.iy + yDirection;
+    const nextRoom = this.rooms.getValue(ix, iy);
 
     if (!nextRoom) {
       return;
@@ -232,35 +251,23 @@ export class Level {
 
     this.currentRoom = nextRoom;
 
-    if (direction >= 0) {
+    if (xDirection > 0) {
       if (sprite.x < nextRoom.x) {
         sprite.x = nextRoom.x;
       }
-    } else {
+    } else if (xDirection < 0) {
       if (nextRoom.right < sprite.x + sprite.width) {
         sprite.x = nextRoom.right - sprite.width;
       }
     }
 
-    this.panCameraTo(nextRoom);
-  }
-
-  moveVertically(sprite, direction) {
-    const previousRoom = this.currentRoom;
-    const newiy = previousRoom.iy + direction;
-    const nextRoom = this.rooms.getValue(previousRoom.ix, newiy);
-
-    if (!nextRoom) {
-      return;
-    }
-
-    this.currentRoom = nextRoom;
-
-    if (direction >= 0) {
+    if (yDirection > 0) {
       sprite.y = nextRoom.y;
-    } else {
+    } else if (yDirection < 0) {
       sprite.y = nextRoom.bottom - sprite.height;
     }
+
+    nextRoom.resetTraps(sprite);
 
     this.panCameraTo(nextRoom);
   }
@@ -300,7 +307,7 @@ export class Level {
       this.currentRoom.render(context);
     }
 
-    if (!this.gameOver) {
+    if (this.gameOverState === GAME_OK) {
       this.player.render();
     }
 

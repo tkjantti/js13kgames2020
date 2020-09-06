@@ -41,6 +41,11 @@ export const DOOR_OPEN = 3;
 // Door to a missing room
 export const DOOR_404 = 404;
 
+export const GAME_OK = 0;
+export const GAME_OVER_LASER = 1;
+export const GAME_OVER_CRUSH = 2;
+export const GAME_OVER_FALL = 3;
+
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
 export const ROOM_OUTER_WIDTH = 300;
@@ -71,6 +76,8 @@ const LADDER_WIDTH = 10;
 const LADDER_PERSPECTIVE_LEFT = 0;
 const LADDER_PERSPECTIVE_BACK = 1;
 const LADDER_PERSPECTIVE_RIGHT = 2;
+
+const LASER_SPEED = 0.5;
 
 // drawHeight parameter when ladder needs to be drawn shorter
 // than it actually is.
@@ -127,6 +134,7 @@ const canPassDoor = doorState => {
 export class Room {
   constructor(x, y, ix, iy, isMissing) {
     this.ladders = [];
+    this.lasers = [];
     this.setPosition(x, y, ix, iy);
     this.isMissing = isMissing;
 
@@ -139,6 +147,13 @@ export class Room {
 
     if (!this.isMissing) {
       this.addLadders();
+
+      if (Math.random() < 0.3) {
+        this.lasers.push({
+          x: this.x + this.width * 0.75,
+          speed: LASER_SPEED
+        });
+      }
     }
   }
 
@@ -164,6 +179,38 @@ export class Room {
       const ladder = this.ladders[i];
       ladder.x += xDiff;
       ladder.y += yDiff;
+    }
+
+    for (let i = 0; i < this.lasers.length; i++) {
+      const laser = this.lasers[i];
+      laser.x += xDiff;
+      laser.y += yDiff;
+    }
+  }
+
+  /*
+   * Makes sure that traps won't hurt player when entering the room.
+   */
+  resetTraps(player) {
+    for (let i = 0; i < this.lasers.length; i++) {
+      const laser = this.lasers[i];
+      if (
+        this.y + 0.25 * this.height < player.y &&
+        player.y < this.y + 0.75 * this.height
+      ) {
+        // Player entering from left/right doors
+        laser.x = this.x + 0.25 * this.width;
+        laser.speed = LASER_SPEED;
+      } else {
+        // Player entering from top/bottom doors
+        if (Math.random() < 0.5) {
+          laser.x = this.x + 0.75 * this.width;
+          laser.speed = LASER_SPEED;
+        } else {
+          laser.x = this.x + 0.25 * this.width;
+          laser.speed = -LASER_SPEED;
+        }
+      }
     }
   }
 
@@ -254,6 +301,27 @@ export class Room {
     );
   }
 
+  update(player) {
+    for (let i = 0; i < this.lasers.length; i++) {
+      const laser = this.lasers[i];
+
+      laser.x += laser.speed;
+
+      if (laser.x < this.x) {
+        laser.speed = LASER_SPEED;
+      }
+      if (this.right < laser.x) {
+        laser.speed = -LASER_SPEED;
+      }
+
+      if (player.x < laser.x && laser.x < player.x + player.width) {
+        return GAME_OVER_LASER;
+      }
+    }
+
+    return GAME_OK;
+  }
+
   render(context) {
     context.save();
 
@@ -267,6 +335,8 @@ export class Room {
     for (let i = 0; i < this.ladders.length; i++) {
       this.ladders[i].render();
     }
+
+    this.renderLasers(context);
 
     context.restore();
   }
@@ -546,6 +616,18 @@ export class Room {
       this.y + ROOM_HEIGHT / 2 - DOOR_HEIGHT / 2
     );
     context.fill();
+  }
+
+  renderLasers(context) {
+    for (let i = 0; i < this.lasers.length; i++) {
+      const laser = this.lasers[i];
+      context.strokeStyle = "red";
+      context.lineWidth = Math.random() < 0.1 ? 2 : 1;
+      context.beginPath();
+      context.moveTo(laser.x, this.y);
+      context.lineTo(laser.x, this.y + this.height);
+      context.stroke();
+    }
   }
 
   getDoorColor(doorState) {
