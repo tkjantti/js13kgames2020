@@ -37,7 +37,6 @@ import {
   GAME_OK,
   GAME_OVER_CRUSH,
   GAME_OVER_FALL,
-  ACTION_NONE,
   ACTION_MOVE
 } from "./room.js";
 import { Camera } from "./camera.js";
@@ -293,9 +292,7 @@ export class Level {
   toggleCurrent(isOn) {
     const otherRoom = findConnection(this.currentRoom, this.rooms);
     if (otherRoom) {
-      console.log("otherRoom:", otherRoom.ix, otherRoom.iy, isOn);
-      // TODO: other actions than moving
-      otherRoom.isMoving = isOn ? ACTION_MOVE : ACTION_NONE;
+      otherRoom.toggleAction(isOn);
     }
   }
 

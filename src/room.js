@@ -219,6 +219,12 @@ export class Room {
     }
   }
 
+  toggleAction(isOn) {
+    if (this.action === ACTION_MOVE) {
+      this.isMoving = isOn;
+    }
+  }
+
   /*
    * Makes sure that traps won't hurt player when entering the room.
    */
