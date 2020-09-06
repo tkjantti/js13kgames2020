@@ -73,6 +73,14 @@ const DOOR_PASSING_MARGIN = 13;
 
 const LADDER_WIDTH = 10;
 
+const SWITCH_RELATIVE_X = ROOM_WIDTH * 0.7;
+const SWITCH_RELATIVE_Y = ROOM_HEIGHT * 0.75;
+const SWITCH_WIDTH = 20;
+const SWITCH_HEIGHT = 50;
+
+// So that player can the switch even when rendering does not overlap.
+const SWITCH_DRAW_HEIGHT = 30;
+
 const LADDER_PERSPECTIVE_LEFT = 0;
 const LADDER_PERSPECTIVE_BACK = 1;
 const LADDER_PERSPECTIVE_RIGHT = 2;
@@ -145,12 +153,14 @@ export class Room {
       bottom: DOOR_EDGE
     };
 
+    this.wires = properties.wires || {};
+
     if (properties.switch) {
       this.switch = {
-        x: this.x + this.width * 0.7,
-        y: this.y + this.width * 0.78, // Just low enough that player collides
-        width: 20,
-        height: 30,
+        x: this.x + SWITCH_RELATIVE_X,
+        y: this.y + SWITCH_RELATIVE_Y,
+        width: SWITCH_WIDTH,
+        height: SWITCH_HEIGHT,
         on: false,
         lastToggleTime: performance.now()
       };
@@ -359,6 +369,8 @@ export class Room {
       this.renderRoom(context);
     }
 
+    this.renderWires(context);
+
     this.renderDoors(context);
 
     for (let i = 0; i < this.ladders.length; i++) {
@@ -376,12 +388,63 @@ export class Room {
 
   renderSwitch(context, sw) {
     context.fillStyle = "gray";
-    context.fillRect(sw.x, sw.y, sw.width, sw.height);
+    context.fillRect(sw.x, sw.y, SWITCH_WIDTH, SWITCH_DRAW_HEIGHT);
     context.fillStyle = "black";
-    context.fillRect(sw.x + 5, sw.y + 5, sw.width - 10, sw.height - 10);
+    context.fillRect(
+      sw.x + 5,
+      sw.y + 5,
+      SWITCH_WIDTH - 10,
+      SWITCH_DRAW_HEIGHT - 10
+    );
     context.fillStyle = "brown";
-    const y = sw.on ? sw.y + 3 : sw.y + sw.height - 8;
-    context.fillRect(sw.x, y, sw.width, 5);
+    const y = sw.on ? sw.y + 3 : sw.y + SWITCH_DRAW_HEIGHT - 8;
+    context.fillRect(sw.x, y, SWITCH_WIDTH, 5);
+  }
+
+  renderWires(context) {
+    const wires = this.wires;
+    context.strokeStyle = "rgb(0,0,150)";
+    context.lineWidth = 3;
+
+    if (wires.left) {
+      context.beginPath();
+      context.moveTo(this.x + Z / 2, this.y + SWITCH_RELATIVE_Y + 10);
+      context.lineTo(
+        this.x + SWITCH_RELATIVE_X,
+        this.y + SWITCH_RELATIVE_Y + 10
+      );
+      context.stroke();
+    }
+
+    if (wires.right) {
+      context.beginPath();
+      context.moveTo(
+        this.x + SWITCH_RELATIVE_X,
+        this.y + SWITCH_RELATIVE_Y + 10
+      );
+      context.lineTo(this.right - Z / 2, this.y + SWITCH_RELATIVE_Y + 10);
+      context.stroke();
+    }
+
+    if (wires.top) {
+      context.beginPath();
+      context.moveTo(this.x + SWITCH_RELATIVE_X + 10, this.y + Z / 2);
+      context.lineTo(
+        this.x + SWITCH_RELATIVE_X + 10,
+        this.y + SWITCH_RELATIVE_Y
+      );
+      context.stroke();
+    }
+
+    if (wires.bottom) {
+      context.beginPath();
+      context.moveTo(
+        this.x + SWITCH_RELATIVE_X + 10,
+        this.y + SWITCH_RELATIVE_Y
+      );
+      context.lineTo(this.x + SWITCH_RELATIVE_X + 10, this.bottom - Z / 2);
+      context.stroke();
+    }
   }
 
   renderRoom(context) {

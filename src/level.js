@@ -57,7 +57,13 @@ const createRooms = (xCount, yCount) => {
           (ix === 4 && iy === 4) ||
           (ix === 3 && iy === 6),
         switch: ix === 2 && iy === 4,
-        laser: Math.random() < 0.3
+        laser: Math.random() < 0.3,
+        wires: {
+          left: true,
+          right: true,
+          top: true,
+          bottom: true
+        }
       };
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
