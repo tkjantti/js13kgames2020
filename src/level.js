@@ -50,15 +50,19 @@ const createRooms = (xCount, yCount) => {
 
   for (let ix = 0; ix < rooms.xCount; ix++) {
     for (let iy = 0; iy < rooms.yCount; iy++) {
-      const isMissing =
-        ix === 5 ||
-        (ix === 1 && iy === 2) ||
-        (ix === 4 && iy === 4) ||
-        (ix === 3 && iy === 6);
+      const properties = {
+        isMissing:
+          ix === 5 ||
+          (ix === 1 && iy === 2) ||
+          (ix === 4 && iy === 4) ||
+          (ix === 3 && iy === 6),
+        switch: ix === 2 && iy === 4,
+        laser: Math.random() < 0.3
+      };
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
-      rooms.setValue(ix, iy, new Room(x, y, ix, iy, isMissing));
+      rooms.setValue(ix, iy, new Room(x, y, ix, iy, properties));
     }
   }
 
@@ -138,7 +142,7 @@ export class Level {
       this.rooms.setValue(
         oldIx,
         oldIy,
-        new Room(oldX, oldY, oldIx, oldIy, true)
+        new Room(oldX, oldY, oldIx, oldIy, { isMissing: true })
       );
       this.updateDoors();
 

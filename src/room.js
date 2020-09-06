@@ -132,11 +132,11 @@ const canPassDoor = doorState => {
 };
 
 export class Room {
-  constructor(x, y, ix, iy, isMissing) {
+  constructor(x, y, ix, iy, properties) {
     this.ladders = [];
     this.lasers = [];
     this.setPosition(x, y, ix, iy);
-    this.isMissing = isMissing;
+    this.isMissing = properties.isMissing;
 
     this.doors = {
       left: DOOR_EDGE,
@@ -145,19 +145,21 @@ export class Room {
       bottom: DOOR_EDGE
     };
 
-    this.switch = {
-      x: this.x + this.width * 0.7,
-      y: this.y + this.width * 0.78, // Just low enough that player collides
-      width: 20,
-      height: 30,
-      on: false,
-      lastToggleTime: performance.now()
-    };
+    if (properties.switch) {
+      this.switch = {
+        x: this.x + this.width * 0.7,
+        y: this.y + this.width * 0.78, // Just low enough that player collides
+        width: 20,
+        height: 30,
+        on: false,
+        lastToggleTime: performance.now()
+      };
+    }
 
     if (!this.isMissing) {
       this.addLadders();
 
-      if (Math.random() < 0.3) {
+      if (properties.laser) {
         this.lasers.push({
           x: this.x + this.width * 0.75,
           speed: LASER_SPEED
@@ -335,13 +337,15 @@ export class Room {
     }
 
     // Check for switch toggle
-    if (
-      collides(player, this.switch) &&
-      keyPressed("space") &&
-      300 < performance.now() - this.switch.lastToggleTime
-    ) {
-      this.switch.on = !this.switch.on;
-      this.switch.lastToggleTime = performance.now();
+    if (this.switch) {
+      if (
+        collides(player, this.switch) &&
+        keyPressed("space") &&
+        300 < performance.now() - this.switch.lastToggleTime
+      ) {
+        this.switch.on = !this.switch.on;
+        this.switch.lastToggleTime = performance.now();
+      }
     }
 
     return GAME_OK;
