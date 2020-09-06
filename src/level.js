@@ -59,12 +59,20 @@ const createRooms = (xCount, yCount) => {
         switch: ix === 2 && iy === 4,
         laser: Math.random() < 0.3,
         wires: {
-          left: true,
-          right: true,
-          top: true,
-          bottom: true
+          left: false,
+          right: false,
+          top: false,
+          bottom: false
         }
       };
+
+      if (ix === 2 && iy === 4) {
+        properties.wires.right = true;
+      }
+
+      if (ix === 3 && iy === 4) {
+        properties.wires.left = true;
+      }
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
@@ -85,7 +93,7 @@ export class Level {
 
     this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(3, 4);
+    this.currentRoom = this.rooms.getValue(2, 4);
 
     this.movingRoom = this.rooms.getValue(3, 4);
     this.movingRoom.xMoveDirection = 1;

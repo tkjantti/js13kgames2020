@@ -377,28 +377,39 @@ export class Room {
       this.ladders[i].render();
     }
 
-    if (this.switch) {
-      this.renderSwitch(context, this.switch);
-    }
+    this.renderConnectionBox(context);
 
     this.renderLasers(context);
 
     context.restore();
   }
 
-  renderSwitch(context, sw) {
-    context.fillStyle = "gray";
-    context.fillRect(sw.x, sw.y, SWITCH_WIDTH, SWITCH_DRAW_HEIGHT);
-    context.fillStyle = "black";
-    context.fillRect(
-      sw.x + 5,
-      sw.y + 5,
-      SWITCH_WIDTH - 10,
-      SWITCH_DRAW_HEIGHT - 10
-    );
-    context.fillStyle = "brown";
-    const y = sw.on ? sw.y + 3 : sw.y + SWITCH_DRAW_HEIGHT - 8;
-    context.fillRect(sw.x, y, SWITCH_WIDTH, 5);
+  renderConnectionBox(context) {
+    const wires = this.wires;
+    if (this.switch) {
+      const sw = this.switch;
+
+      context.fillStyle = "gray";
+      context.fillRect(sw.x, sw.y, SWITCH_WIDTH, SWITCH_DRAW_HEIGHT);
+      context.fillStyle = "black";
+      context.fillRect(
+        sw.x + 5,
+        sw.y + 5,
+        SWITCH_WIDTH - 10,
+        SWITCH_DRAW_HEIGHT - 10
+      );
+      context.fillStyle = "brown";
+      const y = sw.on ? sw.y + 3 : sw.y + SWITCH_DRAW_HEIGHT - 8;
+      context.fillRect(sw.x, y, SWITCH_WIDTH, 5);
+    } else if (wires.left || wires.right || wires.top || wires.bottom) {
+      context.fillStyle = "gray";
+      context.fillRect(
+        this.x + SWITCH_RELATIVE_X,
+        this.y + SWITCH_RELATIVE_Y,
+        25,
+        25
+      );
+    }
   }
 
   renderWires(context) {
