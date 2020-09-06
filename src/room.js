@@ -46,6 +46,9 @@ export const GAME_OVER_LASER = 1;
 export const GAME_OVER_CRUSH = 2;
 export const GAME_OVER_FALL = 3;
 
+export const ACTION_NONE = 0;
+export const ACTION_MOVE = 1;
+
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
 export const ROOM_OUTER_WIDTH = 300;
@@ -154,6 +157,8 @@ export class Room {
     };
 
     this.wires = properties.wires || {};
+    this.isMoving = false;
+    this.action = properties.action || ACTION_NONE;
 
     if (properties.switch) {
       this.switch = {
@@ -327,7 +332,7 @@ export class Room {
     );
   }
 
-  update(player) {
+  update(player, toggleCurrent) {
     // Check for laser hits
     for (let i = 0; i < this.lasers.length; i++) {
       const laser = this.lasers[i];
@@ -355,6 +360,7 @@ export class Room {
       ) {
         this.switch.on = !this.switch.on;
         this.switch.lastToggleTime = performance.now();
+        toggleCurrent(this.switch.on);
       }
     }
 

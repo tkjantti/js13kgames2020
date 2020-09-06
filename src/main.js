@@ -64,6 +64,9 @@ bindKeys("k", () => {
   level.moveRoom(level.currentRoom, 0, 1);
 });
 
+// FOR DEVELOPMENT: uncomment to show whole level at startup
+// level.camera.zoomTo(level);
+
 const renderTexts = (context, ...texts) => {
   context.fillStyle = "white";
   context.font = "32px Sans-serif";

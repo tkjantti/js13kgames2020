@@ -36,7 +36,9 @@ import {
   DOOR_OPEN,
   GAME_OK,
   GAME_OVER_CRUSH,
-  GAME_OVER_FALL
+  GAME_OVER_FALL,
+  ACTION_NONE,
+  ACTION_MOVE
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { createPlayer } from "./player.js";
@@ -55,6 +57,8 @@ const createRooms = (xCount, yCount) => {
           ix === 5 ||
           (ix === 1 && iy === 2) ||
           (ix === 4 && iy === 4) ||
+          (ix === 4 && iy === 2) ||
+          (ix === 4 && iy === 3) ||
           (ix === 3 && iy === 6),
         switch: ix === 2 && iy === 4,
         laser: Math.random() < 0.3,
@@ -72,6 +76,15 @@ const createRooms = (xCount, yCount) => {
 
       if (ix === 3 && iy === 4) {
         properties.wires.left = true;
+        properties.wires.top = true;
+      }
+      if (ix === 3 && iy === 3) {
+        properties.wires.bottom = true;
+        properties.wires.top = true;
+      }
+      if (ix === 3 && iy === 2) {
+        properties.wires.bottom = true;
+        properties.action = ACTION_MOVE;
       }
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
@@ -81,6 +94,72 @@ const createRooms = (xCount, yCount) => {
   }
 
   return rooms;
+};
+
+const findRight = (room, rooms) => {
+  const rightRoom = rooms.getValue(room.ix + 1, room.iy);
+  const topRoom = rooms.getValue(room.ix, room.iy - 1);
+  const bottomRoom = rooms.getValue(room.ix, room.iy + 1);
+
+  const right = room.wires.right && rightRoom && findRight(rightRoom, rooms);
+  const top = room.wires.top && topRoom && findTop(topRoom, rooms);
+  const bottom =
+    room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
+
+  return room.wires.left && (room.action ? room : right || top || bottom);
+};
+
+const findLeft = (room, rooms) => {
+  const leftRoom = rooms.getValue(room.ix - 1, room.iy);
+  const topRoom = rooms.getValue(room.ix, room.iy - 1);
+  const bottomRoom = rooms.getValue(room.ix, room.iy + 1);
+
+  const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
+  const top = room.wires.top && topRoom && findTop(topRoom, rooms);
+  const bottom =
+    room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
+
+  return room.wires.right && (room.action ? room : left || top || bottom);
+};
+
+const findTop = (room, rooms) => {
+  const leftRoom = rooms.getValue(room.ix - 1, room.iy);
+  const rightRoom = rooms.getValue(room.ix + 1, room.iy);
+  const topRoom = rooms.getValue(room.ix, room.iy - 1);
+
+  const right = room.wires.right && rightRoom && findRight(rightRoom, rooms);
+  const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
+  const top = room.wires.top && topRoom && findTop(topRoom, rooms);
+
+  return room.wires.bottom && (room.action ? room : right || left || top);
+};
+
+const findBottom = (room, rooms) => {
+  const leftRoom = rooms.getValue(room.ix - 1, room.iy);
+  const rightRoom = rooms.getValue(room.ix + 1, room.iy);
+  const bottomRoom = rooms.getValue(room.ix, room.iy + 1);
+
+  const right = room.wires.right && rightRoom && findRight(rightRoom, rooms);
+  const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
+  const bottom =
+    room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
+
+  return room.wires.top && (room.action ? room : right || left || bottom);
+};
+
+const findConnection = (room, rooms) => {
+  const leftRoom = rooms.getValue(room.ix - 1, room.iy);
+  const rightRoom = rooms.getValue(room.ix + 1, room.iy);
+  const topRoom = rooms.getValue(room.ix, room.iy - 1);
+  const bottomRoom = rooms.getValue(room.ix, room.iy + 1);
+
+  const right = room.wires.right && rightRoom && findRight(rightRoom, rooms);
+  const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
+  const top = room.wires.top && topRoom && findTop(topRoom, rooms);
+  const bottom =
+    room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
+
+  return right || left || top || bottom;
 };
 
 export class Level {
@@ -95,7 +174,7 @@ export class Level {
     this.updateDoors();
     this.currentRoom = this.rooms.getValue(2, 4);
 
-    this.movingRoom = this.rooms.getValue(3, 4);
+    this.movingRoom = this.rooms.getValue(3, 2);
     this.movingRoom.xMoveDirection = 1;
     this.lastAutoMoveTime = performance.now();
 
@@ -110,7 +189,7 @@ export class Level {
   }
 
   autoMoveRooms() {
-    if (!this.movingRoom) {
+    if (!this.movingRoom || !this.movingRoom.isMoving) {
       return;
     }
 
@@ -211,9 +290,22 @@ export class Level {
     }
   }
 
+  toggleCurrent(isOn) {
+    const otherRoom = findConnection(this.currentRoom, this.rooms);
+    if (otherRoom) {
+      console.log("otherRoom:", otherRoom.ix, otherRoom.iy, isOn);
+      // TODO: other actions than moving
+      otherRoom.isMoving = isOn ? ACTION_MOVE : ACTION_NONE;
+    }
+  }
+
   update() {
     this.autoMoveRooms();
-    const gameOverState = this.currentRoom.update(this.player);
+
+    const gameOverState = this.currentRoom.update(
+      this.player,
+      this.toggleCurrent.bind(this)
+    );
     if (gameOverState !== GAME_OK && gameOverState !== this.gameOverState) {
       this.gameOverState = gameOverState;
     }
@@ -222,6 +314,7 @@ export class Level {
       this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
       this.checkRoomChange();
     }
+
     this.camera.update();
   }
 
