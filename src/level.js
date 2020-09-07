@@ -335,7 +335,7 @@ export class Level {
     }
   }
 
-  toggleCurrent(isOn) {
+  toggleSwitch(isOn) {
     const otherRoom = findConnection(this.currentRoom, this.rooms);
     if (otherRoom) {
       otherRoom.toggleAction(isOn);
@@ -347,7 +347,7 @@ export class Level {
 
     const gameOverState = this.currentRoom.update(
       this.player,
-      this.toggleCurrent.bind(this)
+      this.toggleSwitch.bind(this)
     );
     if (gameOverState !== GAME_OK && gameOverState !== this.gameOverState) {
       this.gameOverState = gameOverState;

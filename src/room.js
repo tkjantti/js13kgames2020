@@ -351,7 +351,7 @@ export class Room {
     );
   }
 
-  update(player, toggleCurrent) {
+  update(player, toggleSwitch) {
     // Check for laser hits
     for (let i = 0; i < this.lasers.length; i++) {
       const laser = this.lasers[i];
@@ -379,7 +379,7 @@ export class Room {
       ) {
         this.switch.on = !this.switch.on;
         this.switch.lastToggleTime = performance.now();
-        toggleCurrent(this.switch.on);
+        toggleSwitch(this.switch.on);
       }
     }
 
