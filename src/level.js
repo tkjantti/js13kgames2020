@@ -181,9 +181,6 @@ export class Level {
     this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
     this.currentRoom = this.rooms.getValue(2, 4);
-
-    this.movingRoom = this.rooms.getValue(3, 2);
-    this.movingRoom.xMoveDirection = 1;
     this.lastAutoMoveTime = performance.now();
 
     this.player = createPlayer();
@@ -197,24 +194,29 @@ export class Level {
   }
 
   autoMoveRooms() {
-    if (!this.movingRoom || !this.movingRoom.isMoving) {
-      return;
-    }
-
-    const room = this.movingRoom;
     const now = performance.now();
 
-    if (now - this.lastAutoMoveTime > ROOM_MOVE_DELAY_MS) {
-      const roomAtNextPosition = this.rooms.getValue(
-        room.ix + room.xMoveDirection,
-        room.iy
-      );
-      if (!(roomAtNextPosition && roomAtNextPosition.isMissing)) {
-        room.xMoveDirection = -room.xMoveDirection;
-      }
+    for (let ix = 0; ix < this.rooms.xCount; ix++) {
+      for (let iy = 0; iy < this.rooms.yCount; iy++) {
+        const room = this.rooms.getValue(ix, iy);
 
-      this.moveRoom(room, room.xMoveDirection, 0);
-      this.lastAutoMoveTime = now;
+        if (!room.xMoveDirection) {
+          continue;
+        }
+
+        if (now - this.lastAutoMoveTime > ROOM_MOVE_DELAY_MS) {
+          const roomAtNextPosition = this.rooms.getValue(
+            room.ix + room.xMoveDirection,
+            room.iy
+          );
+          if (!(roomAtNextPosition && roomAtNextPosition.isMissing)) {
+            room.xMoveDirection = -room.xMoveDirection;
+          }
+
+          this.moveRoom(room, room.xMoveDirection, 0);
+          this.lastAutoMoveTime = now;
+        }
+      }
     }
   }
 

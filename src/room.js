@@ -158,7 +158,7 @@ export class Room {
     };
 
     this.wires = properties.wires || {};
-    this.isMoving = false;
+    this.xMoveDirection = 0;
     this.action = properties.action || ACTION_NONE;
 
     if (properties.switch) {
@@ -222,7 +222,7 @@ export class Room {
 
   toggleAction(isOn) {
     if (this.action === ACTION_MOVE) {
-      this.isMoving = isOn;
+      this.xMoveDirection = isOn ? 1 : 0;
     }
 
     if (this.action === ACTION_LASER) {
