@@ -37,7 +37,8 @@ import {
   GAME_OK,
   GAME_OVER_CRUSH,
   GAME_OVER_FALL,
-  ACTION_MOVE
+  ACTION_MOVE,
+  ACTION_LASER
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { createPlayer } from "./player.js";
@@ -59,8 +60,6 @@ const createRooms = (xCount, yCount) => {
           (ix === 4 && iy === 2) ||
           (ix === 4 && iy === 3) ||
           (ix === 3 && iy === 6),
-        switch: ix === 2 && iy === 4,
-        laser: Math.random() < 0.3,
         wires: {
           left: false,
           right: false,
@@ -70,6 +69,7 @@ const createRooms = (xCount, yCount) => {
       };
 
       if (ix === 2 && iy === 4) {
+        properties.switch = true;
         properties.wires.right = true;
       }
 
@@ -84,6 +84,15 @@ const createRooms = (xCount, yCount) => {
       if (ix === 3 && iy === 2) {
         properties.wires.bottom = true;
         properties.action = ACTION_MOVE;
+      }
+
+      if (ix === 2 && iy === 5) {
+        properties.switch = true;
+        properties.wires.right = true;
+      }
+      if (ix === 3 && iy === 5) {
+        properties.wires.left = true;
+        properties.action = ACTION_LASER;
       }
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);

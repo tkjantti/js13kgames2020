@@ -48,6 +48,7 @@ export const GAME_OVER_FALL = 3;
 
 export const ACTION_NONE = 0;
 export const ACTION_MOVE = 1;
+export const ACTION_LASER = 2;
 
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
@@ -222,6 +223,17 @@ export class Room {
   toggleAction(isOn) {
     if (this.action === ACTION_MOVE) {
       this.isMoving = isOn;
+    }
+
+    if (this.action === ACTION_LASER) {
+      if (isOn) {
+        this.lasers.push({
+          x: this.x + this.width * 0.75,
+          speed: LASER_SPEED
+        });
+      } else {
+        this.lasers = [];
+      }
     }
   }
 
