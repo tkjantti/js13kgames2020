@@ -63,14 +63,15 @@ const ROOM_MOVE_DELAY_MS = 3000;
 
 // prettier-ignore
 const level = [
-  "/r   lb   #    #",
-  "Lr   tl   .    #",
-  "-r   Hl   .    #",
-  "#    #    #    #"
+  "/r   lb   #    #    #",
+  "Lr   tl   .    #    #",
+  "-r   Hl   .    #    #",
+  "#    #    #    #    #",
+  "#    #    #    #    #"
 ];
 
 const parseLevel = () => {
-  const rooms = new Array2D(4, 4);
+  const rooms = new Array2D(level[0].split(/ +/).length, level.length);
 
   for (let iy = 0; iy < level.length; iy++) {
     const row = level[iy].split(/ +/);
