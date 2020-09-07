@@ -42,7 +42,7 @@ const resize = () => {
 window.addEventListener("resize", resize, false);
 resize();
 
-const level = new Level(8, 8);
+const level = new Level();
 
 // Debug keys
 bindKeys("1", () => {

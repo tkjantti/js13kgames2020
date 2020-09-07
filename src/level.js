@@ -47,19 +47,35 @@ const ROOM_GAP = 30;
 
 const ROOM_MOVE_DELAY_MS = 3000;
 
-const createRooms = (xCount, yCount) => {
-  const rooms = new Array2D(xCount, yCount);
+/*
+ * Level format:
+ *
+ * # - plain room
+ * S - switch
+ * H - horizontally moving room
+ * L - laser
+ * l - wire left
+ * r - wire right
+ * t - wire top
+ * b - wire bottom
+ */
 
-  for (let ix = 0; ix < rooms.xCount; ix++) {
-    for (let iy = 0; iy < rooms.yCount; iy++) {
+// prettier-ignore
+const level = [
+  "Sr   lb   #    #",
+  "Lr   tl   .    #",
+  "Sr   Hl   .    #",
+  "#    #    #    #"
+];
+
+const parseLevel = () => {
+  const rooms = new Array2D(4, 4);
+
+  for (let iy = 0; iy < level.length; iy++) {
+    const row = level[iy].split(/ +/);
+    for (let ix = 0; ix < row.length; ix++) {
+      const str = row[ix];
       const properties = {
-        isMissing:
-          ix === 5 ||
-          (ix === 1 && iy === 2) ||
-          (ix === 4 && iy === 4) ||
-          (ix === 4 && iy === 2) ||
-          (ix === 4 && iy === 3) ||
-          (ix === 3 && iy === 6),
         wires: {
           left: false,
           right: false,
@@ -68,32 +84,20 @@ const createRooms = (xCount, yCount) => {
         }
       };
 
-      if (ix === 2 && iy === 4) {
-        properties.switch = true;
-        properties.wires.right = true;
-      }
+      properties.isMissing = str.includes(".");
 
-      if (ix === 3 && iy === 4) {
-        properties.wires.left = true;
-        properties.wires.top = true;
+      properties.switch = str.includes("S");
+      if (str.includes("L")) {
+        properties.action = ACTION_LASER;
       }
-      if (ix === 3 && iy === 3) {
-        properties.wires.bottom = true;
-        properties.wires.top = true;
-      }
-      if (ix === 3 && iy === 2) {
-        properties.wires.bottom = true;
+      if (str.includes("H")) {
         properties.action = ACTION_MOVE;
       }
 
-      if (ix === 2 && iy === 5) {
-        properties.switch = true;
-        properties.wires.right = true;
-      }
-      if (ix === 3 && iy === 5) {
-        properties.wires.left = true;
-        properties.action = ACTION_LASER;
-      }
+      properties.wires.left = str.includes("l");
+      properties.wires.right = str.includes("r");
+      properties.wires.top = str.includes("t");
+      properties.wires.bottom = str.includes("b");
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
@@ -171,16 +175,17 @@ const findConnection = (room, rooms) => {
 };
 
 export class Level {
-  constructor(xCount, yCount) {
+  constructor() {
+    this.rooms = parseLevel();
+
     // For level to work with camera.zoomTo()
     this.x = 0;
     this.y = 0;
-    this.width = xCount * (ROOM_OUTER_WIDTH + ROOM_GAP);
-    this.height = yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
+    this.width = this.rooms.xCount * (ROOM_OUTER_WIDTH + ROOM_GAP);
+    this.height = this.rooms.yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
 
-    this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(2, 4);
+    this.currentRoom = this.rooms.getValue(0, 0);
     this.lastAutoMoveTime = performance.now();
 
     this.player = createPlayer();
