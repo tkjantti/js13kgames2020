@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { Sprite, keyPressed, collides } from "kontra";
+import { keyPressed, collides } from "kontra";
 import { imageFromSvg, VectorAnimation } from "./svg.js";
 
 import playerSvg from "./images/player.svg";
@@ -67,266 +67,265 @@ const climbingAnimationFrames = [
 
 let jumpedCount = 0;
 
-export const createPlayer = () => {
-  return Sprite({
-    width: STANDING_WIDTH,
-    height: STANDING_HEIGHT,
-    xVel: 0, // Horizontal velocity
-    yVel: 0, // Vertical velocity, affected by jumping and gravity
-    latestOnPlatformTime: 0,
-    state: STATE_ON_PLATFORM,
-    hstate: HSTATE_FACING_RIGHT, // Horizontal state
-    stopClimbing: false,
-    walkingAnimation: new VectorAnimation(walkingAnimationFrames, 10),
-    climbingAnimation: new VectorAnimation(climbingAnimationFrames, 10),
+export class Player {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.width = STANDING_WIDTH;
+    this.height = STANDING_HEIGHT;
+    this.xVel = 0; // Horizontal velocity
+    this.yVel = 0; // Vertical velocity, affected by jumping and gravity
+    this.latestOnPlatformTime = 0;
+    this.state = STATE_ON_PLATFORM;
+    this.hstate = HSTATE_FACING_RIGHT; // Horizontal state
+    this.stopClimbing = false;
+    this.walkingAnimation = new VectorAnimation(walkingAnimationFrames, 10);
+    this.climbingAnimation = new VectorAnimation(climbingAnimationFrames, 10);
+  }
 
-    render() {
-      // Translate to (x, y) position is done by kontra
+  render(context) {
+    context.save();
 
-      this.context.save();
+    const animation =
+      this.state === STATE_CLIMBING
+        ? this.climbingAnimation
+        : this.walkingAnimation;
+    const image = animation.getImage();
 
-      const animation =
-        this.state === STATE_CLIMBING
-          ? this.climbingAnimation
-          : this.walkingAnimation;
-      const image = animation.getImage();
+    context.translate(this.x, this.y);
 
-      // scale image to player size
-      this.context.scale(
-        STANDING_WIDTH / image.width,
-        STANDING_HEIGHT / image.height
-      );
+    // scale image to player size
+    context.scale(STANDING_WIDTH / image.width, STANDING_HEIGHT / image.height);
 
-      if (
-        this.hstate === HSTATE_WALKING_LEFT ||
-        this.hstate === HSTATE_FACING_LEFT
-      ) {
-        // mirror image
-        this.context.translate(image.width / 2, 0);
-        this.context.scale(-1, 1);
-        this.context.translate(-image.width / 2, 0);
-      }
+    if (
+      this.hstate === HSTATE_WALKING_LEFT ||
+      this.hstate === HSTATE_FACING_LEFT
+    ) {
+      // mirror image
+      context.translate(image.width / 2, 0);
+      context.scale(-1, 1);
+      context.translate(-image.width / 2, 0);
+    }
 
-      this.context.drawImage(image, 0, 0);
+    context.drawImage(image, 0, 0);
 
-      this.context.restore();
-    },
+    context.restore();
+  }
 
-    _isOnGround(room) {
-      const margin = 5;
-      return this.y + this.height > room.bottom - margin;
-    },
+  _isOnGround(room) {
+    const margin = 5;
+    return this.y + this.height > room.bottom - margin;
+  }
 
-    _findLadderCollision(ladders) {
-      let collidingLadder, collidesHigh;
+  _findLadderCollision(ladders) {
+    let collidingLadder, collidesHigh;
 
-      for (let i = 0; i < ladders.length; i++) {
-        let ladder = ladders[i];
+    for (let i = 0; i < ladders.length; i++) {
+      let ladder = ladders[i];
 
-        if (collides(ladder, this)) {
-          collidingLadder = ladder;
+      if (collides(ladder, this)) {
+        collidingLadder = ladder;
 
-          if (ladder.y < this.y && this.y < ladder.y + ladder.height) {
-            // Top of the player sprite is on ladder
-            collidesHigh = true;
-          }
+        if (ladder.y < this.y && this.y < ladder.y + ladder.height) {
+          // Top of the player sprite is on ladder
+          collidesHigh = true;
         }
       }
+    }
 
-      return { ladder: collidingLadder, collidesHigh };
-    },
+    return { ladder: collidingLadder, collidesHigh };
+  }
 
-    // Custom update method to replace Kontra GameObject update
-    // which takes different parameters
-    do_update(room, ladders, platforms) {
-      const now = performance.now();
+  // Custom update method to replace Kontra GameObject update
+  // which takes different parameters
+  do_update(room, ladders, platforms) {
+    const now = performance.now();
 
-      const platform = this._findPlatform(platforms);
-      if (platform) {
-        this.latestOnPlatformTime = now;
-      }
+    const platform = this._findPlatform(platforms);
+    if (platform) {
+      this.latestOnPlatformTime = now;
+    }
 
-      let movement = { dx: 0, dy: 0 };
+    let movement = { dx: 0, dy: 0 };
 
-      let ladderCollision = this._findLadderCollision(ladders);
+    let ladderCollision = this._findLadderCollision(ladders);
 
-      if (!ladderCollision.ladder && this.state === STATE_CLIMBING) {
-        this.state = STATE_FALLING;
+    if (!ladderCollision.ladder && this.state === STATE_CLIMBING) {
+      this.state = STATE_FALLING;
+    } else {
+      movement = this._handleControls(now, room, ladderCollision, platform);
+    }
+
+    let { dx, dy } = movement;
+
+    if (this.xVel !== 0) {
+      dx += this.xVel;
+      if (Math.abs(this.xVel) > 4) {
+        this.xVel *= 0.97; // friction
       } else {
-        movement = this._handleControls(now, room, ladderCollision, platform);
+        this.xVel = 0;
       }
+    }
 
-      let { dx, dy } = movement;
+    if (this.state === STATE_FALLING) {
+      this.yVel += GRAVITY;
+      dy += this.yVel;
+    }
 
-      if (this.xVel !== 0) {
-        dx += this.xVel;
-        if (Math.abs(this.xVel) > 4) {
-          this.xVel *= 0.97; // friction
-        } else {
-          this.xVel = 0;
-        }
+    this._updateVerticalPosition(room, platform, dy);
+    this._updateHorizontalPosition(room, dx);
+  }
+
+  isMovingLeft() {
+    return keyPressed("left") || keyPressed("a");
+  }
+
+  isMovingRight() {
+    return keyPressed("right") || keyPressed("d");
+  }
+
+  isMovingUp() {
+    return keyPressed("up") || keyPressed("w");
+  }
+
+  isMovingDown() {
+    return keyPressed("down") || keyPressed("s");
+  }
+
+  _handleControls(now, room, ladderCollision, platform) {
+    const previousHorizontalState = this.hstate;
+    let dx = 0;
+    let dy = 0;
+
+    if (this.isMovingLeft()) {
+      dx = -PLAYER_SPEED;
+      if (previousHorizontalState !== HSTATE_WALKING_LEFT) {
+        this.hstate = HSTATE_WALKING_LEFT;
       }
-
-      if (this.state === STATE_FALLING) {
-        this.yVel += GRAVITY;
-        dy += this.yVel;
+      this.walkingAnimation.advance();
+    } else if (this.isMovingRight()) {
+      dx = PLAYER_SPEED;
+      if (previousHorizontalState !== HSTATE_WALKING_RIGHT) {
+        this.hstate = HSTATE_WALKING_RIGHT;
       }
+      this.walkingAnimation.advance();
+    } else if (previousHorizontalState > HSTATE_MAX_FACING) {
+      this.hstate =
+        previousHorizontalState === HSTATE_WALKING_LEFT
+          ? HSTATE_FACING_LEFT
+          : HSTATE_FACING_RIGHT;
+    }
 
-      this._updateVerticalPosition(room, platform, dy);
-      this._updateHorizontalPosition(room, dx);
-    },
+    const upPressed = this.isMovingUp();
+    const downPressed = this.isMovingDown();
 
-    isMovingLeft() {
-      return keyPressed("left") || keyPressed("a");
-    },
-
-    isMovingRight() {
-      return keyPressed("right") || keyPressed("d");
-    },
-
-    isMovingUp() {
-      return keyPressed("up") || keyPressed("w");
-    },
-
-    isMovingDown() {
-      return keyPressed("down") || keyPressed("s");
-    },
-
-    _handleControls(now, room, ladderCollision, platform) {
-      const previousHorizontalState = this.hstate;
-      let dx = 0;
-      let dy = 0;
-
-      if (this.isMovingLeft()) {
-        dx = -PLAYER_SPEED;
-        if (previousHorizontalState !== HSTATE_WALKING_LEFT) {
-          this.hstate = HSTATE_WALKING_LEFT;
-        }
-        this.walkingAnimation.advance();
-      } else if (this.isMovingRight()) {
-        dx = PLAYER_SPEED;
-        if (previousHorizontalState !== HSTATE_WALKING_RIGHT) {
-          this.hstate = HSTATE_WALKING_RIGHT;
-        }
-        this.walkingAnimation.advance();
-      } else if (previousHorizontalState > HSTATE_MAX_FACING) {
-        this.hstate =
-          previousHorizontalState === HSTATE_WALKING_LEFT
-            ? HSTATE_FACING_LEFT
-            : HSTATE_FACING_RIGHT;
+    if (!upPressed) {
+      // Up key must be released to jump after reaching the top of
+      // the stairs.
+      this.stopClimbing = false;
+      // hits the floor after a jump
+      if (this._isOnGround(room) && jumpedCount > 0) {
+        playTune("jump");
+        jumpedCount = 0;
       }
+    }
 
-      const upPressed = this.isMovingUp();
-      const downPressed = this.isMovingDown();
+    if (upPressed && this._isOnGround(room)) {
+      jumpedCount++;
+    }
 
-      if (!upPressed) {
-        // Up key must be released to jump after reaching the top of
-        // the stairs.
-        this.stopClimbing = false;
-        // hits the floor after a jump
-        if (this._isOnGround(room) && jumpedCount > 0) {
-          playTune("jump");
-          jumpedCount = 0;
-        }
-      }
-
-      if (upPressed && this._isOnGround(room)) {
-        jumpedCount++;
-      }
-
-      if (upPressed && !this.stopClimbing) {
-        if (
-          this.state === STATE_CLIMBING &&
-          dx === 0 &&
-          platform &&
-          !ladderCollision.collidesHigh
-        ) {
-          // Prevent jumping when reaching the top of the ladder,
-          // unless another ladder continues from there.
-          this.state = STATE_ON_PLATFORM;
-          this.stopClimbing = true;
-        } else if (
-          (platform ||
-            now - this.latestOnPlatformTime < OFF_LEDGE_JUMP_DELAY_MS ||
-            this._isOnGround(room)) &&
-          !(dx === 0 && ladderCollision.collidesHigh)
-        ) {
-          this.yVel = JUMP_VELOCITY;
-          this.state = STATE_FALLING;
-          this.latestOnPlatformTime = 0;
-        } else if (this.yVel >= 0 && ladderCollision.ladder) {
-          // Climb when not jumping
-          this.state = STATE_CLIMBING;
-          this.yVel = 0;
-          dy -= CLIMB_SPEED;
-        }
-
-        if (this.state === STATE_CLIMBING) {
-          this.climbingAnimation.advance();
-        }
-      } else if (downPressed && ladderCollision.ladder) {
+    if (upPressed && !this.stopClimbing) {
+      if (
+        this.state === STATE_CLIMBING &&
+        dx === 0 &&
+        platform &&
+        !ladderCollision.collidesHigh
+      ) {
+        // Prevent jumping when reaching the top of the ladder,
+        // unless another ladder continues from there.
+        this.state = STATE_ON_PLATFORM;
+        this.stopClimbing = true;
+      } else if (
+        (platform ||
+          now - this.latestOnPlatformTime < OFF_LEDGE_JUMP_DELAY_MS ||
+          this._isOnGround(room)) &&
+        !(dx === 0 && ladderCollision.collidesHigh)
+      ) {
+        this.yVel = JUMP_VELOCITY;
+        this.state = STATE_FALLING;
+        this.latestOnPlatformTime = 0;
+      } else if (this.yVel >= 0 && ladderCollision.ladder) {
+        // Climb when not jumping
         this.state = STATE_CLIMBING;
         this.yVel = 0;
-        dy += CLIMB_SPEED;
+        dy -= CLIMB_SPEED;
+      }
+
+      if (this.state === STATE_CLIMBING) {
         this.climbingAnimation.advance();
       }
+    } else if (downPressed && ladderCollision.ladder) {
+      this.state = STATE_CLIMBING;
+      this.yVel = 0;
+      dy += CLIMB_SPEED;
+      this.climbingAnimation.advance();
+    }
 
-      if (this.state === STATE_CLIMBING && (upPressed || downPressed)) {
-        // Stay at the center of the ladder when up/down pressed.
-        this.x = ladderCollision.ladder.x;
-        dx = 0;
-      }
+    if (this.state === STATE_CLIMBING && (upPressed || downPressed)) {
+      // Stay at the center of the ladder when up/down pressed.
+      this.x = ladderCollision.ladder.x;
+      dx = 0;
+    }
 
-      return { dx, dy };
-    },
+    return { dx, dy };
+  }
 
-    _updateHorizontalPosition(room, dx) {
-      if (this.x + this.width + dx > room.right && !room.isAtRightDoor(this)) {
-        this.x = room.right - this.width;
-        this.xVel = 0;
-      } else if (this.x + dx < room.x && !room.isAtLeftDoor(this)) {
-        this.x = room.x;
-        this.xVel = 0;
-      } else if (dx !== 0) {
-        this.x += dx;
-      }
-    },
+  _updateHorizontalPosition(room, dx) {
+    if (this.x + this.width + dx > room.right && !room.isAtRightDoor(this)) {
+      this.x = room.right - this.width;
+      this.xVel = 0;
+    } else if (this.x + dx < room.x && !room.isAtLeftDoor(this)) {
+      this.x = room.x;
+      this.xVel = 0;
+    } else if (dx !== 0) {
+      this.x += dx;
+    }
+  }
 
-    _updateVerticalPosition(room, platform, dy) {
-      if (this.y + this.height + dy > room.bottom) {
-        // hits ground
-        this.y = room.bottom - this.height;
-        this.state = STATE_ON_PLATFORM;
-        this.yVel = 0;
-      } else if (this.fallingToGround) {
-        this.state = STATE_FALLING;
-        this.y += dy;
-      } else if (this.state === STATE_CLIMBING) {
-        this.y += dy;
-      } else if (dy > 0 && platform) {
-        // Margin so that the player does not constantly toggle
-        // between standing and free falling.
-        const margin = 5;
-        this.y = platform.y - this.height + margin;
-        this.yVel = 0;
-        this.state = STATE_ON_PLATFORM;
-      } else {
-        this.state = STATE_FALLING;
-        this.y += dy;
-      }
-    },
+  _updateVerticalPosition(room, platform, dy) {
+    if (this.y + this.height + dy > room.bottom) {
+      // hits ground
+      this.y = room.bottom - this.height;
+      this.state = STATE_ON_PLATFORM;
+      this.yVel = 0;
+    } else if (this.fallingToGround) {
+      this.state = STATE_FALLING;
+      this.y += dy;
+    } else if (this.state === STATE_CLIMBING) {
+      this.y += dy;
+    } else if (dy > 0 && platform) {
+      // Margin so that the player does not constantly toggle
+      // between standing and free falling.
+      const margin = 5;
+      this.y = platform.y - this.height + margin;
+      this.yVel = 0;
+      this.state = STATE_ON_PLATFORM;
+    } else {
+      this.state = STATE_FALLING;
+      this.y += dy;
+    }
+  }
 
-    _findPlatform(platforms) {
-      for (let i = 0; i < platforms.length; i++) {
-        let platform = platforms[i];
-        if (collides(this, platform)) {
-          if (this.y + this.height < platform.y + platform.height) {
-            return platform;
-          }
+  _findPlatform(platforms) {
+    for (let i = 0; i < platforms.length; i++) {
+      let platform = platforms[i];
+      if (collides(this, platform)) {
+        if (this.y + this.height < platform.y + platform.height) {
+          return platform;
         }
       }
-
-      return null;
     }
-  });
-};
+
+    return null;
+  }
+}

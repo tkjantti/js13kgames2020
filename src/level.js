@@ -41,7 +41,7 @@ import {
   ACTION_LASER
 } from "./room.js";
 import { Camera } from "./camera.js";
-import { createPlayer } from "./player.js";
+import { Player } from "./player.js";
 
 const ROOM_GAP = 30;
 
@@ -204,7 +204,7 @@ export class Level {
     this.currentRoom = this.rooms.getValue(0, 1);
     this.lastAutoMoveTime = performance.now();
 
-    this.player = createPlayer();
+    this.player = new Player();
     this.player.x = this.currentRoom.x + 30;
     this.player.y = this.currentRoom.bottom - this.player.height;
 
@@ -462,7 +462,7 @@ export class Level {
     }
 
     if (this.gameOverState === GAME_OK) {
-      this.player.render();
+      this.player.render(context);
     }
 
     context.restore();
