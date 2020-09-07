@@ -51,7 +51,8 @@ const ROOM_MOVE_DELAY_MS = 3000;
  * Level format:
  *
  * # - plain room
- * S - switch
+ * - - switch off
+ * / - switch on
  * H - horizontally moving room
  * L - laser
  * l - wire left
@@ -62,9 +63,9 @@ const ROOM_MOVE_DELAY_MS = 3000;
 
 // prettier-ignore
 const level = [
-  "Sr   lb   #    #",
+  "/r   lb   #    #",
   "Lr   tl   .    #",
-  "Sr   Hl   .    #",
+  "-r   Hl   .    #",
   "#    #    #    #"
 ];
 
@@ -86,7 +87,12 @@ const parseLevel = () => {
 
       properties.isMissing = str.includes(".");
 
-      properties.switch = str.includes("S");
+      properties.switch = str.includes("/")
+        ? true
+        : str.includes("-")
+        ? false
+        : undefined;
+
       if (str.includes("L")) {
         properties.action = ACTION_LASER;
       }
@@ -196,6 +202,20 @@ export class Level {
     this.camera.zoomTo(this.currentRoom.getOuterBoundingBox());
 
     this.gameOverState = GAME_OK;
+
+    // For switches in on state, set linked action:
+    for (let ix = 0; ix < this.rooms.xCount; ix++) {
+      for (let iy = 0; iy < this.rooms.yCount; iy++) {
+        const room = this.rooms.getValue(ix, iy);
+
+        if (room.switch && room.switch.on) {
+          const otherRoom = findConnection(room, this.rooms);
+          if (otherRoom) {
+            otherRoom.toggleAction(true);
+          }
+        }
+      }
+    }
   }
 
   autoMoveRooms() {

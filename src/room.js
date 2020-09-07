@@ -161,13 +161,14 @@ export class Room {
     this.xMoveDirection = 0;
     this.action = properties.action || ACTION_NONE;
 
-    if (properties.switch) {
+    // switch value true/false/undefined
+    if (properties.switch !== undefined) {
       this.switch = {
         x: this.x + SWITCH_RELATIVE_X,
         y: this.y + SWITCH_RELATIVE_Y,
         width: SWITCH_WIDTH,
         height: SWITCH_HEIGHT,
-        on: false,
+        on: properties.switch,
         lastToggleTime: performance.now()
       };
     }
