@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { Sprite } from "kontra";
+import { Sprite, collides, keyPressed } from "kontra";
 
 // No door at missing rooms, can pass
 export const DOOR_NONE = 0;
@@ -45,6 +45,10 @@ export const GAME_OK = 0;
 export const GAME_OVER_LASER = 1;
 export const GAME_OVER_CRUSH = 2;
 export const GAME_OVER_FALL = 3;
+
+export const ACTION_NONE = 0;
+export const ACTION_MOVE = 1;
+export const ACTION_LASER = 2;
 
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
@@ -72,6 +76,14 @@ const WALL_TO_DOOR_HEIGHT = (ROOM_HEIGHT - DOOR_HEIGHT) / 2;
 const DOOR_PASSING_MARGIN = 13;
 
 const LADDER_WIDTH = 10;
+
+const SWITCH_RELATIVE_X = ROOM_WIDTH * 0.7;
+const SWITCH_RELATIVE_Y = ROOM_HEIGHT * 0.75;
+const SWITCH_WIDTH = 20;
+const SWITCH_HEIGHT = 50;
+
+// So that player can the switch even when rendering does not overlap.
+const SWITCH_DRAW_HEIGHT = 30;
 
 const LADDER_PERSPECTIVE_LEFT = 0;
 const LADDER_PERSPECTIVE_BACK = 1;
@@ -132,11 +144,11 @@ const canPassDoor = doorState => {
 };
 
 export class Room {
-  constructor(x, y, ix, iy, isMissing) {
+  constructor(x, y, ix, iy, properties) {
     this.ladders = [];
     this.lasers = [];
     this.setPosition(x, y, ix, iy);
-    this.isMissing = isMissing;
+    this.isMissing = properties.isMissing;
 
     this.doors = {
       left: DOOR_EDGE,
@@ -145,10 +157,26 @@ export class Room {
       bottom: DOOR_EDGE
     };
 
+    this.wires = properties.wires || {};
+    this.xMoveDirection = 0;
+    this.action = properties.action || ACTION_NONE;
+
+    // switch value true/false/undefined
+    if (properties.switch !== undefined) {
+      this.switch = {
+        x: this.x + SWITCH_RELATIVE_X,
+        y: this.y + SWITCH_RELATIVE_Y,
+        width: SWITCH_WIDTH,
+        height: SWITCH_HEIGHT,
+        on: properties.switch,
+        lastToggleTime: performance.now()
+      };
+    }
+
     if (!this.isMissing) {
       this.addLadders();
 
-      if (Math.random() < 0.3) {
+      if (properties.laser) {
         this.lasers.push({
           x: this.x + this.width * 0.75,
           speed: LASER_SPEED
@@ -185,6 +213,28 @@ export class Room {
       const laser = this.lasers[i];
       laser.x += xDiff;
       laser.y += yDiff;
+    }
+
+    if (this.switch) {
+      this.switch.x += xDiff;
+      this.switch.y += yDiff;
+    }
+  }
+
+  toggleAction(isOn) {
+    if (this.action === ACTION_MOVE) {
+      this.xMoveDirection = isOn ? 1 : 0;
+    }
+
+    if (this.action === ACTION_LASER) {
+      if (isOn) {
+        this.lasers.push({
+          x: this.x + this.width * 0.75,
+          speed: LASER_SPEED
+        });
+      } else {
+        this.lasers = [];
+      }
     }
   }
 
@@ -301,7 +351,8 @@ export class Room {
     );
   }
 
-  update(player) {
+  update(player, toggleSwitch) {
+    // Check for laser hits
     for (let i = 0; i < this.lasers.length; i++) {
       const laser = this.lasers[i];
 
@@ -319,6 +370,19 @@ export class Room {
       }
     }
 
+    // Check for switch toggle
+    if (this.switch) {
+      if (
+        collides(player, this.switch) &&
+        keyPressed("space") &&
+        300 < performance.now() - this.switch.lastToggleTime
+      ) {
+        this.switch.on = !this.switch.on;
+        this.switch.lastToggleTime = performance.now();
+        toggleSwitch(this.switch.on);
+      }
+    }
+
     return GAME_OK;
   }
 
@@ -330,15 +394,143 @@ export class Room {
       this.renderRoom(context);
     }
 
+    this.renderWires(context);
+
     this.renderDoors(context);
 
     for (let i = 0; i < this.ladders.length; i++) {
       this.ladders[i].render();
     }
 
+    this.renderConnectionBox(context);
+
     this.renderLasers(context);
 
     context.restore();
+  }
+
+  renderConnectionBox(context) {
+    const wires = this.wires;
+    if (this.switch) {
+      const sw = this.switch;
+
+      context.fillStyle = "gray";
+      context.fillRect(sw.x, sw.y, SWITCH_WIDTH, SWITCH_DRAW_HEIGHT);
+      context.fillStyle = "black";
+      context.fillRect(
+        sw.x + 5,
+        sw.y + 5,
+        SWITCH_WIDTH - 10,
+        SWITCH_DRAW_HEIGHT - 10
+      );
+      context.fillStyle = "brown";
+      const y = sw.on ? sw.y + 3 : sw.y + SWITCH_DRAW_HEIGHT - 8;
+      context.fillRect(sw.x, y, SWITCH_WIDTH, 5);
+    } else if (wires.left || wires.right || wires.top || wires.bottom) {
+      // Box
+      context.fillStyle = "rgb(60,60,60)";
+      context.fillRect(
+        this.x + SWITCH_RELATIVE_X,
+        this.y + SWITCH_RELATIVE_Y,
+        25,
+        25
+      );
+
+      if (this.action === ACTION_MOVE) {
+        context.fillStyle = this.xMoveDirection
+          ? "rgb(0,220,0)"
+          : "rgb(0,50,0)";
+        context.beginPath();
+        context.moveTo(
+          this.x + SWITCH_RELATIVE_X + 11,
+          this.y + SWITCH_RELATIVE_Y + 5
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 11,
+          this.y + SWITCH_RELATIVE_Y + 20
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 3,
+          this.y + SWITCH_RELATIVE_Y + 12.5
+        );
+        context.fill();
+
+        context.beginPath();
+        context.moveTo(
+          this.x + SWITCH_RELATIVE_X + 14,
+          this.y + SWITCH_RELATIVE_Y + 5
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 14,
+          this.y + SWITCH_RELATIVE_Y + 20
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 22,
+          this.y + SWITCH_RELATIVE_Y + 12.5
+        );
+        context.fill();
+      } else if (this.action === ACTION_LASER) {
+        context.strokeStyle = this.lasers.length
+          ? "rgb(0,220,0)"
+          : "rgb(0,50,0)";
+        context.beginPath();
+        context.moveTo(
+          this.x + SWITCH_RELATIVE_X + 13,
+          this.y + SWITCH_RELATIVE_Y + 5
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 13,
+          this.y + SWITCH_RELATIVE_Y + 20
+        );
+        context.stroke();
+      }
+    }
+  }
+
+  renderWires(context) {
+    const wires = this.wires;
+    context.strokeStyle = "rgb(0,0,150)";
+    context.lineWidth = 3;
+
+    if (wires.left) {
+      context.beginPath();
+      context.moveTo(this.x + Z / 2, this.y + SWITCH_RELATIVE_Y + 10);
+      context.lineTo(
+        this.x + SWITCH_RELATIVE_X,
+        this.y + SWITCH_RELATIVE_Y + 10
+      );
+      context.stroke();
+    }
+
+    if (wires.right) {
+      context.beginPath();
+      context.moveTo(
+        this.x + SWITCH_RELATIVE_X,
+        this.y + SWITCH_RELATIVE_Y + 10
+      );
+      context.lineTo(this.right - Z / 2, this.y + SWITCH_RELATIVE_Y + 10);
+      context.stroke();
+    }
+
+    if (wires.top) {
+      context.beginPath();
+      context.moveTo(this.x + SWITCH_RELATIVE_X + 10, this.y + Z / 2);
+      context.lineTo(
+        this.x + SWITCH_RELATIVE_X + 10,
+        this.y + SWITCH_RELATIVE_Y
+      );
+      context.stroke();
+    }
+
+    if (wires.bottom) {
+      context.beginPath();
+      context.moveTo(
+        this.x + SWITCH_RELATIVE_X + 10,
+        this.y + SWITCH_RELATIVE_Y
+      );
+      context.lineTo(this.x + SWITCH_RELATIVE_X + 10, this.bottom - Z / 2);
+      context.stroke();
+    }
   }
 
   renderRoom(context) {

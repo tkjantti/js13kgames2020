@@ -42,7 +42,7 @@ const resize = () => {
 window.addEventListener("resize", resize, false);
 resize();
 
-const level = new Level(8, 8);
+const level = new Level();
 
 // Debug keys
 bindKeys("1", () => {
@@ -63,6 +63,9 @@ bindKeys("i", () => {
 bindKeys("k", () => {
   level.moveRoom(level.currentRoom, 0, 1);
 });
+
+// FOR DEVELOPMENT: uncomment to show whole level at startup
+// level.camera.zoomTo(level);
 
 const renderTexts = (context, ...texts) => {
   context.fillStyle = "white";

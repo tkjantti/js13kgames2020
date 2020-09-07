@@ -36,7 +36,9 @@ import {
   DOOR_OPEN,
   GAME_OK,
   GAME_OVER_CRUSH,
-  GAME_OVER_FALL
+  GAME_OVER_FALL,
+  ACTION_MOVE,
+  ACTION_LASER
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { createPlayer } from "./player.js";
@@ -45,40 +47,161 @@ const ROOM_GAP = 30;
 
 const ROOM_MOVE_DELAY_MS = 3000;
 
-const createRooms = (xCount, yCount) => {
-  const rooms = new Array2D(xCount, yCount);
+/*
+ * Level format:
+ *
+ * # - plain room
+ * . - missing (non-existing) room
+ * - - switch off
+ * / - switch on
+ * H - horizontally moving room
+ * L - laser
+ * l - wire left
+ * r - wire right
+ * t - wire top
+ * b - wire bottom
+ */
 
-  for (let ix = 0; ix < rooms.xCount; ix++) {
-    for (let iy = 0; iy < rooms.yCount; iy++) {
-      const isMissing =
-        ix === 5 ||
-        (ix === 1 && iy === 2) ||
-        (ix === 4 && iy === 4) ||
-        (ix === 3 && iy === 6);
+// prettier-ignore
+const level = [
+  "/r   lb   .    #    .    #    #    #    #    #    #    #    #    #    #",
+  "#    Lt   #    #-b  .    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #Ht  .    .    #    #    #    #    #    #    #    #    #",
+  "#    #    #    #    .    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    .    #    .    #    #    #    #    #    #    #    #",
+  ".    .    #    #    .    .    .    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #"
+];
+
+const parseLevel = () => {
+  const rooms = new Array2D(level[0].split(/ +/).length, level.length);
+
+  for (let iy = 0; iy < level.length; iy++) {
+    const row = level[iy].split(/ +/);
+    for (let ix = 0; ix < row.length; ix++) {
+      const str = row[ix];
+      const properties = {
+        wires: {
+          left: false,
+          right: false,
+          top: false,
+          bottom: false
+        }
+      };
+
+      properties.isMissing = str.includes(".");
+
+      properties.switch = str.includes("/")
+        ? true
+        : str.includes("-")
+        ? false
+        : undefined;
+
+      if (str.includes("L")) {
+        properties.action = ACTION_LASER;
+      }
+      if (str.includes("H")) {
+        properties.action = ACTION_MOVE;
+      }
+
+      properties.wires.left = str.includes("l");
+      properties.wires.right = str.includes("r");
+      properties.wires.top = str.includes("t");
+      properties.wires.bottom = str.includes("b");
 
       const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
       const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
-      rooms.setValue(ix, iy, new Room(x, y, ix, iy, isMissing));
+      rooms.setValue(ix, iy, new Room(x, y, ix, iy, properties));
     }
   }
 
   return rooms;
 };
 
+const findRight = (room, rooms) => {
+  const rightRoom = rooms.getValue(room.ix + 1, room.iy);
+  const topRoom = rooms.getValue(room.ix, room.iy - 1);
+  const bottomRoom = rooms.getValue(room.ix, room.iy + 1);
+
+  const right = room.wires.right && rightRoom && findRight(rightRoom, rooms);
+  const top = room.wires.top && topRoom && findTop(topRoom, rooms);
+  const bottom =
+    room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
+
+  return room.wires.left && (room.action ? room : right || top || bottom);
+};
+
+const findLeft = (room, rooms) => {
+  const leftRoom = rooms.getValue(room.ix - 1, room.iy);
+  const topRoom = rooms.getValue(room.ix, room.iy - 1);
+  const bottomRoom = rooms.getValue(room.ix, room.iy + 1);
+
+  const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
+  const top = room.wires.top && topRoom && findTop(topRoom, rooms);
+  const bottom =
+    room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
+
+  return room.wires.right && (room.action ? room : left || top || bottom);
+};
+
+const findTop = (room, rooms) => {
+  const leftRoom = rooms.getValue(room.ix - 1, room.iy);
+  const rightRoom = rooms.getValue(room.ix + 1, room.iy);
+  const topRoom = rooms.getValue(room.ix, room.iy - 1);
+
+  const right = room.wires.right && rightRoom && findRight(rightRoom, rooms);
+  const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
+  const top = room.wires.top && topRoom && findTop(topRoom, rooms);
+
+  return room.wires.bottom && (room.action ? room : right || left || top);
+};
+
+const findBottom = (room, rooms) => {
+  const leftRoom = rooms.getValue(room.ix - 1, room.iy);
+  const rightRoom = rooms.getValue(room.ix + 1, room.iy);
+  const bottomRoom = rooms.getValue(room.ix, room.iy + 1);
+
+  const right = room.wires.right && rightRoom && findRight(rightRoom, rooms);
+  const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
+  const bottom =
+    room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
+
+  return room.wires.top && (room.action ? room : right || left || bottom);
+};
+
+const findConnection = (room, rooms) => {
+  const leftRoom = rooms.getValue(room.ix - 1, room.iy);
+  const rightRoom = rooms.getValue(room.ix + 1, room.iy);
+  const topRoom = rooms.getValue(room.ix, room.iy - 1);
+  const bottomRoom = rooms.getValue(room.ix, room.iy + 1);
+
+  const right = room.wires.right && rightRoom && findRight(rightRoom, rooms);
+  const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
+  const top = room.wires.top && topRoom && findTop(topRoom, rooms);
+  const bottom =
+    room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
+
+  return right || left || top || bottom;
+};
+
 export class Level {
-  constructor(xCount, yCount) {
+  constructor() {
+    this.rooms = parseLevel();
+
     // For level to work with camera.zoomTo()
     this.x = 0;
     this.y = 0;
-    this.width = xCount * (ROOM_OUTER_WIDTH + ROOM_GAP);
-    this.height = yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
+    this.width = this.rooms.xCount * (ROOM_OUTER_WIDTH + ROOM_GAP);
+    this.height = this.rooms.yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
 
-    this.rooms = createRooms(xCount, yCount);
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(3, 4);
-
-    this.movingRoom = this.rooms.getValue(3, 4);
-    this.movingRoom.xMoveDirection = 1;
+    this.currentRoom = this.rooms.getValue(0, 1);
     this.lastAutoMoveTime = performance.now();
 
     this.player = createPlayer();
@@ -89,27 +212,46 @@ export class Level {
     this.camera.zoomTo(this.currentRoom.getOuterBoundingBox());
 
     this.gameOverState = GAME_OK;
+
+    // For switches in on state, set linked action:
+    for (let ix = 0; ix < this.rooms.xCount; ix++) {
+      for (let iy = 0; iy < this.rooms.yCount; iy++) {
+        const room = this.rooms.getValue(ix, iy);
+
+        if (room && room.switch && room.switch.on) {
+          const otherRoom = findConnection(room, this.rooms);
+          if (otherRoom) {
+            otherRoom.toggleAction(true);
+          }
+        }
+      }
+    }
   }
 
   autoMoveRooms() {
-    if (!this.movingRoom) {
-      return;
-    }
-
-    const room = this.movingRoom;
     const now = performance.now();
 
-    if (now - this.lastAutoMoveTime > ROOM_MOVE_DELAY_MS) {
-      const roomAtNextPosition = this.rooms.getValue(
-        room.ix + room.xMoveDirection,
-        room.iy
-      );
-      if (!(roomAtNextPosition && roomAtNextPosition.isMissing)) {
-        room.xMoveDirection = -room.xMoveDirection;
-      }
+    for (let ix = 0; ix < this.rooms.xCount; ix++) {
+      for (let iy = 0; iy < this.rooms.yCount; iy++) {
+        const room = this.rooms.getValue(ix, iy);
 
-      this.moveRoom(room, room.xMoveDirection, 0);
-      this.lastAutoMoveTime = now;
+        if (!room.xMoveDirection) {
+          continue;
+        }
+
+        if (now - this.lastAutoMoveTime > ROOM_MOVE_DELAY_MS) {
+          const roomAtNextPosition = this.rooms.getValue(
+            room.ix + room.xMoveDirection,
+            room.iy
+          );
+          if (!(roomAtNextPosition && roomAtNextPosition.isMissing)) {
+            room.xMoveDirection = -room.xMoveDirection;
+          }
+
+          this.moveRoom(room, room.xMoveDirection, 0);
+          this.lastAutoMoveTime = now;
+        }
+      }
     }
   }
 
@@ -138,7 +280,7 @@ export class Level {
       this.rooms.setValue(
         oldIx,
         oldIy,
-        new Room(oldX, oldY, oldIx, oldIy, true)
+        new Room(oldX, oldY, oldIx, oldIy, { isMissing: true })
       );
       this.updateDoors();
 
@@ -193,9 +335,20 @@ export class Level {
     }
   }
 
+  toggleSwitch(isOn) {
+    const otherRoom = findConnection(this.currentRoom, this.rooms);
+    if (otherRoom) {
+      otherRoom.toggleAction(isOn);
+    }
+  }
+
   update() {
     this.autoMoveRooms();
-    const gameOverState = this.currentRoom.update(this.player);
+
+    const gameOverState = this.currentRoom.update(
+      this.player,
+      this.toggleSwitch.bind(this)
+    );
     if (gameOverState !== GAME_OK && gameOverState !== this.gameOverState) {
       this.gameOverState = gameOverState;
     }
@@ -204,6 +357,7 @@ export class Level {
       this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
       this.checkRoomChange();
     }
+
     this.camera.update();
   }
 
