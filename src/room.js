@@ -426,13 +426,49 @@ export class Room {
       const y = sw.on ? sw.y + 3 : sw.y + SWITCH_DRAW_HEIGHT - 8;
       context.fillRect(sw.x, y, SWITCH_WIDTH, 5);
     } else if (wires.left || wires.right || wires.top || wires.bottom) {
-      context.fillStyle = "gray";
+      // Box
+      context.fillStyle = "rgb(60,60,60)";
       context.fillRect(
         this.x + SWITCH_RELATIVE_X,
         this.y + SWITCH_RELATIVE_Y,
         25,
         25
       );
+
+      if (this.action === ACTION_MOVE) {
+        context.fillStyle = this.xMoveDirection
+          ? "rgb(0,220,0)"
+          : "rgb(0,50,0)";
+        context.beginPath();
+        context.moveTo(
+          this.x + SWITCH_RELATIVE_X + 11,
+          this.y + SWITCH_RELATIVE_Y + 5
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 11,
+          this.y + SWITCH_RELATIVE_Y + 20
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 3,
+          this.y + SWITCH_RELATIVE_Y + 12.5
+        );
+        context.fill();
+
+        context.beginPath();
+        context.moveTo(
+          this.x + SWITCH_RELATIVE_X + 14,
+          this.y + SWITCH_RELATIVE_Y + 5
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 14,
+          this.y + SWITCH_RELATIVE_Y + 20
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 22,
+          this.y + SWITCH_RELATIVE_Y + 12.5
+        );
+        context.fill();
+      }
     }
   }
 
