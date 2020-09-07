@@ -1,393 +1,104 @@
-/* eslint-disable no-sparse-arrays */
-export const song = {
-  songData: [
-    {
-      i: [
-        0,
-        91,
-        128,
-        0,
-        0,
-        95,
-        128,
-        12,
-        0,
-        0,
-        12,
-        0,
-        72,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        2,
-        255,
-        0,
-        0,
-        32,
-        83,
-        3,
-        130,
-        4
-      ],
-      p: [, , , , 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      c: [
-        {
-          n: [
-            146,
-            ,
-            ,
-            ,
-            139,
-            ,
-            ,
-            ,
-            137,
-            ,
-            ,
-            ,
-            140,
-            ,
-            ,
-            ,
-            139,
-            ,
-            ,
-            ,
-            142,
-            ,
-            ,
-            ,
-            140,
-            ,
-            ,
-            ,
-            144
-          ],
-          f: [
-            6,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            27
-          ]
-        }
-      ]
-    },
-    {
-      i: [
-        2,
-        192,
-        128,
-        0,
-        2,
-        192,
-        140,
-        18,
-        0,
-        0,
-        158,
-        119,
-        158,
-        6,
-        2,
-        0,
-        0,
-        0,
-        0,
-        2,
-        5,
-        0,
-        0,
-        32,
-        0,
-        0,
-        24,
-        8
-      ],
-      p: [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, , 1, 2, 1, 2, 1, 2, 1, 2],
-      c: [
-        { n: [134], f: [] },
-        { n: [127], f: [] }
-      ]
-    },
-    {
-      i: [
-        0,
-        255,
-        117,
-        1,
-        0,
-        255,
-        110,
-        0,
-        1,
-        0,
-        4,
-        6,
-        35,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        2,
-        14,
-        0,
-        1,
-        39,
-        76,
-        5,
-        0,
-        0
-      ],
-      p: [, , , , , , , , , , , , 1, 1, 1, 1, 1, 1, 1, 1],
-      c: [
-        {
-          n: [
-            125,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            125
-          ],
-          f: []
-        }
-      ]
-    },
-    {
-      i: [
-        0,
-        25,
-        128,
-        1,
-        0,
-        29,
-        128,
-        0,
-        1,
-        23,
-        4,
-        7,
-        41,
-        0,
-        0,
-        0,
-        60,
-        4,
-        1,
-        2,
-        255,
-        0,
-        0,
-        32,
-        61,
-        5,
-        32,
-        6
-      ],
-      p: [, , , , , , , , , , , , 1, 1, 1, 1, 1, 1, 1, 1],
-      c: [
-        {
-          n: [
-            ,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            125,
-            ,
-            ,
-            ,
-            ,
-            ,
-            125,
-            ,
-            125
-          ],
-          f: [
-            10,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            23
-          ]
-        }
-      ]
-    },
-    {
-      i: [
-        3,
-        255,
-        128,
-        0,
-        0,
-        255,
-        140,
-        0,
-        0,
-        127,
-        2,
-        2,
-        23,
-        0,
-        0,
-        0,
-        96,
-        3,
-        1,
-        3,
-        94,
-        79,
-        0,
-        32,
-        84,
-        2,
-        12,
-        4
-      ],
-      p: [, , , , , , , , , , , , 1, 1, 1, 1, 1, 1, 1, 1],
-      c: [
-        {
-          n: [
-            ,
-            ,
-            123,
-            ,
-            ,
-            ,
-            123,
-            ,
-            ,
-            ,
-            123,
-            ,
-            ,
-            ,
-            123,
-            ,
-            ,
-            ,
-            123,
-            ,
-            ,
-            ,
-            123,
-            ,
-            ,
-            ,
-            123,
-            ,
-            ,
-            ,
-            123,
-            123
-          ],
-          f: []
-        }
-      ]
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 Tero Jäntti, Sami H
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+import { song } from "./data.js";
+import CPlayer from "./musicplayer.js";
+
+const mainTune = document.createElement("audio");
+const hitfx = document.createElement("audio");
+const endTune = document.createElement("audio");
+
+export const initMusicPlayer = (audioTrack, tune, isLooped) => {
+  return new Promise(resolve => {
+    var songplayer = new CPlayer();
+    // Initialize music generation (player).
+    songplayer.init(tune);
+    // Generate music...
+    var done = false;
+    setInterval(function() {
+      if (done) {
+        return;
+      }
+      done = songplayer.generate() >= 1;
+      if (done) {
+        // Put the generated song in an Audio element.
+        var wave = songplayer.createWave();
+        audioTrack.src = URL.createObjectURL(
+          new Blob([wave], { type: "audio/wav" })
+        );
+        audioTrack.loop = isLooped;
+        resolve();
+      }
+    }, 0);
+  });
+};
+
+export const initialize = () => {
+  return Promise.all([
+    initMusicPlayer(mainTune, song, true)
+    // initMusicPlayer(hitfx, hitSfx, false),
+    // initMusicPlayer(endTune, endSong, false)
+  ]);
+};
+
+export const playTune = tune => {
+  switch (tune) {
+    case "main": {
+      mainTune.currentTime = 0;
+      mainTune.volume = 0.9;
+      var promise = mainTune.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => {
+            // Autoplay started!
+          })
+          .catch(error => {
+            console.log("No for autoplay!" + error);
+            // Autoplay was prevented.
+          });
+      }
+      break;
     }
-  ],
-  rowLen: 5513,
-  patternLen: 32,
-  endPattern: 19,
-  numChannels: 5
+    case "end": {
+      endTune.play();
+      var currentVolume = mainTune.volume;
+      var fadeOutInterval = setInterval(function() {
+        currentVolume = (parseFloat(currentVolume) - 0.2).toFixed(1);
+        if (currentVolume >= 0.0) {
+          mainTune.volume = currentVolume;
+        } else {
+          mainTune.pause();
+          clearInterval(fadeOutInterval);
+        }
+      }, 100);
+      break;
+    }
+    case "hit": {
+      hitfx.currentTime = 0;
+      hitfx.play();
+      break;
+    }
+  }
 };
