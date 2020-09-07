@@ -27,6 +27,9 @@
 import { init, initKeys, bindKeys, GameLoop } from "kontra";
 import { Level } from "./level";
 import { GAME_OVER_LASER, GAME_OVER_CRUSH, GAME_OVER_FALL } from "./room";
+import { initialize, playTune } from "./sfx/music.js";
+
+let assetsLoaded = false;
 
 const { canvas, context } = init();
 initKeys();
@@ -74,26 +77,104 @@ const renderTexts = (context, ...texts) => {
   }
 };
 
-const loop = GameLoop({
-  update: function() {
-    level.update();
-  },
+const createGameLoop = () => {
+  return GameLoop({
+    update: function() {
+      level.update();
+    },
 
-  render: function() {
-    level.render(canvas, context);
+    render: function() {
+      level.render(canvas, context);
 
-    switch (level.gameOverState) {
-      case GAME_OVER_LASER:
-        renderTexts(context, "You were fried!", "GAME OVER");
-        break;
-      case GAME_OVER_CRUSH:
-        renderTexts(context, "Something heavy crushed you!", "GAME OVER");
-        break;
-      case GAME_OVER_FALL:
-        renderTexts(context, "You fall into the abyss!", "GAME OVER");
-        break;
+      switch (level.gameOverState) {
+        case GAME_OVER_LASER:
+          renderTexts(context, "You were fried!", "GAME OVER");
+          break;
+        case GAME_OVER_CRUSH:
+          renderTexts(context, "Something heavy crushed you!", "GAME OVER");
+          break;
+        case GAME_OVER_FALL:
+          renderTexts(context, "You fall into the abyss!", "GAME OVER");
+          break;
+      }
     }
+  });
+};
+
+const startLevel = number => {
+  gameLoop.stop();
+
+  if (number === 0) {
+    gameLoop = createStartScreenLoop();
+  } else {
+    gameLoop = createGameLoop();
+    playTune("main");
+  }
+
+  gameLoop.start();
+};
+
+const createStartScreenLoop = () => {
+  return GameLoop({
+    update() {},
+
+    render() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      let gradient = context.createLinearGradient(
+        0,
+        canvas.height / 2,
+        0,
+        canvas.height
+      );
+      gradient.addColorStop(0, "rgb(0,0,25");
+      gradient.addColorStop(1, "rgb(100,100,255)");
+
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (!assetsLoaded) {
+        renderStartScreen("Loading...");
+      } else {
+        renderStartScreen("Press enter to start");
+      }
+    }
+  });
+};
+
+let gameLoop = createStartScreenLoop();
+
+const renderStartScreen = lastText => {
+  renderTexts(
+    context,
+    "404?",
+    "",
+    "Controls:",
+    "Arrors or WASD",
+    "",
+    "(c) 2020 by Tero J & Sami H",
+    "",
+    lastText
+  );
+};
+
+bindKeys(["enter"], () => {
+  if (
+    (level.gameOverState === GAME_OVER_LASER ||
+      level.gameOverState === GAME_OVER_CRUSH ||
+      level.gameOverState === GAME_OVER_FALL) &&
+    assetsLoaded
+  ) {
+    level.gameOverState = 0;
+    level.player;
+    playTune("main");
+    startLevel(0);
+  } else {
+    startLevel(1);
   }
 });
 
-loop.start();
+initialize().then(() => {
+  assetsLoaded = true;
+});
+
+startLevel(0);
