@@ -51,6 +51,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
  * Level format:
  *
  * # - plain room
+ * . - missing (non-existing) room
  * - - switch off
  * / - switch on
  * H - horizontally moving room
@@ -63,11 +64,19 @@ const ROOM_MOVE_DELAY_MS = 3000;
 
 // prettier-ignore
 const level = [
-  "/r   lb   #    #    #",
-  "Lr   tl   .    #    #",
-  "-r   Hl   .    #    #",
-  "#    #    #    #    #",
-  "#    #    #    #    #"
+  "/r   lb   .    #    .    #    #    #    #    #    #    #    #    #    #",
+  "#    Lt   #    #-b  .    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #Ht  .    .    #    #    #    #    #    #    #    #    #",
+  "#    #    #    #    .    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    .    #    .    #    #    #    #    #    #    #    #",
+  ".    .    #    #    .    .    .    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    #    #    #    #    #    #    #    #    #    #    #    #"
 ];
 
 const parseLevel = () => {
@@ -192,7 +201,7 @@ export class Level {
     this.height = this.rooms.yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
 
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(0, 0);
+    this.currentRoom = this.rooms.getValue(0, 1);
     this.lastAutoMoveTime = performance.now();
 
     this.player = createPlayer();
@@ -209,7 +218,7 @@ export class Level {
       for (let iy = 0; iy < this.rooms.yCount; iy++) {
         const room = this.rooms.getValue(ix, iy);
 
-        if (room.switch && room.switch.on) {
+        if (room && room.switch && room.switch.on) {
           const otherRoom = findConnection(room, this.rooms);
           if (otherRoom) {
             otherRoom.toggleAction(true);
