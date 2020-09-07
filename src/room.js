@@ -468,6 +468,20 @@ export class Room {
           this.y + SWITCH_RELATIVE_Y + 12.5
         );
         context.fill();
+      } else if (this.action === ACTION_LASER) {
+        context.strokeStyle = this.lasers.length
+          ? "rgb(0,220,0)"
+          : "rgb(0,50,0)";
+        context.beginPath();
+        context.moveTo(
+          this.x + SWITCH_RELATIVE_X + 13,
+          this.y + SWITCH_RELATIVE_Y + 5
+        );
+        context.lineTo(
+          this.x + SWITCH_RELATIVE_X + 13,
+          this.y + SWITCH_RELATIVE_Y + 20
+        );
+        context.stroke();
       }
     }
   }
