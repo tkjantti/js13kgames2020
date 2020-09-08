@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { collides, keyPressed } from "kontra";
+import { keyPressed, collides } from "./kontra";
 
 // No door at missing rooms, can pass
 export const DOOR_NONE = 0;

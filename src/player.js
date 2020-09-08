@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { keyPressed, collides } from "kontra";
+import { keyPressed, collides } from "./kontra";
 import { imageFromSvg, VectorAnimation } from "./svg.js";
 
 import playerSvg from "./images/player.svg";
