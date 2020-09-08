@@ -30,6 +30,7 @@ import { GAME_OVER_LASER, GAME_OVER_CRUSH, GAME_OVER_FALL } from "./room";
 import { initialize, playTune } from "./sfx/music.js";
 
 let assetsLoaded = false;
+let gameEnded = false;
 
 const { canvas, context } = init();
 initKeys();
@@ -88,6 +89,11 @@ const createGameLoop = () => {
 
     render: function() {
       level.render(canvas, context);
+
+      if (!gameEnded && level.gameOverState) {
+        gameEnded = true;
+        playTune("end");
+      }
 
       switch (level.gameOverState) {
         case GAME_OVER_LASER:
@@ -174,6 +180,7 @@ bindKeys(["enter"], () => {
   } else {
     startLevel(1);
   }
+  gameEnded = false;
 });
 
 initialize().then(() => {

@@ -25,6 +25,132 @@
  */
 
 /* eslint-disable no-sparse-arrays */
+export const endSfx = {
+  songData: [
+    {
+      i: [
+        0,
+        255,
+        106,
+        1,
+        0,
+        255,
+        106,
+        0,
+        1,
+        0,
+        5,
+        7,
+        164,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        255,
+        0,
+        2,
+        32,
+        83,
+        5,
+        25,
+        1
+      ],
+      p: [1],
+      c: [{ n: [147], f: [] }]
+    }
+  ],
+  rowLen: 5513,
+  patternLen: 20,
+  endPattern: 0,
+  numChannels: 1
+};
+
+export const jumpSfx = {
+  songData: [
+    {
+      i: [
+        0,
+        192,
+        104,
+        1,
+        0,
+        80,
+        99,
+        0,
+        0,
+        0,
+        4,
+        0,
+        66,
+        0,
+        0,
+        3,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        2,
+        32,
+        0,
+        12,
+        60,
+        8
+      ],
+      p: [1],
+      c: [
+        {
+          n: [137],
+          f: [
+            27,
+            28,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            60,
+            8
+          ]
+        }
+      ]
+    }
+  ],
+  rowLen: 5513,
+  patternLen: 8,
+  endPattern: 0,
+  numChannels: 1
+};
+
 export const song = {
   songData: [
     {
