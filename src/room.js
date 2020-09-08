@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { Sprite, collides, keyPressed } from "kontra";
+import { collides, keyPressed } from "kontra";
 
 // No door at missing rooms, can pass
 export const DOOR_NONE = 0;
@@ -94,13 +94,13 @@ const LASER_SPEED = 0.5;
 // drawHeight parameter when ladder needs to be drawn shorter
 // than it actually is.
 const createLadder = (height, perspective, drawHeight) => {
-  return Sprite({
+  return {
     width: LADDER_WIDTH,
     height: height,
     drawHeight: drawHeight || height,
     perspective: perspective,
 
-    render() {
+    render(context) {
       const stepGap = 5;
       const stepCount = this.drawHeight / stepGap;
       const color = "rgb(60,30,30)";
@@ -121,20 +121,21 @@ const createLadder = (height, perspective, drawHeight) => {
         rodX = (2 * width) / 3;
       }
 
-      let cx = this.context;
-      cx.save();
+      context.save();
 
-      cx.fillStyle = color2;
-      cx.fillRect(rodX, y, width / 3, this.drawHeight);
+      context.translate(this.x, this.y);
+
+      context.fillStyle = color2;
+      context.fillRect(rodX, y, width / 3, this.drawHeight);
 
       for (let i = 0; i < stepCount; i++) {
-        cx.fillStyle = color;
-        cx.fillRect(0, y + i * stepGap + stepGap / 2, width, stepGap / 2);
+        context.fillStyle = color;
+        context.fillRect(0, y + i * stepGap + stepGap / 2, width, stepGap / 2);
       }
 
-      cx.restore();
+      context.restore();
     }
-  });
+  };
 };
 
 const canPassDoor = doorState => {
@@ -399,7 +400,7 @@ export class Room {
     this.renderDoors(context);
 
     for (let i = 0; i < this.ladders.length; i++) {
-      this.ladders[i].render();
+      this.ladders[i].render(context);
     }
 
     this.renderConnectionBox(context);
