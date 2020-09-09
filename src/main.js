@@ -43,7 +43,7 @@ const resize = () => {
 window.addEventListener("resize", resize, false);
 resize();
 
-const level = new Level();
+let level;
 
 // Debug keys
 bindKeys("1", () => {
@@ -168,11 +168,13 @@ const renderStartScreen = lastText => {
 
 bindKeys(["enter"], () => {
   if (
-    (level.gameOverState === GAME_OVER_LASER ||
+    (!level ||
+      level.gameOverState === GAME_OVER_LASER ||
       level.gameOverState === GAME_OVER_CRUSH ||
       level.gameOverState === GAME_OVER_FALL) &&
     assetsLoaded
   ) {
+    level = new Level();
     level.gameOverState = 0;
     level.player;
     playTune("main");
