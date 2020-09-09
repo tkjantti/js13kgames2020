@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { getCanvas } from "kontra";
+import { getCanvas } from "./kontra";
 
 const PAN_SPEED = 15;
 

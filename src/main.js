@@ -24,7 +24,7 @@
  * SOFTWARE.
  */
 
-import { init, initKeys, bindKeys, GameLoop } from "kontra";
+import { init, initKeys, bindKeys, GameLoop } from "./kontra";
 import { Level } from "./level";
 import { GAME_OVER_LASER, GAME_OVER_CRUSH, GAME_OVER_FALL } from "./room";
 import { initialize, playTune } from "./sfx/music.js";
