@@ -23,12 +23,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { song } from "./data.js";
+import { song, jumpSfx, endSfx } from "./data.js";
 import CPlayer from "./musicplayer.js";
 
 const mainTune = document.createElement("audio");
-const hitfx = document.createElement("audio");
-const endTune = document.createElement("audio");
+const jumpfx = document.createElement("audio");
+const endfx = document.createElement("audio");
 
 export const initMusicPlayer = (audioTrack, tune, isLooped) => {
   return new Promise(resolve => {
@@ -57,9 +57,9 @@ export const initMusicPlayer = (audioTrack, tune, isLooped) => {
 
 export const initialize = () => {
   return Promise.all([
-    initMusicPlayer(mainTune, song, true)
-    // initMusicPlayer(hitfx, hitSfx, false),
-    // initMusicPlayer(endTune, endSong, false)
+    initMusicPlayer(mainTune, song, true),
+    initMusicPlayer(jumpfx, jumpSfx, false),
+    initMusicPlayer(endfx, endSfx, false)
   ]);
 };
 
@@ -82,7 +82,8 @@ export const playTune = tune => {
       break;
     }
     case "end": {
-      endTune.play();
+      endfx.loop = false;
+      endfx.play();
       var currentVolume = mainTune.volume;
       var fadeOutInterval = setInterval(function() {
         currentVolume = (parseFloat(currentVolume) - 0.2).toFixed(1);
@@ -95,9 +96,9 @@ export const playTune = tune => {
       }, 100);
       break;
     }
-    case "hit": {
-      hitfx.currentTime = 0;
-      hitfx.play();
+    case "jump": {
+      jumpfx.currentTime = 0;
+      jumpfx.play();
       break;
     }
   }

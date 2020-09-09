@@ -31,6 +31,7 @@ import playerSvg from "./images/player.svg";
 import playerLeftfootSvg from "./images/player-leftfoot.svg";
 import climb1Svg from "./images/player-vertical.svg";
 import climb2Svg from "./images/player-vertical-leftfoot.svg";
+import { playTune } from "./sfx/music.js";
 
 const GRAVITY = 1;
 
@@ -63,6 +64,8 @@ const climbingAnimationFrames = [
   imageFromSvg(climb1Svg),
   imageFromSvg(climb2Svg)
 ];
+
+let jumpedCount = 0;
 
 export const createPlayer = () => {
   return Sprite({
@@ -220,6 +223,15 @@ export const createPlayer = () => {
         // Up key must be released to jump after reaching the top of
         // the stairs.
         this.stopClimbing = false;
+        // hits the floor after a jump
+        if (this._isOnGround(room) && jumpedCount > 0) {
+          playTune("jump");
+          jumpedCount = 0;
+        }
+      }
+
+      if (upPressed && this._isOnGround(room)) {
+        jumpedCount++;
       }
 
       if (upPressed && !this.stopClimbing) {
