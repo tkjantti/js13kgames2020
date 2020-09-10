@@ -38,7 +38,8 @@ import {
   GAME_OVER_CRUSH,
   GAME_OVER_FALL,
   ACTION_MOVE,
-  ACTION_LASER
+  ACTION_LASER,
+  ACTION_LASER_HORIZONTAL
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { Player } from "./player.js";
@@ -55,6 +56,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
  * * - switch off
  * ^ - switch on
  * H - horizontally moving room
+ * - - horizontal laser
  * | - vertical laser
  * l - wire left
  * r - wire right
@@ -105,6 +107,9 @@ const parseLevel = () => {
 
       if (str.includes("|")) {
         properties.action = ACTION_LASER;
+      }
+      if (str.includes("-")) {
+        properties.action = ACTION_LASER_HORIZONTAL;
       }
       if (str.includes("H")) {
         properties.action = ACTION_MOVE;

@@ -49,6 +49,7 @@ export const GAME_OVER_FALL = 3;
 export const ACTION_NONE = 0;
 export const ACTION_MOVE = 1;
 export const ACTION_LASER = 2;
+export const ACTION_LASER_HORIZONTAL = 3;
 
 // The outmost width and height of the room that is drawn when
 // applying the 3D perspective.
@@ -223,19 +224,31 @@ export class Room {
   }
 
   toggleAction(isOn) {
-    if (this.action === ACTION_MOVE) {
-      this.xMoveDirection = isOn ? 1 : 0;
-    }
-
-    if (this.action === ACTION_LASER) {
-      if (isOn) {
-        this.lasers.push({
-          x: this.x + this.width * 0.75,
-          speed: LASER_SPEED
-        });
-      } else {
-        this.lasers = [];
+    switch (this.action) {
+      case ACTION_MOVE: {
+        this.xMoveDirection = isOn ? 1 : 0;
+        break;
       }
+      case ACTION_LASER: {
+        if (isOn) {
+          this.lasers.push({
+            x: this.x + this.width * 0.75,
+            speed: LASER_SPEED
+          });
+        } else {
+          this.lasers = [];
+        }
+
+        break;
+      }
+      case ACTION_LASER_HORIZONTAL:
+        if (isOn) {
+          this.lasers.push({
+            y: this.y + this.height * 0.25,
+            speed: -LASER_SPEED
+          });
+        }
+        break;
     }
   }
 
@@ -245,20 +258,30 @@ export class Room {
   resetTraps(player) {
     for (let i = 0; i < this.lasers.length; i++) {
       const laser = this.lasers[i];
-      if (
-        this.y + 0.25 * this.height < player.y &&
-        player.y < this.y + 0.75 * this.height
-      ) {
-        // Player entering from left/right doors
-        laser.x = this.x + 0.25 * this.width;
-        laser.speed = LASER_SPEED;
-      } else {
-        // Player entering from top/bottom doors
-        if (Math.random() < 0.5) {
-          laser.x = this.x + 0.75 * this.width;
+
+      if (laser.x != null) {
+        if (
+          this.y + 0.25 * this.height < player.y &&
+          player.y < this.y + 0.75 * this.height
+        ) {
+          // Player entering from left/right doors
+          laser.x = this.x + 0.25 * this.width;
           laser.speed = LASER_SPEED;
         } else {
-          laser.x = this.x + 0.25 * this.width;
+          // Player entering from top/bottom doors
+          if (Math.random() < 0.5) {
+            laser.x = this.x + 0.75 * this.width;
+            laser.speed = LASER_SPEED;
+          } else {
+            laser.x = this.x + 0.25 * this.width;
+            laser.speed = -LASER_SPEED;
+          }
+        }
+      } else {
+        laser.y = this.y + this.height * 0.4;
+        if (player.y < this.y + 0.25 * this.height) {
+          laser.speed = LASER_SPEED;
+        } else {
           laser.speed = -LASER_SPEED;
         }
       }
@@ -353,21 +376,43 @@ export class Room {
   }
 
   update(player, toggleSwitch) {
+    const HIT_MARGIN_HORIZONTAL = 3;
+    const HIT_MARGIN_VERTICAL = 5;
+
     // Check for laser hits
     for (let i = 0; i < this.lasers.length; i++) {
       const laser = this.lasers[i];
 
-      laser.x += laser.speed;
+      if (laser.x != null) {
+        laser.x += laser.speed;
 
-      if (laser.x < this.x) {
-        laser.speed = LASER_SPEED;
-      }
-      if (this.right < laser.x) {
-        laser.speed = -LASER_SPEED;
-      }
+        if (laser.x < this.x) {
+          laser.speed = LASER_SPEED;
+        } else if (this.right < laser.x) {
+          laser.speed = -LASER_SPEED;
+        }
 
-      if (player.x < laser.x && laser.x < player.x + player.width) {
-        return GAME_OVER_LASER;
+        if (
+          player.x + HIT_MARGIN_HORIZONTAL < laser.x &&
+          laser.x < player.x + player.width - HIT_MARGIN_HORIZONTAL
+        ) {
+          return GAME_OVER_LASER;
+        }
+      } else {
+        laser.y += laser.speed;
+
+        if (laser.y < this.y) {
+          laser.speed = LASER_SPEED;
+        } else if (this.bottom < laser.y) {
+          laser.speed = -LASER_SPEED;
+        }
+
+        if (
+          player.y + HIT_MARGIN_VERTICAL < laser.y &&
+          laser.y < player.y + player.height - HIT_MARGIN_VERTICAL
+        ) {
+          return GAME_OVER_LASER;
+        }
       }
     }
 
@@ -470,7 +515,10 @@ export class Room {
           this.y + SWITCH_RELATIVE_Y + 12.5
         );
         context.fill();
-      } else if (this.action === ACTION_LASER) {
+      } else if (
+        this.action === ACTION_LASER ||
+        this.action === ACTION_LASER_HORIZONTAL
+      ) {
         context.strokeStyle = this.lasers.length
           ? "rgb(0,220,0)"
           : "rgb(0,50,0)";
@@ -817,8 +865,13 @@ export class Room {
       context.strokeStyle = "red";
       context.lineWidth = Math.random() < 0.1 ? 2 : 1;
       context.beginPath();
-      context.moveTo(laser.x, this.y);
-      context.lineTo(laser.x, this.y + this.height);
+      if (laser.x != null) {
+        context.moveTo(laser.x, this.y);
+        context.lineTo(laser.x, this.bottom);
+      } else {
+        context.moveTo(this.x, laser.y);
+        context.lineTo(this.right, laser.y);
+      }
       context.stroke();
     }
   }
