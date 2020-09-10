@@ -27,7 +27,7 @@
 import { init, initKeys, bindKeys, GameLoop } from "./kontra";
 import { Level } from "./level";
 import { GAME_OVER_LASER, GAME_OVER_CRUSH, GAME_OVER_FALL } from "./room";
-import { initialize, playTune } from "./sfx/music.js";
+import { initialize, playTune, stopTune } from "./sfx/music.js";
 
 let assetsLoaded = false;
 let gameEnded = false;
@@ -174,11 +174,11 @@ bindKeys(["enter"], () => {
       level.gameOverState === GAME_OVER_FALL) &&
     assetsLoaded
   ) {
+    stopTune("end");
     level.gameOverState = 0;
-    level.player;
-    playTune("main");
     startLevel(0);
   } else {
+    playTune("main");
     level = new Level();
     startLevel(1);
   }

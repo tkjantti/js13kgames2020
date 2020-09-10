@@ -86,6 +86,8 @@ export const playTune = tune => {
     }
     case "end": {
       endfx.play();
+      endTune.currentTime = 0;
+      endTune.volume = 0.9;
       endTune.play();
       var currentVolume = mainTune.volume;
       var fadeOutInterval = setInterval(function() {
@@ -102,6 +104,39 @@ export const playTune = tune => {
     case "jump": {
       jumpfx.currentTime = 0;
       jumpfx.play();
+      break;
+    }
+  }
+};
+
+export const stopTune = tune => {
+  switch (tune) {
+    case "main": {
+      var currentVolume = mainTune.volume;
+      var fadeOutInterval = setInterval(function() {
+        currentVolume = (parseFloat(currentVolume) - 0.2).toFixed(1);
+        if (currentVolume >= 0.0) {
+          mainTune.volume = currentVolume;
+        } else {
+          mainTune.pause();
+          clearInterval(fadeOutInterval);
+        }
+      }, 100);
+      break;
+    }
+    case "end": {
+      var currentEndVolume = endTune.volume;
+      if (currentEndVolume > 0) {
+        var fadeOutEndInterval = setInterval(function() {
+          currentEndVolume = (parseFloat(currentEndVolume) - 0.2).toFixed(1);
+          if (currentEndVolume >= 0.0) {
+            endTune.volume = currentEndVolume;
+          } else {
+            endTune.pause();
+            clearInterval(fadeOutEndInterval);
+          }
+        }, 100);
+      }
       break;
     }
   }
