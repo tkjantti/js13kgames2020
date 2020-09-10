@@ -23,12 +23,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { song, jumpSfx, endSfx } from "./data.js";
+import { song, jumpSfx, endSfx, endSong } from "./data.js";
 import CPlayer from "./musicplayer.js";
 
 const mainTune = document.createElement("audio");
 const jumpfx = document.createElement("audio");
 const endfx = document.createElement("audio");
+const endTune = document.createElement("audio");
 
 export const initMusicPlayer = (audioTrack, tune, isLooped) => {
   return new Promise(resolve => {
@@ -59,13 +60,15 @@ export const initialize = () => {
   return Promise.all([
     initMusicPlayer(mainTune, song, true),
     initMusicPlayer(jumpfx, jumpSfx, false),
-    initMusicPlayer(endfx, endSfx, false)
+    initMusicPlayer(endfx, endSfx, false),
+    initMusicPlayer(endTune, endSong, true)
   ]);
 };
 
 export const playTune = tune => {
   switch (tune) {
     case "main": {
+      if (endTune) endTune.pause();
       mainTune.currentTime = 0;
       mainTune.volume = 0.9;
       var promise = mainTune.play();
@@ -82,8 +85,8 @@ export const playTune = tune => {
       break;
     }
     case "end": {
-      endfx.loop = false;
       endfx.play();
+      endTune.play();
       var currentVolume = mainTune.volume;
       var fadeOutInterval = setInterval(function() {
         currentVolume = (parseFloat(currentVolume) - 0.2).toFixed(1);

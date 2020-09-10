@@ -168,18 +168,18 @@ const renderStartScreen = lastText => {
 
 bindKeys(["enter"], () => {
   if (
-    (!level ||
-      level.gameOverState === GAME_OVER_LASER ||
+    level &&
+    (level.gameOverState === GAME_OVER_LASER ||
       level.gameOverState === GAME_OVER_CRUSH ||
       level.gameOverState === GAME_OVER_FALL) &&
     assetsLoaded
   ) {
-    level = new Level();
     level.gameOverState = 0;
     level.player;
     playTune("main");
     startLevel(0);
   } else {
+    level = new Level();
     startLevel(1);
   }
   gameEnded = false;

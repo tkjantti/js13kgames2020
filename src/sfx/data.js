@@ -25,6 +25,217 @@
  */
 
 /* eslint-disable no-sparse-arrays */
+
+export const endSong = {
+  songData: [
+    {
+      i: [
+        2, // OSC1_WAVEFORM
+        59, // OSC1_VOL
+        116, // OSC1_SEMI
+        0, // OSC1_XENV
+        2, // OSC2_WAVEFORM
+        59, // OSC2_VOL
+        128, // OSC2_SEMI
+        4, // OSC2_DETUNE
+        0, // OSC2_XENV
+        0, // NOISE_VOL
+        47, // ENV_ATTACK
+        48, // ENV_SUSTAIN
+        255, // ENV_RELEASE
+        156, // ARP_CHORD
+        1, // ARP_SPEED
+        0, // LFO_WAVEFORM
+        139, // LFO_AMT
+        4, // LFO_FREQ
+        1, // LFO_FX_FREQ
+        3, // FX_FILTER
+        64, // FX_FREQ
+        160, // FX_RESONANCE
+        3, // FX_DIST
+        32, // FX_DRIVE
+        147, // FX_PAN_AMT
+        4, // FX_PAN_FREQ
+        121, // FX_DELAY_AMT
+        5 // FX_DELAY_TIME
+      ],
+      p: [25, 2],
+      c: [
+        {
+          n: [
+            146,
+            ,
+            ,
+            ,
+            139,
+            ,
+            ,
+            ,
+            137,
+            ,
+            ,
+            ,
+            140,
+            ,
+            ,
+            ,
+            139,
+            ,
+            ,
+            ,
+            142,
+            ,
+            ,
+            ,
+            140,
+            ,
+            ,
+            ,
+            144
+          ],
+          f: [
+            6,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            27
+          ]
+        },
+        {
+          n: [
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            139
+          ],
+          f: []
+        },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        { n: [], f: [] },
+        {
+          n: [146],
+          f: [
+            13,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            238
+          ]
+        }
+      ]
+    }
+  ],
+  rowLen: 5513,
+  patternLen: 32,
+  endPattern: 1,
+  numChannels: 1
+};
+
 export const endSfx = {
   songData: [
     {
