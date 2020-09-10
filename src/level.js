@@ -52,10 +52,10 @@ const ROOM_MOVE_DELAY_MS = 3000;
  *
  * # - plain room
  * . - missing (non-existing) room
- * - - switch off
- * / - switch on
+ * * - switch off
+ * ^ - switch on
  * H - horizontally moving room
- * L - laser
+ * | - vertical laser
  * l - wire left
  * r - wire right
  * t - wire top
@@ -64,9 +64,9 @@ const ROOM_MOVE_DELAY_MS = 3000;
 
 // prettier-ignore
 const level = [
-  "/r   lb   .    #    .    #    #    #    #    #    #    #    #    #    #",
-  "#    Lt   #    #-b  .    #    #    #    #    #    #    #    #    #    #",
-  ".    .    #    #Ht  .    .    #    #    #    #    #    #    #    #    #",
+  "^r   lb   .    #    .    #    #    #    #    #    #    #    #    #    #",
+  "#    |t   #    *b   .    #    #    #    #    #    #    #    #    #    #",
+  ".    .    #    Ht   .    .    #    #    #    #    #    #    #    #    #",
   "#    #    #    #    .    #    #    #    #    #    #    #    #    #    #",
   ".    .    #    #    .    #    .    #    #    #    #    #    #    #    #",
   ".    .    #    #    .    .    .    #    #    #    #    #    #    #    #",
@@ -97,13 +97,13 @@ const parseLevel = () => {
 
       properties.isMissing = str.includes(".");
 
-      properties.switch = str.includes("/")
+      properties.switch = str.includes("^")
         ? true
-        : str.includes("-")
+        : str.includes("*")
         ? false
         : undefined;
 
-      if (str.includes("L")) {
+      if (str.includes("|")) {
         properties.action = ACTION_LASER;
       }
       if (str.includes("H")) {
