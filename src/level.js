@@ -67,7 +67,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
 // prettier-ignore
 const level = [
   "^r   lb   .    #    .    #    #    #    #    #    #    #    #    #    #",
-  "#    |t   #    *b   .    #    #    #    #    #    #    #    #    #    #",
+  "#    |-t  #    *b   .    #    #    #    #    #    #    #    #    #    #",
   ".    .    #    Ht   .    .    #    #    #    #    #    #    #    #    #",
   "#    #    #    #    .    #    #    #    #    #    #    #    #    #    #",
   ".    .    #    #    .    #    .    #    #    #    #    #    #    #    #",
@@ -94,7 +94,8 @@ const parseLevel = () => {
           right: false,
           top: false,
           bottom: false
-        }
+        },
+        actions: []
       };
 
       properties.isMissing = str.includes(".");
@@ -106,13 +107,13 @@ const parseLevel = () => {
         : undefined;
 
       if (str.includes("|")) {
-        properties.action = ACTION_LASER;
+        properties.actions.push(ACTION_LASER);
       }
       if (str.includes("-")) {
-        properties.action = ACTION_LASER_HORIZONTAL;
+        properties.actions.push(ACTION_LASER_HORIZONTAL);
       }
       if (str.includes("H")) {
-        properties.action = ACTION_MOVE;
+        properties.actions.push(ACTION_MOVE);
       }
 
       properties.wires.left = str.includes("l");
@@ -139,7 +140,7 @@ const findRight = (room, rooms) => {
   const bottom =
     room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
 
-  return room.wires.left && (room.action ? room : right || top || bottom);
+  return room.wires.left && (room.hasActions() ? room : right || top || bottom);
 };
 
 const findLeft = (room, rooms) => {
@@ -152,7 +153,7 @@ const findLeft = (room, rooms) => {
   const bottom =
     room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
 
-  return room.wires.right && (room.action ? room : left || top || bottom);
+  return room.wires.right && (room.hasActions() ? room : left || top || bottom);
 };
 
 const findTop = (room, rooms) => {
@@ -164,7 +165,7 @@ const findTop = (room, rooms) => {
   const left = room.wires.left && leftRoom && findLeft(leftRoom, rooms);
   const top = room.wires.top && topRoom && findTop(topRoom, rooms);
 
-  return room.wires.bottom && (room.action ? room : right || left || top);
+  return room.wires.bottom && (room.hasActions() ? room : right || left || top);
 };
 
 const findBottom = (room, rooms) => {
@@ -177,7 +178,7 @@ const findBottom = (room, rooms) => {
   const bottom =
     room.wires.bottom && bottomRoom && findBottom(bottomRoom, rooms);
 
-  return room.wires.top && (room.action ? room : right || left || bottom);
+  return room.wires.top && (room.hasActions() ? room : right || left || bottom);
 };
 
 const findConnection = (room, rooms) => {

@@ -46,7 +46,6 @@ export const GAME_OVER_LASER = 1;
 export const GAME_OVER_CRUSH = 2;
 export const GAME_OVER_FALL = 3;
 
-export const ACTION_NONE = 0;
 export const ACTION_MOVE = 1;
 export const ACTION_LASER = 2;
 export const ACTION_LASER_HORIZONTAL = 3;
@@ -161,7 +160,7 @@ export class Room {
 
     this.wires = properties.wires || {};
     this.xMoveDirection = 0;
-    this.action = properties.action || ACTION_NONE;
+    this.actions = properties.actions || [];
 
     // switch value true/false/undefined
     if (properties.switch !== undefined) {
@@ -177,13 +176,6 @@ export class Room {
 
     if (!this.isMissing) {
       this.addLadders();
-
-      if (properties.laser) {
-        this.lasers.push({
-          x: this.x + this.width * 0.75,
-          speed: LASER_SPEED
-        });
-      }
     }
   }
 
@@ -213,8 +205,11 @@ export class Room {
 
     for (let i = 0; i < this.lasers.length; i++) {
       const laser = this.lasers[i];
-      laser.x += xDiff;
-      laser.y += yDiff;
+      if (laser.x != null) {
+        laser.x += xDiff;
+      } else {
+        laser.y += yDiff;
+      }
     }
 
     if (this.switch) {
@@ -223,32 +218,42 @@ export class Room {
     }
   }
 
-  toggleAction(isOn) {
-    switch (this.action) {
-      case ACTION_MOVE: {
-        this.xMoveDirection = isOn ? 1 : 0;
-        break;
-      }
-      case ACTION_LASER: {
-        if (isOn) {
-          this.lasers.push({
-            x: this.x + this.width * 0.75,
-            speed: LASER_SPEED
-          });
-        } else {
-          this.lasers = [];
-        }
+  hasActions() {
+    return this.actions && this.actions.length > 0;
+  }
 
-        break;
-      }
-      case ACTION_LASER_HORIZONTAL:
-        if (isOn) {
-          this.lasers.push({
-            y: this.y + this.height * 0.25,
-            speed: -LASER_SPEED
-          });
+  toggleAction(isOn) {
+    for (let i = 0; i < this.actions.length; i++) {
+      const action = this.actions[i];
+
+      switch (action) {
+        case ACTION_MOVE: {
+          this.xMoveDirection = isOn ? 1 : 0;
+          break;
         }
-        break;
+        case ACTION_LASER: {
+          if (isOn) {
+            this.lasers.push({
+              x: this.x + this.width * 0.75,
+              speed: LASER_SPEED
+            });
+          } else {
+            this.lasers = [];
+          }
+
+          break;
+        }
+        case ACTION_LASER_HORIZONTAL:
+          if (isOn) {
+            this.lasers.push({
+              y: this.y + this.height * 0.25,
+              speed: -LASER_SPEED
+            });
+          } else {
+            this.lasers = [];
+          }
+          break;
+      }
     }
   }
 
@@ -482,7 +487,16 @@ export class Room {
         25
       );
 
-      if (this.action === ACTION_MOVE) {
+      for (let i = 0; i < this.actions.length; i++) {
+        const action = this.actions[i];
+        this.renderActionSymbol(context, action);
+      }
+    }
+  }
+
+  renderActionSymbol(context, action) {
+    switch (action) {
+      case ACTION_MOVE:
         context.fillStyle = this.xMoveDirection
           ? "rgb(0,220,0)"
           : "rgb(0,50,0)";
@@ -515,10 +529,9 @@ export class Room {
           this.y + SWITCH_RELATIVE_Y + 12.5
         );
         context.fill();
-      } else if (
-        this.action === ACTION_LASER ||
-        this.action === ACTION_LASER_HORIZONTAL
-      ) {
+        break;
+      case ACTION_LASER:
+      case ACTION_LASER_HORIZONTAL:
         context.strokeStyle = this.lasers.length
           ? "rgb(0,220,0)"
           : "rgb(0,50,0)";
@@ -532,7 +545,7 @@ export class Room {
           this.y + SWITCH_RELATIVE_Y + 20
         );
         context.stroke();
-      }
+        break;
     }
   }
 
