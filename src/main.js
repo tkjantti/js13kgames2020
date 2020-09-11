@@ -178,7 +178,6 @@ bindKeys(["enter"], () => {
     level.gameOverState = 0;
     startLevel(0);
   } else {
-    playTune("main");
     level = new Level();
     startLevel(1);
   }

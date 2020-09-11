@@ -23,13 +23,14 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { song, jumpSfx, endSfx, endSong } from "./data.js";
+import { song, jumpSfx, endSfx, endSong, emptySfx } from "./data.js";
 import CPlayer from "./musicplayer.js";
 
 const mainTune = document.createElement("audio");
 const jumpfx = document.createElement("audio");
 const endfx = document.createElement("audio");
 const endTune = document.createElement("audio");
+const emptyFx = document.createElement("audio");
 
 export const initMusicPlayer = (audioTrack, tune, isLooped) => {
   return new Promise(resolve => {
@@ -61,15 +62,34 @@ export const initialize = () => {
     initMusicPlayer(mainTune, song, true),
     initMusicPlayer(jumpfx, jumpSfx, false),
     initMusicPlayer(endfx, endSfx, false),
-    initMusicPlayer(endTune, endSong, true)
+    initMusicPlayer(endTune, endSong, true),
+    initMusicPlayer(emptyFx, emptySfx, true)
   ]);
+};
+
+const FadeOut = tune => {
+  var currentVolume = tune.volume;
+  var fadeOutInterval = setInterval(function() {
+    currentVolume = (parseFloat(currentVolume) - 0.1).toFixed(1);
+    if (currentVolume >= 0) {
+      tune.volume = currentVolume;
+    } else {
+      tune.volume = 0;
+      tune.pause();
+      clearInterval(fadeOutInterval);
+    }
+  }, 100);
 };
 
 export const playTune = tune => {
   switch (tune) {
     case "main": {
-      if (endTune) endTune.pause();
-      mainTune.currentTime = 0;
+      emptyFx.play();
+      emptyFx.volume = 0.1;
+
+      if (endTune.volume > 0) {
+        FadeOut(endTune);
+      }
       mainTune.volume = 0.9;
       var promise = mainTune.play();
       if (promise !== undefined) {
@@ -86,24 +106,26 @@ export const playTune = tune => {
     }
     case "end": {
       endfx.play();
+      endfx.volume = 0.5;
+
+      emptyFx.volume = 0.5;
+
       endTune.currentTime = 0;
-      endTune.volume = 0.9;
+      endTune.volume = 0.8;
       endTune.play();
-      var currentVolume = mainTune.volume;
-      var fadeOutInterval = setInterval(function() {
-        currentVolume = (parseFloat(currentVolume) - 0.2).toFixed(1);
-        if (currentVolume >= 0.0) {
-          mainTune.volume = currentVolume;
-        } else {
-          mainTune.pause();
-          clearInterval(fadeOutInterval);
-        }
-      }, 100);
+
+      FadeOut(mainTune);
+
       break;
     }
     case "jump": {
       jumpfx.currentTime = 0;
       jumpfx.play();
+
+      break;
+    }
+    case "empty": {
+      FadeOut(mainTune);
       break;
     }
   }
@@ -112,31 +134,16 @@ export const playTune = tune => {
 export const stopTune = tune => {
   switch (tune) {
     case "main": {
-      var currentVolume = mainTune.volume;
-      var fadeOutInterval = setInterval(function() {
-        currentVolume = (parseFloat(currentVolume) - 0.2).toFixed(1);
-        if (currentVolume >= 0.0) {
-          mainTune.volume = currentVolume;
-        } else {
-          mainTune.pause();
-          clearInterval(fadeOutInterval);
-        }
-      }, 100);
+      FadeOut(mainTune);
       break;
     }
     case "end": {
-      var currentEndVolume = endTune.volume;
-      if (currentEndVolume > 0) {
-        var fadeOutEndInterval = setInterval(function() {
-          currentEndVolume = (parseFloat(currentEndVolume) - 0.2).toFixed(1);
-          if (currentEndVolume >= 0.0) {
-            endTune.volume = currentEndVolume;
-          } else {
-            endTune.pause();
-            clearInterval(fadeOutEndInterval);
-          }
-        }, 100);
-      }
+      FadeOut(endTune);
+      FadeOut(emptyFx);
+      break;
+    }
+    case "empty": {
+      FadeOut(emptyFx);
       break;
     }
   }

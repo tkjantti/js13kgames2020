@@ -42,6 +42,7 @@ import {
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { Player } from "./player.js";
+import { playTune } from "./sfx/music.js";
 
 const ROOM_GAP = 30;
 
@@ -401,6 +402,12 @@ export class Level {
 
     if (!nextRoom) {
       return;
+    }
+
+    if (nextRoom.isMissing) {
+      playTune("empty");
+    } else {
+      playTune("main");
     }
 
     this.currentRoom = nextRoom;
