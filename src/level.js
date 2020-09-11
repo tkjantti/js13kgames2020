@@ -53,6 +53,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
  *
  * # - plain room
  * . - missing (non-existing) room
+ * ; - void, player can't enter
  * * - switch off
  * ^ - switch on
  * H - horizontally moving room
@@ -68,7 +69,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
 const level = [
   "^r   lb   .    #    .    #    #    #    #    #    #    #    #    #    #",
   "#    |-t  #    *b   .    #    #    #    #    #    #    #    #    #    #",
-  "|-   .    #    Ht   .    .    #    #    #    #    #    #    #    #    #",
+  ";    .    #    Ht   .    .    #    #    #    #    #    #    #    #    #",
   "#    #    #    #    .    #    #    #    #    #    #    #    #    #    #",
   ".    .    #    #    .    #    .    #    #    #    #    #    #    #    #",
   ".    .    #    #    .    .    .    #    #    #    #    #    #    #    #",
@@ -88,42 +89,50 @@ const parseLevel = () => {
     const row = level[iy].split(/ +/);
     for (let ix = 0; ix < row.length; ix++) {
       const str = row[ix];
-      const properties = {
-        wires: {
-          left: false,
-          right: false,
-          top: false,
-          bottom: false
-        },
-        actions: []
-      };
+      let room;
 
-      properties.isMissing = str.includes(".");
+      if (str.includes(";")) {
+        room = null; // void
+      } else {
+        const properties = {
+          wires: {
+            left: false,
+            right: false,
+            top: false,
+            bottom: false
+          },
+          actions: []
+        };
 
-      properties.switch = str.includes("^")
-        ? true
-        : str.includes("*")
-        ? false
-        : undefined;
+        properties.isMissing = str.includes(".");
 
-      if (str.includes("|")) {
-        properties.actions.push(ACTION_LASER);
+        properties.switch = str.includes("^")
+          ? true
+          : str.includes("*")
+          ? false
+          : undefined;
+
+        if (str.includes("|")) {
+          properties.actions.push(ACTION_LASER);
+        }
+        if (str.includes("-")) {
+          properties.actions.push(ACTION_LASER_HORIZONTAL);
+        }
+        if (str.includes("H")) {
+          properties.actions.push(ACTION_MOVE);
+        }
+
+        properties.wires.left = str.includes("l");
+        properties.wires.right = str.includes("r");
+        properties.wires.top = str.includes("t");
+        properties.wires.bottom = str.includes("b");
+
+        const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
+        const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
+        room = new Room(x, y, ix, iy, properties);
       }
-      if (str.includes("-")) {
-        properties.actions.push(ACTION_LASER_HORIZONTAL);
-      }
-      if (str.includes("H")) {
-        properties.actions.push(ACTION_MOVE);
-      }
 
-      properties.wires.left = str.includes("l");
-      properties.wires.right = str.includes("r");
-      properties.wires.top = str.includes("t");
-      properties.wires.bottom = str.includes("b");
-
-      const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
-      const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
-      rooms.setValue(ix, iy, new Room(x, y, ix, iy, properties));
+      rooms.setValue(ix, iy, room);
     }
   }
 
@@ -253,7 +262,7 @@ export class Level {
       for (let iy = 0; iy < this.rooms.yCount; iy++) {
         const room = this.rooms.getValue(ix, iy);
 
-        if (!room.xMoveDirection) {
+        if (!room || !room.xMoveDirection) {
           continue;
         }
 
