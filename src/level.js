@@ -453,6 +453,9 @@ export class Level {
 
     if (yDirection > 0) {
       sprite.y = nextRoom.y;
+
+      // Position player to be on ladders
+      sprite.x = nextRoom.x + nextRoom.width / 2;
     } else if (yDirection < 0) {
       sprite.y = nextRoom.bottom - sprite.height;
     }
