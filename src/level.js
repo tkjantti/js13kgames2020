@@ -51,6 +51,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
 /*
  * Level format:
  *
+ * @ - start room
  * # - plain room
  * . - missing (non-existing) room
  * ; - void, player can't enter
@@ -69,7 +70,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
 const level = [
   "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
   "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
+  "#    #    @    #    #    #    #    ;    #    #    #    #    #    #    #",
   "#    #    #    #    #    #    #    #    #    #    #    #    #    #    #",
   "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
   "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
@@ -86,6 +87,7 @@ const level = [
 
 const parseLevel = () => {
   const rooms = new Array2D(level[0].split(/ +/).length, level.length);
+  let startRoom;
 
   for (let iy = 0; iy < level.length; iy++) {
     const row = level[iy].split(/ +/);
@@ -132,13 +134,17 @@ const parseLevel = () => {
         const x = ix * (ROOM_OUTER_WIDTH + ROOM_GAP);
         const y = iy * (ROOM_OUTER_HEIGHT + ROOM_GAP);
         room = new Room(x, y, ix, iy, properties);
+
+        if (str.includes("@")) {
+          startRoom = room;
+        }
       }
 
       rooms.setValue(ix, iy, room);
     }
   }
 
-  return rooms;
+  return { rooms, startRoom };
 };
 
 const findRight = (room, rooms) => {
@@ -209,7 +215,8 @@ const findConnection = (room, rooms) => {
 
 export class Level {
   constructor() {
-    this.rooms = parseLevel();
+    let { rooms, startRoom } = parseLevel();
+    this.rooms = rooms;
 
     // For level to work with camera.zoomTo()
     this.x = 0;
@@ -218,7 +225,7 @@ export class Level {
     this.height = this.rooms.yCount * (ROOM_OUTER_HEIGHT + ROOM_GAP);
 
     this.updateDoors();
-    this.currentRoom = this.rooms.getValue(0, 1);
+    this.currentRoom = startRoom;
     this.lastAutoMoveTime = performance.now();
 
     this.player = new Player();
