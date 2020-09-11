@@ -56,6 +56,11 @@ const ROOM_GAP = 30;
 
 const ROOM_MOVE_DELAY_MS = 3000;
 
+const wallTexts = {
+  "0": "WHERE Am I ?",
+  "1": "LOL"
+};
+
 /*
  * Map format:
  *
@@ -78,7 +83,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
 const map = [
   "#    ;    #    #    #    #    #    ;    #    #    #    #    #    #    #",
   "#    ^r   |-l  ;    ;    #    .    ;    #    #    #    #    #    #    #",
-  ".    |    @    ;    ;    .    .    ;    #    #    #    #    #    #    #",
+  ".    |1   @0   ;    ;    .    .    ;    #    #    #    #    #    #    #",
   ".    -    |    |-b  #    #    #    #    #    #    #    #    #    #    #",
   ".    #    -    ^t   #    -    -    ;    #    #    #    #    #    #    #",
   "#    |    #    |    #    #    #    ;    #    #    #    #    #    #    #",
@@ -132,6 +137,14 @@ const parseMap = () => {
         }
         if (str.includes("H")) {
           properties.actions.push(ACTION_MOVE);
+        }
+
+        const numberMatch = str.match(/[0-9]/);
+        if (numberMatch) {
+          const textIndex = numberMatch[0];
+          if (wallTexts[textIndex]) {
+            properties.text = wallTexts[textIndex];
+          }
         }
 
         properties.wires.left = str.includes("l");

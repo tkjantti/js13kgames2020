@@ -151,6 +151,11 @@ export class Room {
     this.setPosition(x, y, ix, iy);
     this.isMissing = properties.isMissing;
 
+    this.text = properties.text || undefined;
+    this.textX = this.x + this.width * 0.2 + (Math.random() * this.width) / 8;
+    this.textY = this.y + this.height * 0.78;
+    this.textAngle = -Math.PI / 20 + (Math.random() * Math.PI) / 10;
+
     this.doors = {
       left: DOOR_EDGE,
       right: DOOR_EDGE,
@@ -437,6 +442,7 @@ export class Room {
     if (!this.isMissing) {
       this.renderId(context);
       this.renderRoom(context);
+      this.renderWallTexts(context);
     }
 
     this.renderWires(context);
@@ -452,6 +458,24 @@ export class Room {
     this.renderLasers(context);
 
     context.restore();
+  }
+
+  renderWallTexts(context) {
+    if (this.text) {
+      context.save();
+      context.fillStyle = "rgb(170,170,150)";
+      context.font = "6px Sans-serif";
+
+      const textWidth = context.measureText(this.text).width;
+      const textHeight = context.measureText("M").width; // Approximation of height
+
+      context.translate(this.textX, this.textY);
+      context.rotate(this.textAngle);
+      context.translate(-textWidth / 2, -textHeight / 2);
+
+      context.fillText(this.text, 0, 0);
+      context.restore();
+    }
   }
 
   renderConnectionBox(context) {
