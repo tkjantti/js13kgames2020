@@ -270,22 +270,11 @@ export class Room {
       const laser = this.lasers[i];
 
       if (laser.x != null) {
-        if (
-          this.y + 0.25 * this.height < player.y &&
-          player.y < this.y + 0.75 * this.height
-        ) {
-          // Player entering from left/right doors
-          laser.x = this.x + 0.25 * this.width;
+        laser.x = this.x + this.width * 0.4;
+        if (player.x < this.x + 0.25 * this.width) {
           laser.speed = LASER_SPEED;
         } else {
-          // Player entering from top/bottom doors
-          if (Math.random() < 0.5) {
-            laser.x = this.x + 0.75 * this.width;
-            laser.speed = LASER_SPEED;
-          } else {
-            laser.x = this.x + 0.25 * this.width;
-            laser.speed = -LASER_SPEED;
-          }
+          laser.speed = -LASER_SPEED;
         }
       } else {
         laser.y = this.y + this.height * 0.4;
