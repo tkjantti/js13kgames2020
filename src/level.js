@@ -49,7 +49,7 @@ const ROOM_GAP = 30;
 const ROOM_MOVE_DELAY_MS = 3000;
 
 /*
- * Level format:
+ * Map format:
  *
  * @ - start room
  * # - plain room
@@ -67,12 +67,12 @@ const ROOM_MOVE_DELAY_MS = 3000;
  */
 
 // prettier-ignore
-const level = [
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    @    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    #    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
+const map = [
+  "#    ;    #    #    #    #    #    ;    #    #    #    #    #    #    #",
+  "#    ^r   |-l  ;    ;    #    #    ;    #    #    #    #    #    #    #",
+  ".    |    @    |    #    #    #    ;    #    #    #    #    #    #    #",
+  ".    -    |    #    #    #    #    #    #    #    #    #    #    #    #",
+  ".    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
   "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
   "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
   ";    ;    ;    #    ;    ;    ;    ;    ;    ;    ;    #    ;    ;    ;",
@@ -85,12 +85,12 @@ const level = [
   "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #"
 ];
 
-const parseLevel = () => {
-  const rooms = new Array2D(level[0].split(/ +/).length, level.length);
+const parseMap = () => {
+  const rooms = new Array2D(map[0].split(/ +/).length, map.length);
   let startRoom;
 
-  for (let iy = 0; iy < level.length; iy++) {
-    const row = level[iy].split(/ +/);
+  for (let iy = 0; iy < map.length; iy++) {
+    const row = map[iy].split(/ +/);
     for (let ix = 0; ix < row.length; ix++) {
       const str = row[ix];
       let room;
@@ -215,7 +215,7 @@ const findConnection = (room, rooms) => {
 
 export class Level {
   constructor() {
-    let { rooms, startRoom } = parseLevel();
+    let { rooms, startRoom } = parseMap();
     this.rooms = rooms;
 
     // For level to work with camera.zoomTo()
