@@ -218,6 +218,11 @@ export class Room {
     }
   }
 
+  hasWires() {
+    const wires = this.wires;
+    return wires && (wires.left || wires.right || wires.top || wires.bottom);
+  }
+
   hasActions() {
     return this.actions && this.actions.length > 0;
   }

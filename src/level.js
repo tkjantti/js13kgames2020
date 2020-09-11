@@ -68,7 +68,7 @@ const ROOM_MOVE_DELAY_MS = 3000;
 const level = [
   "^r   lb   .    #    .    #    #    #    #    #    #    #    #    #    #",
   "#    |-t  #    *b   .    #    #    #    #    #    #    #    #    #    #",
-  ".    .    #    Ht   .    .    #    #    #    #    #    #    #    #    #",
+  "|-   .    #    Ht   .    .    #    #    #    #    #    #    #    #    #",
   "#    #    #    #    .    #    #    #    #    #    #    #    #    #    #",
   ".    .    #    #    .    #    .    #    #    #    #    #    #    #    #",
   ".    .    #    #    .    .    .    #    #    #    #    #    #    #    #",
@@ -219,16 +219,28 @@ export class Level {
 
     this.gameOverState = GAME_OK;
 
-    // For switches in on state, set linked action:
+    this.setInitialActionStates();
+  }
+
+  setInitialActionStates() {
     for (let ix = 0; ix < this.rooms.xCount; ix++) {
       for (let iy = 0; iy < this.rooms.yCount; iy++) {
         const room = this.rooms.getValue(ix, iy);
+        if (!room) {
+          continue;
+        }
 
-        if (room && room.switch && room.switch.on) {
+        // For a switch in on state, set action in a linked room.
+        if (room.switch && room.switch.on) {
           const otherRoom = findConnection(room, this.rooms);
           if (otherRoom) {
             otherRoom.toggleAction(true);
           }
+        }
+
+        // If no connections anywhere, turn action on by default.
+        if (room.hasActions() && !room.hasWires()) {
+          room.toggleAction(true);
         }
       }
     }
