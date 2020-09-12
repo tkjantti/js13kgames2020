@@ -447,7 +447,7 @@ export class Level {
       playTune("main");
     }
 
-    if (nextRoom.actions.length > 0) {
+    if (nextRoom.lasers.length > 0) {
       playTune("laser");
     } else {
       stopTune("laser");
