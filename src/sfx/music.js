@@ -23,7 +23,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { song, jumpSfx, endSfx, endSong, emptySfx } from "./data.js";
+import { song, jumpSfx, endSfx, endSong, emptySfx, laserSfx } from "./data.js";
 import CPlayer from "./musicplayer.js";
 
 const mainTune = document.createElement("audio");
@@ -31,6 +31,7 @@ const jumpfx = document.createElement("audio");
 const endfx = document.createElement("audio");
 const endTune = document.createElement("audio");
 const emptyFx = document.createElement("audio");
+const laserFx = document.createElement("audio");
 
 export const initMusicPlayer = (audioTrack, tune, isLooped) => {
   return new Promise(resolve => {
@@ -63,7 +64,8 @@ export const initialize = () => {
     initMusicPlayer(jumpfx, jumpSfx, false),
     initMusicPlayer(endfx, endSfx, false),
     initMusicPlayer(endTune, endSong, true),
-    initMusicPlayer(emptyFx, emptySfx, true)
+    initMusicPlayer(emptyFx, emptySfx, true),
+    initMusicPlayer(laserFx, laserSfx, true)
   ]);
 };
 
@@ -109,17 +111,6 @@ export const playTune = tune => {
         FadeOut(emptyFx);
       }
       FadeIn(mainTune, 0.9);
-      // var promise = mainTune.play();
-      // if (promise !== undefined) {
-      //   promise
-      //     .then(() => {
-      //       // Autoplay started!
-      //     })
-      //     .catch(error => {
-      //       console.log("No for autoplay!" + error);
-      //       // Autoplay was prevented.
-      //     });
-      // }
       break;
     }
     case "end": {
@@ -143,6 +134,10 @@ export const playTune = tune => {
       FadeOut(mainTune, 0.05);
       break;
     }
+    case "laser": {
+      FadeIn(laserFx, 0.2);
+      break;
+    }
     case "start": {
       FadeIn(emptyFx, 0.2);
       var promise = emptyFx.play();
@@ -156,6 +151,7 @@ export const playTune = tune => {
             // Autoplay was prevented.
           });
       }
+      FadeOut(laserFx);
       FadeOut(mainTune);
       FadeOut(endTune);
       mainTune.currentTime = 0;
@@ -177,6 +173,10 @@ export const stopTune = tune => {
     }
     case "empty": {
       FadeOut(emptyFx);
+      break;
+    }
+    case "laser": {
+      FadeOut(laserFx);
       break;
     }
   }

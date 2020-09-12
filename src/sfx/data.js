@@ -1081,3 +1081,89 @@ export const emptySfx = {
   endPattern: 1, // End pattern
   numChannels: 1 // Number of channels
 };
+
+export const laserSfx = {
+  songData: [
+    {
+      // Instrument 0
+      i: [
+        0, // OSC1_WAVEFORM
+        0, // OSC1_VOL
+        104, // OSC1_SEMI
+        1, // OSC1_XENV
+        0, // OSC2_WAVEFORM
+        0, // OSC2_VOL
+        104, // OSC2_SEMI
+        0, // OSC2_DETUNE
+        1, // OSC2_XENV
+        27, // NOISE_VOL
+        0, // ENV_ATTACK
+        255, // ENV_SUSTAIN
+        255, // ENV_RELEASE
+        0, // ARP_CHORD
+        0, // ARP_SPEED
+        0, // LFO_WAVEFORM
+        198, // LFO_AMT
+        8, // LFO_FREQ
+        1, // LFO_FX_FREQ
+        3, // FX_FILTER
+        183, // FX_FREQ
+        15, // FX_RESONANCE
+        0, // FX_DIST
+        32, // FX_DRIVE
+        255, // FX_PAN_AMT
+        4, // FX_PAN_FREQ
+        74, // FX_DELAY_AMT
+        6 // FX_DELAY_TIME
+      ],
+      // Patterns
+      p: [1, 2],
+      // Columns
+      c: [
+        {
+          n: [135],
+          f: [
+            25,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            ,
+            255
+          ]
+        },
+        { n: [], f: [] }
+      ]
+    }
+  ],
+  rowLen: 5513, // In sample lengths
+  patternLen: 32, // Rows per pattern
+  endPattern: 1, // End pattern
+  numChannels: 1 // Number of channels
+};
