@@ -23,7 +23,15 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { song, jumpSfx, endSfx, endSong, emptySfx } from "./data.js";
+import {
+  song,
+  jumpSfx,
+  endSfx,
+  endSong,
+  emptySfx,
+  laserSfx,
+  switchSfx
+} from "./data.js";
 import CPlayer from "./musicplayer.js";
 
 const mainTune = document.createElement("audio");
@@ -31,6 +39,8 @@ const jumpfx = document.createElement("audio");
 const endfx = document.createElement("audio");
 const endTune = document.createElement("audio");
 const emptyFx = document.createElement("audio");
+const laserFx = document.createElement("audio");
+const switchFx = document.createElement("audio");
 
 export const initMusicPlayer = (audioTrack, tune, isLooped) => {
   return new Promise(resolve => {
@@ -63,35 +73,87 @@ export const initialize = () => {
     initMusicPlayer(jumpfx, jumpSfx, false),
     initMusicPlayer(endfx, endSfx, false),
     initMusicPlayer(endTune, endSong, true),
-    initMusicPlayer(emptyFx, emptySfx, true)
+    initMusicPlayer(emptyFx, emptySfx, true),
+    initMusicPlayer(laserFx, laserSfx, true),
+    initMusicPlayer(switchFx, switchSfx, false)
   ]);
 };
 
-const FadeOut = tune => {
+const FadeOut = (tune, vol = 0) => {
   var currentVolume = tune.volume;
-  var fadeOutInterval = setInterval(function() {
-    currentVolume = (parseFloat(currentVolume) - 0.1).toFixed(1);
-    if (currentVolume >= 0) {
-      tune.volume = currentVolume;
-    } else {
-      tune.volume = 0;
-      tune.pause();
-      clearInterval(fadeOutInterval);
-    }
-  }, 100);
+  if (tune.volume > vol) {
+    var fadeOutInterval = setInterval(function() {
+      currentVolume = (parseFloat(currentVolume) - 0.1).toFixed(1);
+      if (currentVolume > vol) {
+        tune.volume = currentVolume;
+      } else {
+        tune.volume = vol;
+        if (vol === 0) tune.pause();
+        clearInterval(fadeOutInterval);
+      }
+    }, 100);
+  }
+};
+
+const FadeIn = (tune, vol = 1) => {
+  tune.play();
+  var currentVolume = tune.volume;
+  if (tune.volume < vol) {
+    var fadeOutInterval = setInterval(function() {
+      currentVolume = (parseFloat(currentVolume) + 0.1).toFixed(1);
+      if (currentVolume < vol) {
+        tune.volume = currentVolume;
+      } else {
+        tune.volume = vol;
+        clearInterval(fadeOutInterval);
+      }
+    }, 100);
+  }
 };
 
 export const playTune = tune => {
   switch (tune) {
     case "main": {
-      emptyFx.play();
-      emptyFx.volume = 0.1;
-
       if (endTune.volume > 0) {
         FadeOut(endTune);
       }
-      mainTune.volume = 0.9;
-      var promise = mainTune.play();
+      if (emptyFx.volume > 0) {
+        FadeOut(emptyFx);
+      }
+      FadeIn(mainTune, 0.9);
+      break;
+    }
+    case "end": {
+      FadeIn(endfx, 0.5);
+      FadeIn(emptyFx, 0.2);
+      endTune.currentTime = 0;
+      FadeIn(endTune, 0.8);
+      FadeOut(mainTune);
+      break;
+    }
+    case "jump": {
+      jumpfx.currentTime = 0;
+      jumpfx.play();
+      break;
+    }
+    case "empty": {
+      FadeIn(emptyFx, 0.2);
+      FadeOut(mainTune, 0.05);
+      break;
+    }
+    case "laser": {
+      FadeIn(laserFx, 0.2);
+      break;
+    }
+    case "switch": {
+      switchFx.currentTime = 0;
+      switchFx.volume = 0.4;
+      switchFx.play();
+      break;
+    }
+    case "start": {
+      FadeIn(emptyFx, 0.2);
+      var promise = emptyFx.play();
       if (promise !== undefined) {
         promise
           .then(() => {
@@ -102,30 +164,10 @@ export const playTune = tune => {
             // Autoplay was prevented.
           });
       }
-      break;
-    }
-    case "end": {
-      endfx.play();
-      endfx.volume = 0.5;
-
-      emptyFx.volume = 0.5;
-
-      endTune.currentTime = 0;
-      endTune.volume = 0.8;
-      endTune.play();
-
+      FadeOut(laserFx);
       FadeOut(mainTune);
-
-      break;
-    }
-    case "jump": {
-      jumpfx.currentTime = 0;
-      jumpfx.play();
-
-      break;
-    }
-    case "empty": {
-      FadeOut(mainTune);
+      FadeOut(endTune);
+      mainTune.currentTime = 0;
       break;
     }
   }
@@ -144,6 +186,10 @@ export const stopTune = tune => {
     }
     case "empty": {
       FadeOut(emptyFx);
+      break;
+    }
+    case "laser": {
+      FadeOut(laserFx);
       break;
     }
   }
