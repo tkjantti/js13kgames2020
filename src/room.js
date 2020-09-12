@@ -150,6 +150,12 @@ export class Room {
     this.lasers = [];
     this.setPosition(x, y, ix, iy);
     this.isMissing = properties.isMissing;
+    this.isExit = properties.isExit || false;
+
+    this.text = properties.text || undefined;
+    this.textX = this.x + this.width * 0.2 + (Math.random() * this.width) / 8;
+    this.textY = this.y + this.height * 0.78;
+    this.textAngle = -Math.PI / 20 + (Math.random() * Math.PI) / 10;
 
     this.doors = {
       left: DOOR_EDGE,
@@ -233,7 +239,7 @@ export class Room {
 
       switch (action) {
         case ACTION_MOVE: {
-          this.xMoveDirection = isOn ? 1 : 0;
+          this.xMoveDirection = isOn ? 1 : -1;
           break;
         }
         case ACTION_LASER: {
@@ -435,8 +441,8 @@ export class Room {
     context.save();
 
     if (!this.isMissing) {
-      this.renderId(context);
       this.renderRoom(context);
+      this.renderWallTexts(context);
     }
 
     this.renderWires(context);
@@ -452,6 +458,24 @@ export class Room {
     this.renderLasers(context);
 
     context.restore();
+  }
+
+  renderWallTexts(context) {
+    if (this.text) {
+      context.save();
+      context.fillStyle = "rgb(170,170,150)";
+      context.font = "6px Sans-serif";
+
+      const textWidth = context.measureText(this.text).width;
+      const textHeight = context.measureText("M").width; // Approximation of height
+
+      context.translate(this.textX, this.textY);
+      context.rotate(this.textAngle);
+      context.translate(-textWidth / 2, -textHeight / 2);
+
+      context.fillText(this.text, 0, 0);
+      context.restore();
+    }
   }
 
   renderConnectionBox(context) {
@@ -489,11 +513,12 @@ export class Room {
   }
 
   renderActionSymbol(context, action) {
+    const COLOR_ON = "rgb(0,220,0)";
+    const COLOR_OFF = "rgb(0,50,0)";
+
     switch (action) {
       case ACTION_MOVE:
-        context.fillStyle = this.xMoveDirection
-          ? "rgb(0,220,0)"
-          : "rgb(0,50,0)";
+        context.fillStyle = this.xMoveDirection < 0 ? COLOR_ON : COLOR_OFF;
         context.beginPath();
         context.moveTo(
           this.x + SWITCH_RELATIVE_X + 11,
@@ -509,6 +534,7 @@ export class Room {
         );
         context.fill();
 
+        context.fillStyle = this.xMoveDirection > 0 ? COLOR_ON : COLOR_OFF;
         context.beginPath();
         context.moveTo(
           this.x + SWITCH_RELATIVE_X + 14,
@@ -526,9 +552,7 @@ export class Room {
         break;
       case ACTION_LASER:
       case ACTION_LASER_HORIZONTAL:
-        context.strokeStyle = this.lasers.length
-          ? "rgb(0,220,0)"
-          : "rgb(0,50,0)";
+        context.strokeStyle = this.lasers.length ? COLOR_ON : COLOR_OFF;
         context.beginPath();
         context.moveTo(
           this.x + SWITCH_RELATIVE_X + 13,
@@ -607,6 +631,25 @@ export class Room {
     const color2 = "#202020";
     const color3 = "#303030";
     const color4 = "#606060";
+
+    if (this.isExit) {
+      const gradient = context.createLinearGradient(
+        this.outerX,
+        this.outerY,
+        this.outerX + ROOM_OUTER_WIDTH,
+        this.outerY + ROOM_HEIGHT
+      );
+      gradient.addColorStop(0, "rgb(120, 120, 255)");
+      gradient.addColorStop(1, "rgb(200, 200, 255)");
+      context.fillStyle = gradient;
+
+      context.fillRect(
+        this.outerX,
+        this.outerY,
+        ROOM_OUTER_WIDTH,
+        ROOM_OUTER_HEIGHT
+      );
+    }
 
     //  ceiling/bottom/sides
 
@@ -753,28 +796,23 @@ export class Room {
     context.stroke();
 
     // background
-    const gradient = context.createLinearGradient(
-      this.outerX,
-      this.outerY,
-      this.outerX + ROOM_OUTER_WIDTH,
-      this.outerY + ROOM_HEIGHT
-    );
-    gradient.addColorStop(0, bgcolor1);
-    gradient.addColorStop(1, bgcolor2);
-    context.fillStyle = gradient;
-    context.fillRect(
-      this.outerX,
-      this.outerY,
-      ROOM_OUTER_WIDTH,
-      this.outerY + ROOM_HEIGHT
-    );
-  }
-
-  renderId(context) {
-    context.fillStyle = "green";
-    context.font = "bold 18px Sans-serif";
-    const text = "" + this.ix + ", " + this.iy;
-    context.fillText(text, this.outerX + Z + 30, this.outerY + Z + 35);
+    if (!this.isExit) {
+      const gradient = context.createLinearGradient(
+        this.outerX,
+        this.outerY,
+        this.outerX + ROOM_OUTER_WIDTH,
+        this.outerY + ROOM_OUTER_HEIGHT
+      );
+      gradient.addColorStop(0, bgcolor1);
+      gradient.addColorStop(1, bgcolor2);
+      context.fillStyle = gradient;
+      context.fillRect(
+        this.outerX,
+        this.outerY,
+        ROOM_OUTER_WIDTH,
+        ROOM_OUTER_HEIGHT
+      );
+    }
   }
 
   renderDoors(context) {

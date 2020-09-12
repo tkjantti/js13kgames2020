@@ -54,13 +54,20 @@ import {
 
 const ROOM_GAP = 30;
 
-const ROOM_MOVE_DELAY_MS = 3000;
+const ROOM_MOVE_DELAY_MS = 500;
+
+const wallTexts = {
+  "0": "WHERE Am I ?",
+  "1": "THERES NO WAY OUT",
+  "2": "LONG WAY DoWN"
+};
 
 /*
  * Map format:
  *
  * @ - start room
  * # - plain room
+ * E - exit room
  * . - missing (non-existing) room
  * ; - void, player can't enter
  * * - switch off
@@ -76,21 +83,18 @@ const ROOM_MOVE_DELAY_MS = 3000;
 
 // prettier-ignore
 const map = [
-  "#    ;    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    ^r   |-l  ;    ;    #    .    ;    #    #    #    #    #    #    #",
-  ".    |    @    ;    ;    .    .    ;    #    #    #    #    #    #    #",
-  ".    -    |    |-b  #    #    #    #    #    #    #    #    #    #    #",
-  ".    #    -    ^t   #    -    -    ;    #    #    #    #    #    #    #",
-  "#    |    #    |    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    H    .    .    -    #    #    ;    #    #    #    #    #    #    #",
-  ";    ;    ;    #    ;    ;    ;    ;    ;    ;    ;    #    ;    ;    ;",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    #    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #",
-  "#    #    #    #    #    #    #    ;    #    #    #    #    #    #    #"
+  ";    ;    ;    ;    ;    #    #    #    ;",
+  ";    ;    ;    ;    ;    #    #    #    E",
+  ";    ;    ;    ;    ;    #    #    #    ;",
+  ";    ;    ;    ;    ;    #    .    ;    ;",
+  ";    ;    ;    ;    ;    .    #Hb  ;    ;",
+  ";    -    #1   #2   #    #tr  #^lt #-   ;",
+  "#@   |-b  |-   .    ;    ;    ;    ;    ;",
+  ";    #t^0 ;    .    ;    ;    ;    ;    ;",
+  ".    #    ;    .    ;    ;    ;    ;    ;",
+  ".    ;    ;    .    ;    ;    ;    ;    ;",
+  "#    #    #    .-   ;    ;    ;    ;    ;",
+  ";    ;    ;    .    ;    ;    ;    ;    ;",
 ];
 
 const parseMap = () => {
@@ -117,6 +121,7 @@ const parseMap = () => {
         };
 
         properties.isMissing = str.includes(".");
+        properties.isExit = str.includes("E");
 
         properties.switch = str.includes("^")
           ? true
@@ -132,6 +137,14 @@ const parseMap = () => {
         }
         if (str.includes("H")) {
           properties.actions.push(ACTION_MOVE);
+        }
+
+        const numberMatch = str.match(/[0-9]/);
+        if (numberMatch) {
+          const textIndex = numberMatch[0];
+          if (wallTexts[textIndex]) {
+            properties.text = wallTexts[textIndex];
+          }
         }
 
         properties.wires.left = str.includes("l");
@@ -272,30 +285,36 @@ export class Level {
     }
   }
 
+  isFinished() {
+    return this.currentRoom && this.currentRoom.isExit;
+  }
+
   autoMoveRooms() {
     const now = performance.now();
 
-    for (let ix = 0; ix < this.rooms.xCount; ix++) {
-      for (let iy = 0; iy < this.rooms.yCount; iy++) {
-        const room = this.rooms.getValue(ix, iy);
+    if (now - this.lastAutoMoveTime > ROOM_MOVE_DELAY_MS) {
+      for (let ix = 0; ix < this.rooms.xCount; ix++) {
+        for (let iy = 0; iy < this.rooms.yCount; iy++) {
+          const room = this.rooms.getValue(ix, iy);
 
-        if (!room || !room.xMoveDirection) {
-          continue;
-        }
-
-        if (now - this.lastAutoMoveTime > ROOM_MOVE_DELAY_MS) {
-          const roomAtNextPosition = this.rooms.getValue(
-            room.ix + room.xMoveDirection,
-            room.iy
-          );
-          if (!(roomAtNextPosition && roomAtNextPosition.isMissing)) {
-            room.xMoveDirection = -room.xMoveDirection;
+          if (!room || !room.xMoveDirection) {
+            continue;
           }
 
-          this.moveRoom(room, room.xMoveDirection, 0);
-          this.lastAutoMoveTime = now;
+          if (now - this.lastAutoMoveTime > ROOM_MOVE_DELAY_MS) {
+            const roomAtNextPosition = this.rooms.getValue(
+              room.ix + room.xMoveDirection,
+              room.iy
+            );
+
+            if (roomAtNextPosition && roomAtNextPosition.isMissing) {
+              this.moveRoom(room, room.xMoveDirection, 0);
+            }
+          }
         }
       }
+
+      this.lastAutoMoveTime = now;
     }
   }
 
