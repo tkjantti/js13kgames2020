@@ -239,7 +239,7 @@ export class Room {
 
       switch (action) {
         case ACTION_MOVE: {
-          this.xMoveDirection = isOn ? 1 : 0;
+          this.xMoveDirection = isOn ? 1 : -1;
           break;
         }
         case ACTION_LASER: {
@@ -514,11 +514,12 @@ export class Room {
   }
 
   renderActionSymbol(context, action) {
+    const COLOR_ON = "rgb(0,220,0)";
+    const COLOR_OFF = "rgb(0,50,0)";
+
     switch (action) {
       case ACTION_MOVE:
-        context.fillStyle = this.xMoveDirection
-          ? "rgb(0,220,0)"
-          : "rgb(0,50,0)";
+        context.fillStyle = this.xMoveDirection < 0 ? COLOR_ON : COLOR_OFF;
         context.beginPath();
         context.moveTo(
           this.x + SWITCH_RELATIVE_X + 11,
@@ -534,6 +535,7 @@ export class Room {
         );
         context.fill();
 
+        context.fillStyle = this.xMoveDirection > 0 ? COLOR_ON : COLOR_OFF;
         context.beginPath();
         context.moveTo(
           this.x + SWITCH_RELATIVE_X + 14,
@@ -551,9 +553,7 @@ export class Room {
         break;
       case ACTION_LASER:
       case ACTION_LASER_HORIZONTAL:
-        context.strokeStyle = this.lasers.length
-          ? "rgb(0,220,0)"
-          : "rgb(0,50,0)";
+        context.strokeStyle = this.lasers.length ? COLOR_ON : COLOR_OFF;
         context.beginPath();
         context.moveTo(
           this.x + SWITCH_RELATIVE_X + 13,
