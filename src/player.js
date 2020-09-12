@@ -31,7 +31,7 @@ import playerSvg from "./images/player.svg";
 import playerLeftfootSvg from "./images/player-leftfoot.svg";
 import climb1Svg from "./images/player-vertical.svg";
 import climb2Svg from "./images/player-vertical-leftfoot.svg";
-import { playTune } from "./sfx/music.js";
+import { playTune, SFX_JUMP } from "./sfx/music.js";
 
 const GRAVITY = 1;
 
@@ -225,7 +225,7 @@ export class Player {
       this.stopClimbing = false;
       // hits the floor after a jump
       if (this._isOnGround(room) && jumpedCount > 0) {
-        playTune("jump");
+        playTune(SFX_JUMP);
         jumpedCount = 0;
       }
     }

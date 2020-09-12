@@ -34,6 +34,14 @@ import {
 } from "./data.js";
 import CPlayer from "./musicplayer.js";
 
+export const SFX_START = "start";
+export const SFX_MAIN = "main";
+export const SFX_END = "end";
+export const SFX_EMPTY = "empty";
+export const SFX_LASER = "laser";
+export const SFX_JUMP = "jump";
+export const SFX_SWITCH = "switch";
+
 const mainTune = document.createElement("audio");
 const jumpfx = document.createElement("audio");
 const endfx = document.createElement("audio");
@@ -113,7 +121,7 @@ const FadeIn = (tune, vol = 1) => {
 
 export const playTune = tune => {
   switch (tune) {
-    case "main": {
+    case SFX_MAIN: {
       if (endTune.volume > 0) {
         FadeOut(endTune);
       }
@@ -123,7 +131,7 @@ export const playTune = tune => {
       FadeIn(mainTune, 0.9);
       break;
     }
-    case "end": {
+    case SFX_END: {
       FadeIn(endfx, 0.5);
       FadeIn(emptyFx, 0.2);
       endTune.currentTime = 0;
@@ -131,27 +139,27 @@ export const playTune = tune => {
       FadeOut(mainTune);
       break;
     }
-    case "jump": {
+    case SFX_JUMP: {
       jumpfx.currentTime = 0;
       jumpfx.play();
       break;
     }
-    case "empty": {
+    case SFX_EMPTY: {
       FadeIn(emptyFx, 0.2);
       FadeOut(mainTune, 0.05);
       break;
     }
-    case "laser": {
+    case SFX_LASER: {
       FadeIn(laserFx, 0.2);
       break;
     }
-    case "switch": {
+    case SFX_SWITCH: {
       switchFx.currentTime = 0;
       switchFx.volume = 0.4;
       switchFx.play();
       break;
     }
-    case "start": {
+    case SFX_START: {
       FadeIn(emptyFx, 0.2);
       var promise = emptyFx.play();
       if (promise !== undefined) {
@@ -175,20 +183,20 @@ export const playTune = tune => {
 
 export const stopTune = tune => {
   switch (tune) {
-    case "main": {
+    case SFX_MAIN: {
       FadeOut(mainTune);
       break;
     }
-    case "end": {
+    case SFX_END: {
       FadeOut(endTune);
       FadeOut(emptyFx);
       break;
     }
-    case "empty": {
+    case SFX_EMPTY: {
       FadeOut(emptyFx);
       break;
     }
-    case "laser": {
+    case SFX_LASER: {
       FadeOut(laserFx);
       break;
     }

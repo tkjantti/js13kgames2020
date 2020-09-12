@@ -43,7 +43,14 @@ import {
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { Player } from "./player.js";
-import { playTune, stopTune } from "./sfx/music.js";
+import {
+  playTune,
+  stopTune,
+  SFX_LASER,
+  SFX_EMPTY,
+  SFX_SWITCH,
+  SFX_MAIN
+} from "./sfx/music.js";
 
 const ROOM_GAP = 30;
 
@@ -373,7 +380,7 @@ export class Level {
   }
 
   toggleSwitch(isOn) {
-    playTune("switch");
+    playTune(SFX_SWITCH);
     const otherRoom = findConnection(this.currentRoom, this.rooms);
     if (otherRoom) {
       otherRoom.toggleAction(isOn);
@@ -442,15 +449,15 @@ export class Level {
     }
 
     if (nextRoom.isMissing) {
-      playTune("empty");
+      playTune(SFX_EMPTY);
     } else {
-      playTune("main");
+      playTune(SFX_MAIN);
     }
 
     if (nextRoom.lasers.length > 0) {
-      playTune("laser");
+      playTune(SFX_LASER);
     } else {
-      stopTune("laser");
+      stopTune(SFX_LASER);
     }
 
     this.currentRoom = nextRoom;
