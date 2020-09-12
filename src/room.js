@@ -150,6 +150,7 @@ export class Room {
     this.lasers = [];
     this.setPosition(x, y, ix, iy);
     this.isMissing = properties.isMissing;
+    this.isExit = properties.isExit || false;
 
     this.text = properties.text || undefined;
     this.textX = this.x + this.width * 0.2 + (Math.random() * this.width) / 8;
@@ -632,6 +633,25 @@ export class Room {
     const color3 = "#303030";
     const color4 = "#606060";
 
+    if (this.isExit) {
+      const gradient = context.createLinearGradient(
+        this.outerX,
+        this.outerY,
+        this.outerX + ROOM_OUTER_WIDTH,
+        this.outerY + ROOM_HEIGHT
+      );
+      gradient.addColorStop(0, "rgb(120, 120, 255)");
+      gradient.addColorStop(1, "rgb(200, 200, 255)");
+      context.fillStyle = gradient;
+
+      context.fillRect(
+        this.outerX,
+        this.outerY,
+        ROOM_OUTER_WIDTH,
+        ROOM_OUTER_HEIGHT
+      );
+    }
+
     //  ceiling/bottom/sides
 
     context.lineWidth = 8;
@@ -777,21 +797,23 @@ export class Room {
     context.stroke();
 
     // background
-    const gradient = context.createLinearGradient(
-      this.outerX,
-      this.outerY,
-      this.outerX + ROOM_OUTER_WIDTH,
-      this.outerY + ROOM_OUTER_HEIGHT
-    );
-    gradient.addColorStop(0, bgcolor1);
-    gradient.addColorStop(1, bgcolor2);
-    context.fillStyle = gradient;
-    context.fillRect(
-      this.outerX,
-      this.outerY,
-      ROOM_OUTER_WIDTH,
-      ROOM_OUTER_HEIGHT
-    );
+    if (!this.isExit) {
+      const gradient = context.createLinearGradient(
+        this.outerX,
+        this.outerY,
+        this.outerX + ROOM_OUTER_WIDTH,
+        this.outerY + ROOM_OUTER_HEIGHT
+      );
+      gradient.addColorStop(0, bgcolor1);
+      gradient.addColorStop(1, bgcolor2);
+      context.fillStyle = gradient;
+      context.fillRect(
+        this.outerX,
+        this.outerY,
+        ROOM_OUTER_WIDTH,
+        ROOM_OUTER_HEIGHT
+      );
+    }
   }
 
   renderId(context) {

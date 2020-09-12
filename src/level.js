@@ -67,6 +67,7 @@ const wallTexts = {
  *
  * @ - start room
  * # - plain room
+ * E - exit room
  * . - missing (non-existing) room
  * ; - void, player can't enter
  * * - switch off
@@ -84,7 +85,7 @@ const wallTexts = {
 const map = [
   ";    ;    ;    ;    ;    ;    ;    ;    ;",
   ";    -    #1   #2   #    #    #    .|   #",
-  "#@   |-b  |-   .    ;    ;    ;    #    #",
+  "#@   |-b  |-   .    ;    ;    ;    E    #",
   ";    #t^0 ;    .    ;    ;    ;    ;    #",
   ".    #    ;    .    #    #    #    ;    #",
   ".    ;    ;    .    #    #    #    ;    #",
@@ -116,6 +117,7 @@ const parseMap = () => {
         };
 
         properties.isMissing = str.includes(".");
+        properties.isExit = str.includes("E");
 
         properties.switch = str.includes("^")
           ? true
