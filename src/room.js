@@ -781,7 +781,7 @@ export class Room {
       this.outerX,
       this.outerY,
       this.outerX + ROOM_OUTER_WIDTH,
-      this.outerY + ROOM_HEIGHT
+      this.outerY + ROOM_OUTER_HEIGHT
     );
     gradient.addColorStop(0, bgcolor1);
     gradient.addColorStop(1, bgcolor2);
@@ -790,7 +790,7 @@ export class Room {
       this.outerX,
       this.outerY,
       ROOM_OUTER_WIDTH,
-      this.outerY + ROOM_HEIGHT
+      ROOM_OUTER_HEIGHT
     );
   }
 
