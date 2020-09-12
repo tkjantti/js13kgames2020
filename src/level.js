@@ -373,6 +373,7 @@ export class Level {
   }
 
   toggleSwitch(isOn) {
+    playTune("switch");
     const otherRoom = findConnection(this.currentRoom, this.rooms);
     if (otherRoom) {
       otherRoom.toggleAction(isOn);
@@ -445,8 +446,6 @@ export class Level {
     } else {
       playTune("main");
     }
-
-    console.log(nextRoom.actions);
 
     if (nextRoom.actions.length > 0) {
       playTune("laser");

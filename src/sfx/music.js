@@ -23,7 +23,15 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { song, jumpSfx, endSfx, endSong, emptySfx, laserSfx } from "./data.js";
+import {
+  song,
+  jumpSfx,
+  endSfx,
+  endSong,
+  emptySfx,
+  laserSfx,
+  switchSfx
+} from "./data.js";
 import CPlayer from "./musicplayer.js";
 
 const mainTune = document.createElement("audio");
@@ -32,6 +40,7 @@ const endfx = document.createElement("audio");
 const endTune = document.createElement("audio");
 const emptyFx = document.createElement("audio");
 const laserFx = document.createElement("audio");
+const switchFx = document.createElement("audio");
 
 export const initMusicPlayer = (audioTrack, tune, isLooped) => {
   return new Promise(resolve => {
@@ -65,7 +74,8 @@ export const initialize = () => {
     initMusicPlayer(endfx, endSfx, false),
     initMusicPlayer(endTune, endSong, true),
     initMusicPlayer(emptyFx, emptySfx, true),
-    initMusicPlayer(laserFx, laserSfx, true)
+    initMusicPlayer(laserFx, laserSfx, true),
+    initMusicPlayer(switchFx, switchSfx, false)
   ]);
 };
 
@@ -118,15 +128,12 @@ export const playTune = tune => {
       FadeIn(emptyFx, 0.2);
       endTune.currentTime = 0;
       FadeIn(endTune, 0.8);
-
       FadeOut(mainTune);
-
       break;
     }
     case "jump": {
       jumpfx.currentTime = 0;
       jumpfx.play();
-
       break;
     }
     case "empty": {
@@ -136,6 +143,12 @@ export const playTune = tune => {
     }
     case "laser": {
       FadeIn(laserFx, 0.2);
+      break;
+    }
+    case "switch": {
+      switchFx.currentTime = 0;
+      switchFx.volume = 0.4;
+      switchFx.play();
       break;
     }
     case "start": {
