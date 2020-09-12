@@ -441,7 +441,6 @@ export class Room {
     context.save();
 
     if (!this.isMissing) {
-      this.renderId(context);
       this.renderRoom(context);
       this.renderWallTexts(context);
     }
@@ -814,13 +813,6 @@ export class Room {
         ROOM_OUTER_HEIGHT
       );
     }
-  }
-
-  renderId(context) {
-    context.fillStyle = "green";
-    context.font = "bold 18px Sans-serif";
-    const text = "" + this.ix + ", " + this.iy;
-    context.fillText(text, this.outerX + Z + 30, this.outerY + Z + 35);
   }
 
   renderDoors(context) {
