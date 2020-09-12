@@ -27,10 +27,17 @@
 import { init, initKeys, bindKeys, GameLoop } from "./kontra";
 import { Level } from "./level";
 import { GAME_OVER_LASER, GAME_OVER_CRUSH, GAME_OVER_FALL } from "./room";
-import { initialize, playTune } from "./sfx/music.js";
+import {
+  initialize,
+  playTune,
+  SFX_START,
+  SFX_MAIN,
+  SFX_END
+} from "./sfx/music.js";
 
 let assetsLoaded = false;
 let gameEnded = false;
+let gameStartScreen = true;
 
 const { canvas, context } = init();
 initKeys();
@@ -92,7 +99,7 @@ const createGameLoop = () => {
 
       if (!gameEnded && level.gameOverState) {
         gameEnded = true;
-        playTune("end");
+        playTune(SFX_END);
       }
 
       switch (level.gameOverState) {
@@ -115,10 +122,10 @@ const startLevel = number => {
 
   if (number === 0) {
     gameLoop = createStartScreenLoop();
-    playTune("start");
+    playTune(SFX_START);
   } else {
     gameLoop = createGameLoop();
-    playTune("main");
+    playTune(SFX_MAIN);
   }
 
   gameLoop.start();
@@ -168,9 +175,10 @@ const renderStartScreen = lastText => {
 };
 
 bindKeys(["enter"], () => {
-  if (!gameEnded) {
+  if (gameStartScreen) {
     level = new Level();
     startLevel(1);
+    gameStartScreen = false;
   } else if (
     level &&
     (level.gameOverState === GAME_OVER_LASER ||
@@ -181,6 +189,7 @@ bindKeys(["enter"], () => {
     level.gameOverState = 0;
     startLevel(0);
     gameEnded = false;
+    gameStartScreen = true;
   }
 });
 
