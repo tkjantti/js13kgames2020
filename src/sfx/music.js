@@ -67,52 +67,66 @@ export const initialize = () => {
   ]);
 };
 
-const FadeOut = tune => {
+const FadeOut = (tune, vol = 0) => {
   var currentVolume = tune.volume;
-  var fadeOutInterval = setInterval(function() {
-    currentVolume = (parseFloat(currentVolume) - 0.1).toFixed(1);
-    if (currentVolume >= 0) {
-      tune.volume = currentVolume;
-    } else {
-      tune.volume = 0;
-      tune.pause();
-      clearInterval(fadeOutInterval);
-    }
-  }, 100);
+  if (tune.volume > vol) {
+    var fadeOutInterval = setInterval(function() {
+      currentVolume = (parseFloat(currentVolume) - 0.1).toFixed(1);
+      if (currentVolume > vol) {
+        tune.volume = currentVolume;
+      } else {
+        tune.volume = vol;
+        if (vol === 0) tune.pause();
+        clearInterval(fadeOutInterval);
+      }
+    }, 100);
+  }
+};
+
+const FadeIn = (tune, vol = 1) => {
+  tune.play();
+  var currentVolume = tune.volume;
+  if (tune.volume < vol) {
+    var fadeOutInterval = setInterval(function() {
+      currentVolume = (parseFloat(currentVolume) + 0.1).toFixed(1);
+      if (currentVolume < vol) {
+        tune.volume = currentVolume;
+      } else {
+        tune.volume = vol;
+        clearInterval(fadeOutInterval);
+      }
+    }, 100);
+  }
 };
 
 export const playTune = tune => {
   switch (tune) {
     case "main": {
-      emptyFx.play();
-      emptyFx.volume = 0.1;
-
       if (endTune.volume > 0) {
         FadeOut(endTune);
       }
-      mainTune.volume = 0.9;
-      var promise = mainTune.play();
-      if (promise !== undefined) {
-        promise
-          .then(() => {
-            // Autoplay started!
-          })
-          .catch(error => {
-            console.log("No for autoplay!" + error);
-            // Autoplay was prevented.
-          });
+      if (emptyFx.volume > 0) {
+        FadeOut(emptyFx);
       }
+      FadeIn(mainTune, 0.9);
+      // var promise = mainTune.play();
+      // if (promise !== undefined) {
+      //   promise
+      //     .then(() => {
+      //       // Autoplay started!
+      //     })
+      //     .catch(error => {
+      //       console.log("No for autoplay!" + error);
+      //       // Autoplay was prevented.
+      //     });
+      // }
       break;
     }
     case "end": {
-      endfx.play();
-      endfx.volume = 0.5;
-
-      emptyFx.volume = 0.5;
-
+      FadeIn(endfx, 0.5);
+      FadeIn(emptyFx, 0.2);
       endTune.currentTime = 0;
-      endTune.volume = 0.8;
-      endTune.play();
+      FadeIn(endTune, 0.8);
 
       FadeOut(mainTune);
 
@@ -125,7 +139,26 @@ export const playTune = tune => {
       break;
     }
     case "empty": {
+      FadeIn(emptyFx, 0.2);
+      FadeOut(mainTune, 0.05);
+      break;
+    }
+    case "start": {
+      FadeIn(emptyFx, 0.2);
+      var promise = emptyFx.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => {
+            // Autoplay started!
+          })
+          .catch(error => {
+            console.log("No for autoplay!" + error);
+            // Autoplay was prevented.
+          });
+      }
       FadeOut(mainTune);
+      FadeOut(endTune);
+      mainTune.currentTime = 0;
       break;
     }
   }
