@@ -194,7 +194,7 @@ let gameLoop = createStartScreenLoop();
 const renderStartScreen = lastText => {
   renderTexts(
     context,
-    "404?",
+    "THE WAFFLE",
     "",
     "Controls:",
     "Move and jump/climb by ARROWS or W/A/S/D.",
