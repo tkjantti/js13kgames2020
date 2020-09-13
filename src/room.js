@@ -25,6 +25,7 @@
  */
 
 import { keyPressed, collides } from "./kontra";
+import { playTune, SFX_EMPTY } from "./sfx/music";
 
 // No door at missing rooms, can pass
 export const DOOR_NONE = 0;
@@ -45,6 +46,7 @@ export const GAME_OK = 0;
 export const GAME_OVER_LASER = 1;
 export const GAME_OVER_CRUSH = 2;
 export const GAME_OVER_FALL = 3;
+export const GAME_OVER_FINISHED = 4;
 
 export const ACTION_MOVE = 1;
 export const ACTION_LASER = 2;
@@ -448,6 +450,8 @@ export class Room {
       }
     }
 
+    if (this.isFinish) return GAME_OVER_FINISHED;
+
     return GAME_OK;
   }
 
@@ -455,6 +459,7 @@ export class Room {
     context.save();
 
     if (this.isFinish) {
+      playTune(SFX_EMPTY);
       this.renderFinishScreen(context);
       context.restore();
       return;
@@ -483,13 +488,14 @@ export class Room {
   renderFinishScreen(context) {
     // background
     const gradient = context.createLinearGradient(
-      this.outerX,
-      this.outerY,
       this.outerX + ROOM_OUTER_WIDTH,
+      this.outerY,
+      this.outerX,
       this.outerY + ROOM_OUTER_HEIGHT
     );
-    gradient.addColorStop(0, "rgb(130, 130, 255)");
-    gradient.addColorStop(1, "rgb(230, 230, 255)");
+    gradient.addColorStop(0, "#303090");
+    gradient.addColorStop(0.5, "#000");
+    gradient.addColorStop(1, "#000");
     context.fillStyle = gradient;
     context.fillRect(
       this.outerX,
@@ -501,21 +507,31 @@ export class Room {
     // bridge
     const gradient2 = context.createLinearGradient(
       this.outerX,
-      this.y + this.height,
-      this.outerX,
+      this.outerY,
+      this.outerX + ROOM_OUTER_WIDTH,
       this.y + this.height + 5
     );
-    gradient2.addColorStop(0, "rgb(150, 150, 255)");
-    gradient2.addColorStop(1, "rgb(230, 230, 255)");
+    gradient2.addColorStop(0, "#333");
+    gradient2.addColorStop(1, "#aaa");
     context.fillStyle = gradient2;
     context.fillRect(this.outerX, this.y + this.height, ROOM_OUTER_WIDTH, 5);
 
     // end text
-    context.fillStyle = "white";
-    context.font = "bold 50px Sans-serif";
+    context.fillStyle = "#F0F0F0";
+    context.font = "bold 36px Sans-serif";
     const t = (performance.now() - this.roomEnterTime) / 3000;
     const relativeY = Math.min(1, easeOutCubic(t));
-    context.fillText("THE END", this.x + 50, this.y + relativeY * this.height);
+    context.fillText(
+      "YOU GOT OUT!",
+      this.x + 0,
+      this.y + relativeY * this.height
+    );
+    context.font = "bold 16px Sans-serif";
+    context.fillText(
+      "Game finished, well done.",
+      this.x + 0,
+      this.y + relativeY * this.height * 2
+    );
   }
 
   renderWallTexts(context) {

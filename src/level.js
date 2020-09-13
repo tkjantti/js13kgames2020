@@ -39,7 +39,8 @@ import {
   GAME_OVER_FALL,
   ACTION_MOVE,
   ACTION_LASER,
-  ACTION_LASER_HORIZONTAL
+  ACTION_LASER_HORIZONTAL,
+  GAME_OVER_FINISHED
 } from "./room.js";
 import { Camera } from "./camera.js";
 import { Player } from "./player.js";
@@ -411,11 +412,17 @@ export class Level {
       this.player,
       this.toggleSwitch.bind(this)
     );
-    if (gameOverState !== GAME_OK && gameOverState !== this.gameOverState) {
+    if (
+      (gameOverState !== GAME_OK || gameOverState !== GAME_OVER_FINISHED) &&
+      gameOverState !== this.gameOverState
+    ) {
       this.gameOverState = gameOverState;
     }
 
-    if (this.gameOverState === GAME_OK) {
+    if (
+      this.gameOverState === GAME_OK ||
+      this.gameOverState === GAME_OVER_FINISHED
+    ) {
       this.player.do_update(this.currentRoom, this.currentRoom.ladders, []);
       this.checkRoomChange();
     }
@@ -538,7 +545,10 @@ export class Level {
       this.currentRoom.render(context);
     }
 
-    if (this.gameOverState === GAME_OK) {
+    if (
+      this.gameOverState === GAME_OK ||
+      this.gameOverState === GAME_OVER_FINISHED
+    ) {
       this.player.render(context);
     }
 

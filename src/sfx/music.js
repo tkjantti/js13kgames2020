@@ -41,6 +41,7 @@ export const SFX_EMPTY = "empty";
 export const SFX_LASER = "laser";
 export const SFX_JUMP = "jump";
 export const SFX_SWITCH = "switch";
+export const SFX_FINISHED = "finished";
 
 const mainTune = document.createElement("audio");
 const jumpfx = document.createElement("audio");
@@ -159,7 +160,13 @@ export const playTune = tune => {
       switchFx.play();
       break;
     }
+    case SFX_FINISHED: {
+      FadeIn(emptyFx, 0.2);
+      FadeOut(mainTune, 0.05);
+      break;
+    }
     case SFX_START: {
+      emptyFx.volume = 0;
       FadeIn(emptyFx, 0.2);
       var promise = emptyFx.play();
       if (promise !== undefined) {

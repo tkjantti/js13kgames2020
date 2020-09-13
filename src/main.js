@@ -26,7 +26,13 @@
 
 import { init, initKeys, bindKeys, GameLoop } from "./kontra";
 import { Level } from "./level";
-import { GAME_OVER_LASER, GAME_OVER_CRUSH, GAME_OVER_FALL } from "./room";
+import {
+  GAME_OK,
+  GAME_OVER_LASER,
+  GAME_OVER_CRUSH,
+  GAME_OVER_FALL,
+  GAME_OVER_FINISHED
+} from "./room";
 import {
   initialize,
   playTune,
@@ -99,7 +105,7 @@ const createGameLoop = () => {
 
       if (!gameEnded && level.gameOverState) {
         gameEnded = true;
-        playTune(SFX_END);
+        if (level.gameOverState !== GAME_OVER_FINISHED) playTune(SFX_END);
       }
 
       switch (level.gameOverState) {
@@ -136,23 +142,63 @@ const createStartScreenLoop = () => {
     update() {},
 
     render() {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      let gradient = context.createLinearGradient(
+      const gradient = context.createLinearGradient(
+        canvas.width,
         0,
-        canvas.height / 2,
         0,
         canvas.height
       );
-      gradient.addColorStop(0, "rgb(0,0,25");
-      gradient.addColorStop(1, "rgb(100,100,255)");
-
+      gradient.addColorStop(0, "#303090");
+      gradient.addColorStop(0.5, "#000");
+      gradient.addColorStop(1, "#000");
       context.fillStyle = gradient;
       context.fillRect(0, 0, canvas.width, canvas.height);
+
+      // const color1 = "#101010";
+      // const color3 = "#303030";
+
+      // context.clearRect(0, 0, canvas.width, canvas.height);
+      // let gradient = context.createLinearGradient(
+      //   0,
+      //   canvas.width,
+      //   0,
+      //   canvas.height
+      // );
+      // gradient.addColorStop(0, color3);
+      // gradient.addColorStop(1, color1);
+
+      // context.fillStyle = gradient;
+      // context.fillRect(0, 0, canvas.width, canvas.height);
+
+      const color3 = "#ffffff20";
+
+      context.strokeStyle = color3;
+      context.lineWidth = 12;
+      context.beginPath();
+      context.lineTo(0, 0);
+      context.lineTo(canvas.height, 0);
+      context.lineTo(canvas.height, 0);
+      context.lineTo(canvas.height, canvas.height);
+      context.lineTo(0, canvas.height);
+      context.lineTo(0, 0);
+      context.moveTo(canvas.height / 4, 0);
+      context.lineTo(canvas.height / 4, canvas.height);
+      context.moveTo(0, canvas.height / 4);
+      context.lineTo(canvas.height, canvas.height / 4);
+      context.moveTo(canvas.height / 2, 0);
+      context.lineTo(canvas.height / 2, canvas.height);
+      context.moveTo(0, canvas.height / 2);
+      context.lineTo(canvas.height, canvas.height / 2);
+      context.moveTo(canvas.height / 4 + canvas.height / 2, 0);
+      context.lineTo(canvas.height / 4 + canvas.height / 2, canvas.height);
+      context.moveTo(0, canvas.height / 4 + canvas.height / 2);
+      context.lineTo(canvas.height, canvas.height / 4 + canvas.height / 2);
+      context.stroke();
 
       if (!assetsLoaded) {
         renderStartScreen("Loading...");
       } else {
-        renderStartScreen("Press enter to start");
+        renderStartScreen("Press ENTER to start");
       }
     }
   });
@@ -166,7 +212,7 @@ const renderStartScreen = lastText => {
     "404?",
     "",
     "Controls:",
-    "Move and jump/climb by Arrors or W/A/S/D.",
+    "Move and jump/climb by ARROWS or W/A/S/D.",
     "Toggle switch by SPACE",
     "",
     "(c) 2020 by Tero J & Sami H",
@@ -184,10 +230,11 @@ bindKeys(["enter"], () => {
     level &&
     (level.gameOverState === GAME_OVER_LASER ||
       level.gameOverState === GAME_OVER_CRUSH ||
-      level.gameOverState === GAME_OVER_FALL) &&
+      level.gameOverState === GAME_OVER_FALL ||
+      level.gameOverState === GAME_OVER_FINISHED) &&
     assetsLoaded
   ) {
-    level.gameOverState = 0;
+    level.gameOverState = GAME_OK;
     startLevel(0);
     gameEnded = false;
     gameStartScreen = true;
