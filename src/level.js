@@ -59,7 +59,8 @@ const ROOM_MOVE_DELAY_MS = 500;
 const wallTexts = {
   "0": "WHERE Am I ?",
   "1": "THERES NO WAY OUT",
-  "2": "LONG WAY DoWN"
+  "2": "LONG WAY DoWN",
+  "3": "LOST"
 };
 
 /*
@@ -84,9 +85,9 @@ const wallTexts = {
 
 // prettier-ignore
 const map = [
-  ";    ;    ;    ;    ;    #    #    #    #    ;    ;",
-  ";    ;    ;    ;    ;    #    #    #    #    E    F",
-  ";    ;    ;    ;    ;    #    #    #    #    ;    ;",
+  ";    ;    ;    ;    ;    ;    #    #|-  #    ;    ;",
+  ";    ;    ;    ;    ;    ;    #    #    #    E    F",
+  ";    ;    ;    ;    ;    ;    #3   #|   #    ;    ;",
   ";    ;    ;    ;    ;    ;    #    .    ;    ;    ;",
   ";    ;    ;    ;    ;    ;    .    #Hb  ;    ;    ;",
   ";    -    #1   #2   H*   .    #tr  #^lt #-   ;    ;",
