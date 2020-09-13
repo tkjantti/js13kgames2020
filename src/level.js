@@ -58,6 +58,7 @@ const ROOM_GAP = 30;
 const ROOM_MOVE_DELAY_MS = 500;
 
 const wallTexts = {
+  "9": "12 Sept FIND WAY OUT",
   "0": "WHERE Am I ?",
   "1": "THERES NO WAY OUT",
   "2": "LONG WAY DoWN",
@@ -92,7 +93,7 @@ const map = [
   ";    ;    ;    ;    ;    ;    ;    #3   #|   #    ;    ;",
   ";    ;    ;    ;    ;    ;    ;    #    .    ;    ;    ;",
   ";    -    #1   #    .    ;    ;    .    #Hb  ;    ;    ;",
-  "#@   |-b  |-   ;    #2   H*   .    #tr  #^lt #-   ;    ;",
+  "#9@  |-b  |-   ;    #2   H*   .    #tr  #^lt #-   ;    ;",
   ";    #t^0 ;    ;    .    ;    .    ;    ;    ;    ;    ;",
   ".    #    ;    ;    .    ;    .    ;    ;    ;    ;    ;",
   ".    ;    ;    ;    .    ;    .    ;    ;    ;    ;    ;",
