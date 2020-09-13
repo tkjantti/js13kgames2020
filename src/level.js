@@ -60,7 +60,8 @@ const ROOM_MOVE_DELAY_MS = 500;
 const wallTexts = {
   "0": "WHERE Am I ?",
   "1": "THERES NO WAY OUT",
-  "2": "LONG WAY DoWN"
+  "2": "LONG WAY DoWN",
+  "3": "LOST"
 };
 
 /*
@@ -85,18 +86,18 @@ const wallTexts = {
 
 // prettier-ignore
 const map = [
-  ";    ;    ;    ;    ;    #    #    #    ;    ;",
-  ";    ;    ;    ;    ;    #    #    #    E    F",
-  ";    ;    ;    ;    ;    #    #    #    ;    ;",
-  ";    ;    ;    ;    ;    #    .    ;    ;    ;",
-  ";    ;    ;    ;    ;    .    #Hb  ;    ;    ;",
-  ";    -    #1   #2   #    #tr  #^lt #-   ;    ;",
-  "#@   |-b  |-   .    ;    ;    ;    ;    ;    ;",
-  ";    #t^0 ;    .    ;    ;    ;    ;    ;    ;",
-  ".    #    ;    .    ;    ;    ;    ;    ;    ;",
-  ".    ;    ;    .    ;    ;    ;    ;    ;    ;",
-  "#    #    #    .-   ;    ;    ;    ;    ;    ;",
-  ";    ;    ;    .    ;    ;    ;    ;    ;    ;",
+  ";    ;    ;    ;    ;    ;    #    #|-  #    ;    ;",
+  ";    ;    ;    ;    ;    ;    #    #    #    E    F",
+  ";    ;    ;    ;    ;    ;    #3   #|   #    ;    ;",
+  ";    ;    ;    ;    ;    ;    #    .    ;    ;    ;",
+  ";    ;    ;    ;    ;    ;    .    #Hb  ;    ;    ;",
+  ";    -    #1   #2   H*   .    #tr  #^lt #-   ;    ;",
+  "#@   |-b  |-   .    ;    .-   ;    ;    ;    ;    ;",
+  ";    #t^0 ;    .    ;    ;    ;    ;    ;    ;    ;",
+  ".    #    ;    .    ;    ;    ;    ;    ;    ;    ;",
+  ".    ;    ;    .    ;    ;    ;    ;    ;    ;    ;",
+  "#    #    #    .-   ;    ;    ;    ;    ;    ;    ;",
+  ";    ;    ;    .    ;    ;    ;    ;    ;    ;    ;",
 ];
 
 const parseMap = () => {
@@ -223,6 +224,9 @@ const findBottom = (room, rooms) => {
 };
 
 const findConnection = (room, rooms) => {
+  if (room.hasActions()) {
+    return room;
+  }
   const leftRoom = rooms.getValue(room.ix - 1, room.iy);
   const rightRoom = rooms.getValue(room.ix + 1, room.iy);
   const topRoom = rooms.getValue(room.ix, room.iy - 1);
@@ -272,16 +276,14 @@ export class Level {
           continue;
         }
 
-        // For a switch in on state, set action in a linked room.
-        if (room.switch && room.switch.on) {
+        if (room.switch) {
+          // For each switch, set action in a connected room.
           const otherRoom = findConnection(room, this.rooms);
           if (otherRoom) {
-            otherRoom.toggleAction(true);
+            otherRoom.toggleAction(room.switch.on);
           }
-        }
-
-        // If no connections anywhere, turn action on by default.
-        if (room.hasActions() && !room.hasWires()) {
+        } else if (room.hasActions() && !room.hasWires()) {
+          // If no connections anywhere, turn action on by default.
           room.toggleAction(true);
         }
       }

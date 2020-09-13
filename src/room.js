@@ -553,7 +553,6 @@ export class Room {
   }
 
   renderConnectionBox(context) {
-    const wires = this.wires;
     if (this.switch) {
       const sw = this.switch;
 
@@ -569,24 +568,36 @@ export class Room {
       context.fillStyle = "brown";
       const y = sw.on ? sw.y + 3 : sw.y + SWITCH_DRAW_HEIGHT - 8;
       context.fillRect(sw.x, y, SWITCH_WIDTH, 5);
-    } else if (wires.left || wires.right || wires.top || wires.bottom) {
-      // Box
+    } else if (this.hasWires()) {
+      // Small box when just wires
       context.fillStyle = "rgb(60,60,60)";
       context.fillRect(
         this.x + SWITCH_RELATIVE_X,
         this.y + SWITCH_RELATIVE_Y,
-        25,
-        25
+        20,
+        20
       );
+    }
+
+    // Render action box and symbol
+    if (this.hasActions() && (this.hasWires() || this.switch)) {
+      let x = this.x + SWITCH_RELATIVE_X;
+      let y = this.y + SWITCH_RELATIVE_Y;
+      if (this.switch) {
+        x += SWITCH_WIDTH;
+      }
+
+      context.fillStyle = "rgb(60,60,60)";
+      context.fillRect(x, y, 30, 30);
 
       for (let i = 0; i < this.actions.length; i++) {
         const action = this.actions[i];
-        this.renderActionSymbol(context, action);
+        this.renderActionSymbol(context, action, x + 2, y + 2);
       }
     }
   }
 
-  renderActionSymbol(context, action) {
+  renderActionSymbol(context, action, x, y) {
     const COLOR_ON = "rgb(0,220,0)";
     const COLOR_OFF = "rgb(0,50,0)";
 
@@ -594,48 +605,24 @@ export class Room {
       case ACTION_MOVE:
         context.fillStyle = this.xMoveDirection < 0 ? COLOR_ON : COLOR_OFF;
         context.beginPath();
-        context.moveTo(
-          this.x + SWITCH_RELATIVE_X + 11,
-          this.y + SWITCH_RELATIVE_Y + 5
-        );
-        context.lineTo(
-          this.x + SWITCH_RELATIVE_X + 11,
-          this.y + SWITCH_RELATIVE_Y + 20
-        );
-        context.lineTo(
-          this.x + SWITCH_RELATIVE_X + 3,
-          this.y + SWITCH_RELATIVE_Y + 12.5
-        );
+        context.moveTo(x + 11, y + 5);
+        context.lineTo(x + 11, y + 20);
+        context.lineTo(x + 3, y + 12.5);
         context.fill();
 
         context.fillStyle = this.xMoveDirection > 0 ? COLOR_ON : COLOR_OFF;
         context.beginPath();
-        context.moveTo(
-          this.x + SWITCH_RELATIVE_X + 14,
-          this.y + SWITCH_RELATIVE_Y + 5
-        );
-        context.lineTo(
-          this.x + SWITCH_RELATIVE_X + 14,
-          this.y + SWITCH_RELATIVE_Y + 20
-        );
-        context.lineTo(
-          this.x + SWITCH_RELATIVE_X + 22,
-          this.y + SWITCH_RELATIVE_Y + 12.5
-        );
+        context.moveTo(x + 14, y + 5);
+        context.lineTo(x + 14, y + 20);
+        context.lineTo(x + 22, y + 12.5);
         context.fill();
         break;
       case ACTION_LASER:
       case ACTION_LASER_HORIZONTAL:
         context.strokeStyle = this.lasers.length ? COLOR_ON : COLOR_OFF;
         context.beginPath();
-        context.moveTo(
-          this.x + SWITCH_RELATIVE_X + 13,
-          this.y + SWITCH_RELATIVE_Y + 5
-        );
-        context.lineTo(
-          this.x + SWITCH_RELATIVE_X + 13,
-          this.y + SWITCH_RELATIVE_Y + 20
-        );
+        context.moveTo(x + 13, y + 5);
+        context.lineTo(x + 13, y + 20);
         context.stroke();
         break;
     }
