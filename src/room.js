@@ -538,7 +538,7 @@ export class Room {
     if (this.text) {
       context.save();
       context.fillStyle = "rgb(170,170,150)";
-      context.font = "6px Sans-serif";
+      context.font = "6px cursive";
 
       const textWidth = context.measureText(this.text).width;
       const textHeight = context.measureText("M").width; // Approximation of height
@@ -713,9 +713,8 @@ export class Room {
         this.outerX + ROOM_OUTER_WIDTH,
         this.outerY
       );
-      gradient.addColorStop(0, "rgb(0, 0, 0)");
-      gradient.addColorStop(0.5, "rgb(80, 80, 255)");
-      gradient.addColorStop(1, "rgb(220, 220, 255)");
+      gradient.addColorStop(0, "#00100080");
+      gradient.addColorStop(1, "#00401080");
       context.fillStyle = gradient;
 
       context.fillRect(

@@ -83,7 +83,7 @@ bindKeys("k", () => {
 
 const renderTexts = (context, ...texts) => {
   context.fillStyle = "white";
-  context.font = "32px Sans-serif";
+  context.font = "32px cursive";
 
   for (let i = 0; i < texts.length; i++) {
     const text = texts[i];
@@ -154,22 +154,6 @@ const createStartScreenLoop = () => {
       context.fillStyle = gradient;
       context.fillRect(0, 0, canvas.width, canvas.height);
 
-      // const color1 = "#101010";
-      // const color3 = "#303030";
-
-      // context.clearRect(0, 0, canvas.width, canvas.height);
-      // let gradient = context.createLinearGradient(
-      //   0,
-      //   canvas.width,
-      //   0,
-      //   canvas.height
-      // );
-      // gradient.addColorStop(0, color3);
-      // gradient.addColorStop(1, color1);
-
-      // context.fillStyle = gradient;
-      // context.fillRect(0, 0, canvas.width, canvas.height);
-
       const color3 = "#ffffff20";
 
       context.strokeStyle = color3;
@@ -222,6 +206,7 @@ const renderStartScreen = lastText => {
 };
 
 bindKeys(["enter"], () => {
+  if (!assetsLoaded) return;
   if (gameStartScreen) {
     level = new Level();
     startLevel(1);
@@ -231,8 +216,7 @@ bindKeys(["enter"], () => {
     (level.gameOverState === GAME_OVER_LASER ||
       level.gameOverState === GAME_OVER_CRUSH ||
       level.gameOverState === GAME_OVER_FALL ||
-      level.gameOverState === GAME_OVER_FINISHED) &&
-    assetsLoaded
+      level.gameOverState === GAME_OVER_FINISHED)
   ) {
     level.gameOverState = GAME_OK;
     startLevel(0);
