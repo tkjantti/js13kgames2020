@@ -154,10 +154,11 @@ const createStartScreenLoop = () => {
       context.fillStyle = gradient;
       context.fillRect(0, 0, canvas.width, canvas.height);
 
-      const color3 = "#ffffff20";
-
-      context.strokeStyle = color3;
+      context.fillStyle = "#10000080";
       context.lineWidth = 12;
+      context.fillRect(0, 0, canvas.height, canvas.height);
+
+      context.strokeStyle = "#ffffff20";
       context.beginPath();
       context.lineTo(0, 0);
       context.lineTo(canvas.height, 0);
