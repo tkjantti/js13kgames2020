@@ -59,24 +59,25 @@ resize();
 let level;
 
 // Debug keys
-bindKeys("1", () => {
-  level.camera.zoomTo(level);
-});
-bindKeys("2", () => {
-  level.camera.zoomTo(level.currentRoom.getOuterBoundingBox());
-});
-bindKeys("j", () => {
-  level.moveRoom(level.currentRoom, -1, 0);
-});
-bindKeys("l", () => {
-  level.moveRoom(level.currentRoom, 1, 0);
-});
-bindKeys("i", () => {
-  level.moveRoom(level.currentRoom, 0, -1);
-});
-bindKeys("k", () => {
-  level.moveRoom(level.currentRoom, 0, 1);
-});
+
+// bindKeys("1", () => {
+//   level.camera.zoomTo(level);
+// });
+// bindKeys("2", () => {
+//   level.camera.zoomTo(level.currentRoom.getOuterBoundingBox());
+// });
+// bindKeys("j", () => {
+//   level.moveRoom(level.currentRoom, -1, 0);
+// });
+// bindKeys("l", () => {
+//   level.moveRoom(level.currentRoom, 1, 0);
+// });
+// bindKeys("i", () => {
+//   level.moveRoom(level.currentRoom, 0, -1);
+// });
+// bindKeys("k", () => {
+//   level.moveRoom(level.currentRoom, 0, 1);
+// });
 
 // FOR DEVELOPMENT: uncomment to show whole level at startup
 // level.camera.zoomTo(level);
@@ -194,7 +195,7 @@ let gameLoop = createStartScreenLoop();
 const renderStartScreen = lastText => {
   renderTexts(
     context,
-    "404?",
+    "THE WAFFLE",
     "",
     "Controls:",
     "Move and jump/climb by ARROWS or W/A/S/D.",
