@@ -100,8 +100,6 @@ const createGameLoop = () => {
       if (!gameEnded && level.gameOverState) {
         gameEnded = true;
         playTune(SFX_END);
-      } else if (level.isFinished()) {
-        renderTexts(context, "THE END");
       }
 
       switch (level.gameOverState) {

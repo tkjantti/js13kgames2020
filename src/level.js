@@ -68,6 +68,7 @@ const wallTexts = {
  * @ - start room
  * # - plain room
  * E - exit room
+ * F - finish room
  * . - missing (non-existing) room
  * ; - void, player can't enter
  * * - switch off
@@ -83,18 +84,18 @@ const wallTexts = {
 
 // prettier-ignore
 const map = [
-  ";    ;    ;    ;    ;    #    #    #    ;",
-  ";    ;    ;    ;    ;    #    #    #    E",
-  ";    ;    ;    ;    ;    #    #    #    ;",
-  ";    ;    ;    ;    ;    #    .    ;    ;",
-  ";    ;    ;    ;    ;    .    #Hb  ;    ;",
-  ";    -    #1   #2   #    #tr  #^lt #-   ;",
-  "#@   |-b  |-   .    ;    ;    ;    ;    ;",
-  ";    #t^0 ;    .    ;    ;    ;    ;    ;",
-  ".    #    ;    .    ;    ;    ;    ;    ;",
-  ".    ;    ;    .    ;    ;    ;    ;    ;",
-  "#    #    #    .-   ;    ;    ;    ;    ;",
-  ";    ;    ;    .    ;    ;    ;    ;    ;",
+  ";    ;    ;    ;    ;    #    #    #    ;    ;",
+  ";    ;    ;    ;    ;    #    #    #    E    F",
+  ";    ;    ;    ;    ;    #    #    #    ;    ;",
+  ";    ;    ;    ;    ;    #    .    ;    ;    ;",
+  ";    ;    ;    ;    ;    .    #Hb  ;    ;    ;",
+  ";    -    #1   #2   #    #tr  #^lt #-   ;    ;",
+  "#@   |-b  |-   .    ;    ;    ;    ;    ;    ;",
+  ";    #t^0 ;    .    ;    ;    ;    ;    ;    ;",
+  ".    #    ;    .    ;    ;    ;    ;    ;    ;",
+  ".    ;    ;    .    ;    ;    ;    ;    ;    ;",
+  "#    #    #    .-   ;    ;    ;    ;    ;    ;",
+  ";    ;    ;    .    ;    ;    ;    ;    ;    ;",
 ];
 
 const parseMap = () => {
@@ -122,6 +123,7 @@ const parseMap = () => {
 
         properties.isMissing = str.includes(".");
         properties.isExit = str.includes("E");
+        properties.isFinish = str.includes("F");
 
         properties.switch = str.includes("^")
           ? true
@@ -283,10 +285,6 @@ export class Level {
         }
       }
     }
-  }
-
-  isFinished() {
-    return this.currentRoom && this.currentRoom.isExit;
   }
 
   autoMoveRooms() {
@@ -513,7 +511,7 @@ export class Level {
 
   panCameraTo(room) {
     if (this.camera.area !== this) {
-      this.camera.panTo(room);
+      this.camera.panTo(room.getOuterBoundingBox());
     }
   }
 
