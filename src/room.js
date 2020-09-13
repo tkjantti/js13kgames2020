@@ -91,6 +91,11 @@ const LADDER_PERSPECTIVE_RIGHT = 2;
 
 const LASER_SPEED = 0.5;
 
+// https://easings.net/#easeOutCubic
+function easeOutCubic(x) {
+  return 1 - Math.pow(1 - x, 3);
+}
+
 // drawHeight parameter when ladder needs to be drawn shorter
 // than it actually is.
 const createLadder = (height, perspective, drawHeight) => {
@@ -151,6 +156,13 @@ export class Room {
     this.setPosition(x, y, ix, iy);
     this.isMissing = properties.isMissing;
     this.isExit = properties.isExit || false;
+    this.isFinish = properties.isFinish || false;
+
+    if (this.isFinish) {
+      this.height = ROOM_HEIGHT / 2;
+      this.bottom = this.y + ROOM_HEIGHT / 2;
+      this.roomEnterTime = performance.now();
+    }
 
     this.text = properties.text || undefined;
     this.textX = this.x + this.width * 0.2 + (Math.random() * this.width) / 8;
@@ -180,7 +192,7 @@ export class Room {
       };
     }
 
-    if (!this.isMissing) {
+    if (!(this.isMissing || this.isFinish)) {
       this.addLadders();
     }
   }
@@ -291,6 +303,8 @@ export class Room {
         }
       }
     }
+
+    this.roomEnterTime = performance.now();
   }
 
   addLadders() {
@@ -440,6 +454,12 @@ export class Room {
   render(context) {
     context.save();
 
+    if (this.isFinish) {
+      this.renderFinishScreen(context);
+      context.restore();
+      return;
+    }
+
     if (!this.isMissing) {
       this.renderRoom(context);
       this.renderWallTexts(context);
@@ -458,6 +478,44 @@ export class Room {
     this.renderLasers(context);
 
     context.restore();
+  }
+
+  renderFinishScreen(context) {
+    // background
+    const gradient = context.createLinearGradient(
+      this.outerX,
+      this.outerY,
+      this.outerX + ROOM_OUTER_WIDTH,
+      this.outerY + ROOM_OUTER_HEIGHT
+    );
+    gradient.addColorStop(0, "rgb(130, 130, 255)");
+    gradient.addColorStop(1, "rgb(230, 230, 255)");
+    context.fillStyle = gradient;
+    context.fillRect(
+      this.outerX,
+      this.outerY,
+      ROOM_OUTER_WIDTH,
+      ROOM_OUTER_HEIGHT
+    );
+
+    // bridge
+    const gradient2 = context.createLinearGradient(
+      this.outerX,
+      this.y + this.height,
+      this.outerX,
+      this.y + this.height + 5
+    );
+    gradient2.addColorStop(0, "rgb(150, 150, 255)");
+    gradient2.addColorStop(1, "rgb(230, 230, 255)");
+    context.fillStyle = gradient2;
+    context.fillRect(this.outerX, this.y + this.height, ROOM_OUTER_WIDTH, 5);
+
+    // end text
+    context.fillStyle = "white";
+    context.font = "bold 50px Sans-serif";
+    const t = (performance.now() - this.roomEnterTime) / 3000;
+    const relativeY = Math.min(1, easeOutCubic(t));
+    context.fillText("THE END", this.x + 50, this.y + relativeY * this.height);
   }
 
   renderWallTexts(context) {
@@ -637,10 +695,11 @@ export class Room {
         this.outerX,
         this.outerY,
         this.outerX + ROOM_OUTER_WIDTH,
-        this.outerY + ROOM_HEIGHT
+        this.outerY
       );
-      gradient.addColorStop(0, "rgb(120, 120, 255)");
-      gradient.addColorStop(1, "rgb(200, 200, 255)");
+      gradient.addColorStop(0, "rgb(0, 0, 0)");
+      gradient.addColorStop(0.5, "rgb(80, 80, 255)");
+      gradient.addColorStop(1, "rgb(220, 220, 255)");
       context.fillStyle = gradient;
 
       context.fillRect(
