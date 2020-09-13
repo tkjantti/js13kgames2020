@@ -688,7 +688,7 @@ export class Room {
       bgcolor2 = "#00104080";
     }
 
-    const color1 = "#101010";
+    const color1 = "#101010a0";
     const color2 = "#202020";
     const color3 = "#303030";
     const color4 = "#606060";

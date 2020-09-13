@@ -61,7 +61,7 @@ const wallTexts = {
   "0": "WHERE Am I ?",
   "1": "THERES NO WAY OUT",
   "2": "LONG WAY DoWN",
-  "3": "LOST"
+  "3": "LOST 404"
 };
 
 /*
@@ -415,7 +415,8 @@ export class Level {
       this.toggleSwitch.bind(this)
     );
     if (
-      (gameOverState !== GAME_OK || gameOverState !== GAME_OVER_FINISHED) &&
+      gameOverState !== GAME_OK &&
+      gameOverState !== GAME_OVER_FINISHED &&
       gameOverState !== this.gameOverState
     ) {
       this.gameOverState = gameOverState;
